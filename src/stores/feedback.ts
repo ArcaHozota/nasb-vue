@@ -27,10 +27,12 @@ export const useFeedbackStore = defineStore("feedback", () => {
     resolve: null,
   });
 
-  // 旧 layer.msg(トースト)相当
+  // 旧 layer.msg(トースト)相当。MUI Snackbarの autoHideDuration={3000} に合わせ、
+  // 3秒後に自動で閉じる。
   const toast = (text: string): void => {
     snackbar.show = true;
     snackbar.text = text;
+    setTimeout(closeSnackbar, 3000);
   };
 
   const closeSnackbar = (): void => {
