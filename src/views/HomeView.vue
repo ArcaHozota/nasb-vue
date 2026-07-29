@@ -301,6 +301,12 @@ const pageItems = computed<(number | "ellipsis")[]>(() => {
   background-attachment: fixed;
 }
 
+/* 基本スタイル(Niconneフォント等)はmain.cssのグローバル定義を継承し、
+   HomeView内はサイズだけ上書きする(旧 HomeView.css の挙動) */
+.effect-shine {
+  font-size: 2.2rem;
+}
+
 .home-nav {
   position: sticky;
   top: 0;

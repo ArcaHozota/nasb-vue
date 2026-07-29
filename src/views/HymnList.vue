@@ -183,7 +183,14 @@ const onPageSizeChange = (e: Event) => {
         </div>
 
         <div class="overflow-x-auto rounded-md border border-gray-200">
-          <table class="hymn-table w-full text-sm">
+          <table class="hymn-table w-full table-fixed text-sm">
+            <colgroup>
+              <col style="width: 30%" />
+              <col style="width: 26%" />
+              <col style="width: 10%" />
+              <col style="width: 10%" />
+              <col style="width: 24%" />
+            </colgroup>
             <thead class="bg-gray-50 text-gray-600">
               <tr>
                 <th class="px-3 py-2 text-left">名称</th>
