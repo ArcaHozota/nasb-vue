@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+/*
+ * 旧 theme.ts (MUI createTheme) の palette をそのまま踏襲。
+ * primary: #800020, secondary: #002fa7, success: #006400,
+ * warning: #f6c91c, info: #353542
+ */
+@theme {
+  --color-primary: #800020;
+  --color-secondary: #002fa7;
+  --color-success: #006400;
+  --color-warning: #f6c91c;
+  --color-info: #353542;
+}
