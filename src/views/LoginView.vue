@@ -3,6 +3,7 @@
 // 旧 views/LoginView.tsx を移植
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { LoaderCircle } from "@lucide/vue";
 import { useAuthStore } from "@/stores/auth";
 import { EMPTY_STRING } from "@/constants";
 import bgImage from "@/assets/mainmenu-bg6.webp";
@@ -80,7 +81,7 @@ const onEnter = (e: KeyboardEvent) => {
           :disabled="loading"
           @click="onLogin"
         >
-          <span v-if="loading" class="inline-block animate-spin">⟳</span>
+          <LoaderCircle v-if="loading" class="inline-block h-4 w-4 animate-spin" />
           <span v-else>ログイン</span>
         </button>
       </div>

@@ -2,6 +2,7 @@
 // src/views/BookAddition.vue
 // 旧 views/BookAddition.tsx を移植
 import { reactive, ref, watch, onMounted } from "vue";
+import { BookOpen, Book, Baseline, LoaderCircle } from "@lucide/vue";
 import api from "@/api/axios";
 import { useFeedbackStore } from "@/stores/feedback";
 import { EMPTY_STRING, extractErrorMessage } from "@/constants";
@@ -121,7 +122,7 @@ const onStore = async () => {
 
     <div class="bookaddition-card noto-serif relative mt-2 overflow-hidden rounded-[18px]">
       <div class="noto-serif flex items-center bg-gray-800 px-4 py-3 text-white">
-        <span class="mr-2">📖</span>
+        <BookOpen class="mr-2 h-5 w-5" />
         <h1 class="text-lg font-semibold">聖書章節入力</h1>
       </div>
 
@@ -147,7 +148,7 @@ const onStore = async () => {
             @mousedown.prevent
             @click="onWrapSelection"
           >
-            🖊
+            <Baseline class="h-5 w-5" />
           </button>
         </div>
 
@@ -178,7 +179,7 @@ const onStore = async () => {
           <div class="w-full md:w-[30%]">
             <label class="noto-serif mb-1 flex items-center gap-1 text-sm text-gray-600">
               章
-              <span v-if="chapterLoading" class="inline-block animate-spin text-xs">⟳</span>
+              <LoaderCircle v-if="chapterLoading" class="inline-block h-3 w-3 animate-spin" />
             </label>
             <select
               v-model="chapterId"
@@ -211,8 +212,8 @@ const onStore = async () => {
               :disabled="saving"
               @click="onStore"
             >
-              <span v-if="saving" class="inline-block animate-spin">⟳</span>
-              <span v-else>📕 追加</span>
+              <LoaderCircle v-if="saving" class="inline-block h-4 w-4 animate-spin" />
+              <span v-else class="flex items-center justify-center gap-1"><Book class="h-4 w-4" /> 追加</span>
             </button>
           </div>
         </div>

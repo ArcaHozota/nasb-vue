@@ -3,6 +3,7 @@
 // 旧 views/RandomFive.tsx を移植
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
+import { LayoutGrid, Search, LoaderCircle } from "@lucide/vue";
 import api from "@/api/axios";
 import { useFeedbackStore } from "@/stores/feedback";
 import { EMPTY_STRING, extractErrorMessage } from "@/constants";
@@ -69,7 +70,7 @@ const onKeyDown = (e: KeyboardEvent) => {
 
     <div class="randomfive-card noto-serif relative mt-2 overflow-hidden rounded-[18px]">
       <div class="flex items-center bg-gray-800 px-4 py-3 text-white">
-        <span class="mr-2">▦</span>
+        <LayoutGrid class="mr-2 h-5 w-5" />
         <h1 class="text-lg font-semibold">賛美歌ランドム選択</h1>
       </div>
 
@@ -88,7 +89,7 @@ const onKeyDown = (e: KeyboardEvent) => {
               class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
               @click="onRandom"
             >
-              🔍
+              <Search class="h-4 w-4" />
             </button>
           </div>
         </div>
@@ -103,7 +104,7 @@ const onKeyDown = (e: KeyboardEvent) => {
           <tbody>
             <tr v-if="loading" class="body-row-glass">
               <td class="py-4 text-center">
-                <span class="inline-block animate-spin">⟳</span>
+                <LoaderCircle class="inline-block h-4 w-4 animate-spin" />
               </td>
             </tr>
             <tr v-else-if="records.length === 0" class="body-row-glass">

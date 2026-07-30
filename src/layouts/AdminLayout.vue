@@ -6,6 +6,17 @@
 // router/index.ts の router.beforeEach に集約済みなので、ここでは重複させていない。
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import {
+  Anchor,
+  Package,
+  Music,
+  Shuffle,
+  UserCog,
+  MessageSquare,
+  LogOut,
+  ChevronUp,
+  Search,
+} from "@lucide/vue";
 import { useAuthStore } from "@/stores/auth";
 import { useFeedbackStore } from "@/stores/feedback";
 import { DELAY_APOLOGY, EMPTY_STRING } from "@/constants";
@@ -21,25 +32,25 @@ const userMenuOpen = ref(false);
 const navItems = [
   {
     key: "bookSearch",
-    icon: "⚓",
+    icon: Anchor,
     title: "聖書章節選択",
     action: () => feedback.toast(DELAY_APOLOGY),
   },
   {
     key: "bookAdd",
-    icon: "📦",
+    icon: Package,
     title: "聖書章節入力",
     action: () => router.push("/books/add"),
   },
   {
     key: "hymns",
-    icon: "🎵",
+    icon: Music,
     title: "賛美歌一覧",
     action: () => router.push("/hymns"),
   },
   {
     key: "randomFive",
-    icon: "🔀",
+    icon: Shuffle,
     title: "ランダム五つ",
     action: () => router.push("/hymns/random-five"),
   },
@@ -100,7 +111,7 @@ const goPersonal = () => {
           class="flex w-full items-center gap-3 px-4 py-3 text-sm hover:bg-white/10"
           @click="item.action"
         >
-          <span class="w-5 text-center">{{ item.icon }}</span>
+          <component :is="item.icon" class="h-5 w-5 shrink-0" />
           <span>{{ item.title }}</span>
         </button>
       </nav>
@@ -119,7 +130,7 @@ const goPersonal = () => {
             {{ auth.username?.slice(0, 1) }}
           </span>
           <span class="flex-1 text-[0.9rem]">{{ auth.username }}</span>
-          <span class="text-xs">▴</span>
+          <ChevronUp class="h-4 w-4 shrink-0" />
         </button>
 
         <!-- クリック外を検知して閉じるための透明レイヤー -->
@@ -134,14 +145,14 @@ const goPersonal = () => {
             class="flex w-full items-center gap-2 px-3 py-2 hover:bg-gray-100"
             @click="goPersonal"
           >
-            🛠 個人スペース
+            <UserCog class="h-4 w-4" /> 個人スペース
           </button>
           <button
             type="button"
             class="flex w-full items-center gap-2 px-3 py-2 hover:bg-gray-100"
             @click="closeUserMenu(); feedback.toast(DELAY_APOLOGY)"
           >
-            ✉ メッセージ
+            <MessageSquare class="h-4 w-4" /> メッセージ
           </button>
           <hr class="my-1 border-gray-200" />
           <button
@@ -149,7 +160,7 @@ const goPersonal = () => {
             class="flex w-full items-center gap-2 px-3 py-2 text-red-700 hover:bg-gray-100"
             @click="onLogout"
           >
-            🚪 ログアウト
+            <LogOut class="h-4 w-4" /> ログアウト
           </button>
         </div>
       </div>
@@ -166,7 +177,7 @@ const goPersonal = () => {
             class="w-60 rounded bg-gray-100 py-1.5 pl-8 pr-2 text-sm text-gray-900 outline-none"
             @keydown="onSearchKeyDown"
           />
-          <span class="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-500">🔍</span>
+          <Search class="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
         </div>
         <button
           type="button"
@@ -174,7 +185,7 @@ const goPersonal = () => {
           title="ログアウト"
           @click="onLogout"
         >
-          🚪
+          <LogOut class="h-4 w-4" />
         </button>
       </header>
 

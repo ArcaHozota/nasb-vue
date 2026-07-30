@@ -5,6 +5,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useQuery, keepPreviousData } from "@tanstack/vue-query";
 import type { AxiosError } from "axios";
+import { LogIn, Search } from "@lucide/vue";
 import api from "@/api/axios";
 import { useFeedbackStore } from "@/stores/feedback";
 import { EMPTY_STRING, extractErrorMessage } from "@/constants";
@@ -225,7 +226,7 @@ const pageItems = computed<(number | "ellipsis")[]>(() => {
         <span class="effect-shine">NASB1995</span>
       </div>
       <button class="login-btn-desktop" @click="goLogin">
-        🔑 ログイン
+        <LogIn class="h-4 w-4" /> ログイン
       </button>
     </header>
 
@@ -238,7 +239,7 @@ const pageItems = computed<(number | "ellipsis")[]>(() => {
           class="search-input"
           @keydown="onSearchKeyDown"
         />
-        <button type="button" class="search-btn" @click="onSearch">🔍</button>
+        <button type="button" class="search-btn" @click="onSearch"><Search class="h-4 w-4" /></button>
       </div>
 
       <div class="card-row" :class="{ 'card-row--loading': isFetching }">

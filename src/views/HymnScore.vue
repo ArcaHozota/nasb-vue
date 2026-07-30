@@ -4,6 +4,7 @@
 import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
+import { LayoutGrid, CloudUpload, LoaderCircle } from "@lucide/vue";
 import api from "@/api/axios";
 import { useFeedbackStore } from "@/stores/feedback";
 import { EMPTY_STRING, extractErrorMessage } from "@/constants";
@@ -93,7 +94,7 @@ const onUpload = async () => {
 
     <div class="score-card relative overflow-hidden rounded-[18px]">
       <div class="flex items-center bg-secondary px-4 py-3 text-white">
-        <span class="mr-2">▦</span>
+        <LayoutGrid class="mr-2 h-5 w-5" />
         <h1 class="text-lg font-semibold">賛美歌楽譜アプロード</h1>
       </div>
 
@@ -109,10 +110,10 @@ const onUpload = async () => {
           />
           <button
             type="button"
-            class="rounded-md border border-secondary px-4 py-1.5 text-sm font-medium text-secondary"
+            class="flex items-center gap-1 rounded-md border border-secondary px-4 py-1.5 text-sm font-medium text-secondary"
             @click="fileInput?.click()"
           >
-            ⬆ ファイルを選択
+            <CloudUpload class="h-4 w-4" /> ファイルを選択
           </button>
           <p v-if="file" class="mt-1 text-sm text-gray-600">
             {{ file.name }}({{ Math.round(file.size / 1024) }} KB)
@@ -128,8 +129,8 @@ const onUpload = async () => {
           :disabled="uploading"
           @click="onUpload"
         >
-          <span v-if="uploading" class="inline-block animate-spin">⟳</span>
-          <span v-else>⬆ アプロード</span>
+          <span v-if="uploading" class="inline-block"><LoaderCircle class="h-4 w-4 animate-spin" /></span>
+          <span v-else class="flex items-center gap-1"><CloudUpload class="h-4 w-4" /> アプロード</span>
         </button>
       </div>
     </div>

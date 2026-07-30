@@ -4,6 +4,7 @@
 import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/vue-query";
+import { LayoutGrid, CirclePlus, Search } from "@lucide/vue";
 import api from "@/api/axios";
 import { useFeedbackStore } from "@/stores/feedback";
 import { EMPTY_STRING, extractErrorMessage, utf8ToBase64 } from "@/constants";
@@ -148,7 +149,7 @@ const onPageSizeChange = (e: Event) => {
 
     <div class="hymnlist-card relative mt-2 overflow-hidden rounded-[18px]">
       <div class="noto-serif flex items-center bg-gray-800 px-4 py-3 text-white">
-        <span class="mr-2">▦</span>
+        <LayoutGrid class="mr-2 h-5 w-5" />
         <h1 class="text-lg font-semibold">賛美歌情報メンテナンス</h1>
       </div>
 
@@ -167,17 +168,17 @@ const onPageSizeChange = (e: Event) => {
               class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
               @click="onSearch"
             >
-              🔍
+              <Search class="h-4 w-4" />
             </button>
           </div>
 
           <div class="ml-auto">
             <button
               type="button"
-              class="rounded-md bg-success px-4 py-1.5 text-sm font-medium text-white"
+              class="flex items-center gap-1 rounded-md bg-success px-4 py-1.5 text-sm font-medium text-white"
               @click="goAdd"
             >
-              ＋ 賛美歌情報追加
+              <CirclePlus class="h-4 w-4" /> 賛美歌情報追加
             </button>
           </div>
         </div>

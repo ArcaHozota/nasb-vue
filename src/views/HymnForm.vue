@@ -3,6 +3,7 @@
 // 旧 views/HymnForm.tsx を移植(追加・編集の両方で使用)
 import { reactive, ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { LayoutGrid, LoaderCircle } from "@lucide/vue";
 import api from "@/api/axios";
 import { useFeedbackStore } from "@/stores/feedback";
 import { useAuthStore } from "@/stores/auth";
@@ -199,7 +200,7 @@ const listQueryStr = computed(() => buildListQuery());
         class="flex items-center px-4 py-3 text-white"
         :class="isEdit ? 'bg-primary' : 'bg-success'"
       >
-        <span class="mr-2">▦</span>
+        <LayoutGrid class="mr-2 h-5 w-5" />
         <h1 class="text-lg font-semibold">
           {{ isEdit ? "賛美歌情報更新" : "賛美歌情報追加" }}
         </h1>
@@ -275,7 +276,7 @@ const listQueryStr = computed(() => buildListQuery());
           :disabled="saving"
           @click="onSubmit"
         >
-          <span v-if="saving" class="inline-block animate-spin">⟳</span>
+          <LoaderCircle v-if="saving" class="inline-block h-4 w-4 animate-spin" />
           <span v-else>{{ isEdit ? "更新" : "追加" }}</span>
         </button>
         <button

@@ -3,6 +3,7 @@
 // 旧 views/StudentEdition.tsx を移植
 import { reactive, ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { IdCard, Eye, EyeOff, Zap, Trash2, LoaderCircle } from "@lucide/vue";
 import api from "@/api/axios";
 import { useFeedbackStore } from "@/stores/feedback";
 import { EMPTY_STRING, extractErrorMessage } from "@/constants";
@@ -158,7 +159,7 @@ const onRestore = async () => {
 
     <div class="studentedition-card relative overflow-hidden rounded-[18px]">
       <div class="flex items-center px-4 py-3 text-white" style="background-color: #ff883e">
-        <span class="mr-2">👤</span>
+        <IdCard class="mr-2 h-5 w-5" />
         <h1 class="text-lg font-semibold">ユーザー情報更新</h1>
       </div>
 
@@ -203,7 +204,8 @@ const onRestore = async () => {
               class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
               @click="showPassword = !showPassword"
             >
-              {{ showPassword ? "🙈" : "👁" }}
+              <EyeOff v-if="showPassword" class="h-4 w-4" />
+              <Eye v-else class="h-4 w-4" />
             </button>
           </div>
           <p v-if="errors.password" class="mt-1 text-xs text-red-600">{{ errors.password }}</p>
@@ -240,15 +242,15 @@ const onRestore = async () => {
           :disabled="saving"
           @click="onUpdate"
         >
-          <span v-if="saving" class="inline-block animate-spin">⟳</span>
-          <span v-else>⚡ 更新</span>
+          <LoaderCircle v-if="saving" class="inline-block h-4 w-4 animate-spin" />
+          <span v-else class="flex items-center justify-center gap-1"><Zap class="h-4 w-4" /> 更新</span>
         </button>
         <button
           type="button"
-          class="rounded-md bg-gray-500 px-4 py-1.5 text-sm font-medium text-white"
+          class="flex items-center gap-1 rounded-md bg-gray-500 px-4 py-1.5 text-sm font-medium text-white"
           @click="onRestore"
         >
-          🗑 廃棄
+          <Trash2 class="h-4 w-4" /> 廃棄
         </button>
       </div>
     </div>
