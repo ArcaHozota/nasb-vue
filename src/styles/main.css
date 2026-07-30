@@ -5,6 +5,13 @@
  * primary: #800020, secondary: #002fa7, success: #006400,
  * warning: #f6c91c, info: #353542
  */
+/* ブラウザの既定スタイルでは<button>はcursor:defaultのまま
+   (<a>と違い自動でpointerにはならない)。旧MUIのButtonは内部でこれを
+   設定していたので、アプリ全体に同じ挙動を持たせる。 */
+button:not(:disabled) {
+  cursor: pointer;
+}
+
 @theme {
   --color-primary: #800020;
   --color-secondary: #002fa7;

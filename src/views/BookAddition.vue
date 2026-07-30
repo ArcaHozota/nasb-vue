@@ -170,7 +170,7 @@ const onStore = async () => {
             <label class="noto-serif mb-1 block text-sm text-gray-600">書</label>
             <select
               v-model="bookId"
-              class="noto-serif w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+              class="noto-serif h-9 w-full rounded-md border border-gray-300 px-2 text-sm"
             >
               <option v-for="b in books" :key="b.id" :value="b.id">{{ b.name }}</option>
             </select>
@@ -183,7 +183,7 @@ const onStore = async () => {
             </label>
             <select
               v-model="chapterId"
-              class="noto-serif w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+              class="noto-serif h-9 w-full rounded-md border border-gray-300 px-2 text-sm"
             >
               <option v-for="c in chapters" :key="c.id" :value="c.id">{{ c.name }}</option>
             </select>
@@ -195,7 +195,7 @@ const onStore = async () => {
               :value="verseId"
               type="text"
               placeholder="節の数を入力しましょう"
-              class="noto-serif w-full rounded-md border px-2 py-1.5 text-sm outline-none"
+              class="noto-serif h-9 w-full rounded-md border px-2 text-sm outline-none"
               :class="errors.verseId ? 'border-red-400' : 'border-gray-300 focus:border-primary'"
               @input="handleVerseIdChange(($event.target as HTMLInputElement).value)"
             />
@@ -208,7 +208,7 @@ const onStore = async () => {
             <label class="mb-1 block text-sm text-transparent">追加</label>
             <button
               type="button"
-              class="noto-serif h-10 w-full rounded-md bg-primary text-sm font-medium text-white disabled:opacity-60"
+              class="noto-serif h-9 w-full rounded-md bg-primary text-sm font-medium text-white disabled:opacity-60"
               :disabled="saving"
               @click="onStore"
             >
