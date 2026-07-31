@@ -5,7 +5,7 @@
 // 認証チェック(旧: user が無ければ fetchMe() → 失敗時 /home へリダイレクト)は
 // router/index.ts の router.beforeEach に集約済みなので、ここでは重複させていない。
 import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import {
   Anchor,
   Package,
@@ -22,6 +22,7 @@ import { useFeedbackStore } from "@/stores/feedback";
 import { DELAY_APOLOGY, EMPTY_STRING } from "@/constants";
 import brandLogo from "@/assets/jerusalem-cross2.svg";
 
+const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
 const feedback = useFeedbackStore();
@@ -35,24 +36,33 @@ const navItems = [
     icon: Anchor,
     title: "聖書章節選択",
     action: () => feedback.toast(DELAY_APOLOGY),
+    // 実ページが無い(トースト表示のみ)ため、アクティブ判定の対象外
+    isActive: () => false,
   },
   {
     key: "bookAdd",
     icon: Package,
     title: "聖書章節入力",
     action: () => router.push("/books/add"),
+    isActive: () => route.path === "/books/add",
   },
   {
     key: "hymns",
     icon: Music,
     title: "賛美歌一覧",
     action: () => router.push("/hymns"),
+    // /hymns配下の一覧・追加・編集・楽譜画面をまとめて「賛美歌一覧」としてアクティブ扱いにする。
+    // ただし /hymns/random-five は別ナビ項目なのでここには含めない。
+    isActive: () =>
+      route.path === "/hymns" ||
+      (route.path.startsWith("/hymns/") && !route.path.startsWith("/hymns/random-five")),
   },
   {
     key: "randomFive",
     icon: Shuffle,
     title: "ランダム五つ",
     action: () => router.push("/hymns/random-five"),
+    isActive: () => route.path.startsWith("/hymns/random-five"),
   },
 ];
 
@@ -112,7 +122,12 @@ const goPersonal = () => {
           v-for="item in navItems"
           :key="item.key"
           type="button"
-          class="flex w-full items-center gap-3 px-4 py-3 text-sm hover:bg-white/10"
+          class="flex w-full items-center gap-3 py-3 pl-4 pr-0 text-sm transition-colors"
+          :class="
+            item.isActive()
+              ? 'rounded-l-full bg-white text-gray-900'
+              : 'text-white hover:bg-white/10'
+          "
           @click="item.action"
         >
           <component :is="item.icon" class="h-5 w-5 shrink-0" />
