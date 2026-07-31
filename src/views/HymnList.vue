@@ -4,7 +4,7 @@
 import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/vue-query";
-import { LayoutGrid, CirclePlus, Search } from "@lucide/vue";
+import { LayoutGrid, CirclePlus, Search, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight } from "@lucide/vue";
 import api from "@/api/axios";
 import { useFeedbackStore } from "@/stores/feedback";
 import { EMPTY_STRING, extractErrorMessage, utf8ToBase64 } from "@/constants";
@@ -264,27 +264,53 @@ const onPageSizeChange = (e: Event) => {
           <div class="flex items-center gap-2">
             <select
               :value="pageSize"
-              class="rounded border border-gray-300 px-2 py-1"
+              class="rounded border border-gray-300 bg-white px-2 py-1"
               @change="onPageSizeChange"
             >
               <option v-for="opt in pageSizeOptions" :key="opt" :value="opt">
                 {{ opt }}件/ページ
               </option>
             </select>
-            <button
-              class="rounded px-2 py-1 disabled:opacity-40"
-              :disabled="page <= 1"
-              @click="page -= 1"
-            >
-              ←
-            </button>
-            <button
-              class="rounded px-2 py-1 disabled:opacity-40"
-              :disabled="page >= totalPages"
-              @click="page += 1"
-            >
 
-            </button>
+            <div class="flex items-center gap-0.5 rounded-md border border-gray-300 bg-white p-0.5">
+              <button
+                type="button"
+                title="最初のページ"
+                class="rounded p-1.5 text-gray-600 hover:bg-primary hover:text-white disabled:pointer-events-none disabled:opacity-30"
+                :disabled="page <= 1"
+                @click="page = 1"
+              >
+                <ChevronsLeft class="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                title="前のページ"
+                class="rounded p-1.5 text-gray-600 hover:bg-primary hover:text-white disabled:pointer-events-none disabled:opacity-30"
+                :disabled="page <= 1"
+                @click="page -= 1"
+              >
+                <ChevronLeft class="h-4 w-4" />
+              </button>
+              <span class="px-2 text-sm font-medium text-primary">{{ page }} / {{ totalPages }}</span>
+              <button
+                type="button"
+                title="次のページ"
+                class="rounded p-1.5 text-gray-600 hover:bg-primary hover:text-white disabled:pointer-events-none disabled:opacity-30"
+                :disabled="page >= totalPages"
+                @click="page += 1"
+              >
+                <ChevronRight class="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                title="最後のページ"
+                class="rounded p-1.5 text-gray-600 hover:bg-primary hover:text-white disabled:pointer-events-none disabled:opacity-30"
+                :disabled="page >= totalPages"
+                @click="page = totalPages"
+              >
+                <ChevronsRight class="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
