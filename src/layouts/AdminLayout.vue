@@ -117,28 +117,21 @@ const goPersonal = () => {
       <hr class="border-white/10" />
 
       <!-- メインナビ -->
-      <!-- 項目数が少なく現状スクロール不要なため overflow-y-auto は付けていない
-           (右にはみ出すアクティブストライプがクリップされないようにするため) -->
-      <nav class="flex-1 py-0">
+      <nav class="flex-1 overflow-y-auto py-2">
         <button
           v-for="item in navItems"
           :key="item.key"
           type="button"
-          class="relative flex w-full items-center gap-3 py-3 pl-4 pr-0 text-sm transition-colors"
+          class="mx-2 mb-1 flex w-[calc(100%-1rem)] items-center gap-3 rounded-lg border-2 px-3 py-3 text-sm transition-colors"
           :class="
             item.isActive()
-              ? 'rounded-l-full bg-white text-gray-900'
-              : 'text-white hover:bg-white/10'
+              ? 'border-blue-500 bg-white text-gray-900'
+              : 'border-transparent text-white hover:bg-white/10'
           "
           @click="item.action"
         >
           <component :is="item.icon" class="h-5 w-5 shrink-0" />
           <span>{{ item.title }}</span>
-          <!-- サイドバー右端の外側にはみ出す6px幅の白いストライプ(アクティブ時のみ) -->
-          <span
-            v-if="item.isActive()"
-            class="absolute -right-1.5 top-0 bottom-0 w-1.5 bg-white"
-          />
         </button>
       </nav>
 
