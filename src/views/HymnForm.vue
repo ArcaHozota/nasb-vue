@@ -214,7 +214,7 @@ const listQueryStr = computed(() => buildListQuery());
             type="text"
             placeholder="日本語名称を入力してください"
             class="w-full rounded-md border px-3 py-1.5 text-sm outline-none"
-            :class="errors.nameJp ? 'border-red-400' : 'border-gray-300 focus:border-primary'"
+            :class="errors.nameJp ? 'border-red-400' : `border-gray-300 ${isEdit ? 'focus:border-primary' : 'focus:border-success'}`"
             @blur="checkNameJp"
           />
           <p v-if="errors.nameJp" class="mt-1 text-xs text-red-600">{{ errors.nameJp }}</p>
@@ -227,7 +227,7 @@ const listQueryStr = computed(() => buildListQuery());
             type="text"
             placeholder="韓国語名称を入力してください"
             class="w-full rounded-md border px-3 py-1.5 text-sm outline-none"
-            :class="errors.nameKr ? 'border-red-400' : 'border-gray-300 focus:border-primary'"
+            :class="errors.nameKr ? 'border-red-400' : `border-gray-300 ${isEdit ? 'focus:border-primary' : 'focus:border-success'}`"
             @blur="checkNameKr"
           />
           <p v-if="errors.nameKr" class="mt-1 text-xs text-red-600">{{ errors.nameKr }}</p>
@@ -241,13 +241,13 @@ const listQueryStr = computed(() => buildListQuery());
               type="text"
               placeholder="リンクを入力してください"
               class="w-full rounded-md border px-3 py-1.5 text-sm outline-none"
-              :class="errors.link ? 'border-red-400' : 'border-gray-300 focus:border-primary'"
+              :class="errors.link ? 'border-red-400' : `border-gray-300 ${isEdit ? 'focus:border-primary' : 'focus:border-success'}`"
             />
             <p v-if="errors.link" class="mt-1 text-xs text-red-600">{{ errors.link }}</p>
           </div>
           <div class="classic-field">
             <div class="form-label">クラシック</div>
-            <input v-model="form.classic" type="checkbox" class="h-5 w-5 accent-primary" />
+            <input v-model="form.classic" type="checkbox" class="h-5 w-5" :class="isEdit ? 'accent-primary' : 'accent-success'" />
           </div>
         </div>
 
@@ -258,7 +258,7 @@ const listQueryStr = computed(() => buildListQuery());
             rows="6"
             placeholder="セリフを入力してください"
             class="w-full rounded-md border px-3 py-1.5 text-sm outline-none"
-            :class="errors.lyric ? 'border-red-400' : 'border-gray-300 focus:border-primary'"
+            :class="errors.lyric ? 'border-red-400' : `border-gray-300 ${isEdit ? 'focus:border-primary' : 'focus:border-success'}`"
           />
           <p v-if="errors.lyric" class="mt-1 text-xs text-red-600">{{ errors.lyric }}</p>
         </div>
