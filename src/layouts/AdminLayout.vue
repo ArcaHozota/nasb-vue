@@ -124,15 +124,20 @@ const goPersonal = () => {
           class="pointer-events-none absolute right-0 top-0 bottom-0 w-1.5 bg-white"
         />
         <button
-          v-for="item in navItems"
+          v-for="(item, idx) in navItems"
           :key="item.key"
           type="button"
           class="relative flex w-full items-center gap-3 py-3 pl-4 pr-0 text-sm transition-colors"
-          :class="
+          :class="[
             item.isActive()
               ? 'rounded-l-full bg-white text-gray-900'
-              : 'text-white hover:bg-white/10'
-          "
+              : 'text-white hover:bg-white/10',
+            // 区切り線は「非アクティブ同士が隣り合う境界」だけに表示し、
+            // アクティブ項目とは接しないようにする(写真のブラウザタブと同じ挙動)
+            idx > 0 && !item.isActive() && !navItems[idx - 1].isActive()
+              ? 'border-t border-white/15'
+              : '',
+          ]"
           @click="item.action"
         >
           <component :is="item.icon" class="h-5 w-5 shrink-0" />
