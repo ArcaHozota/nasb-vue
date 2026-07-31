@@ -88,9 +88,13 @@ const goPersonal = () => {
 </script>
 
 <template>
-  <div class="flex">
+  <!-- 画面全体をFlexboxで固定し、スクロールは<main>内だけに閉じ込める。
+       以前はサイドバー/上部バーをposition:fixed + margin計算(mt-12/pl-64/ml-64)で
+       位置合わせしていたが、ピクセル計算のズレでページ全体にごくわずかな縦
+       オーバーフローが生じ、意図しないスクロールバーの原因になっていた。 -->
+  <div class="flex h-screen overflow-hidden">
     <!-- ===== 左サイドバー(旧 Drawer) ===== -->
-    <aside class="fixed inset-y-0 left-0 z-20 flex w-64 flex-col bg-gray-900 text-white">
+    <aside class="flex w-64 shrink-0 flex-col bg-gray-900 text-white">
       <!-- ブランド -->
       <button
         type="button"
@@ -166,9 +170,9 @@ const goPersonal = () => {
       </div>
     </aside>
 
-    <div class="flex-1 pl-64">
+    <div class="flex flex-1 flex-col overflow-hidden">
       <!-- ===== 上部バー(旧 AppBar) ===== -->
-      <header class="fixed inset-x-0 top-0 z-10 ml-64 flex h-12 items-center justify-end gap-2 bg-gray-900 px-4">
+      <header class="flex h-12 shrink-0 items-center justify-end gap-2 bg-gray-900 px-4">
         <div class="relative">
           <input
             v-model="keyword"
@@ -189,8 +193,8 @@ const goPersonal = () => {
         </button>
       </header>
 
-      <!-- ===== 各画面 ===== -->
-      <main class="mt-12 p-[3px]">
+      <!-- ===== 各画面(ここだけがスクロールする) ===== -->
+      <main class="flex-1 overflow-y-auto p-[3px]">
         <router-view />
       </main>
     </div>
