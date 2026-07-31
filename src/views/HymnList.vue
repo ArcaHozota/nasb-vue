@@ -141,7 +141,7 @@ const onPageSizeChange = (e: Event) => {
 
 <template>
   <div
-    class="relative min-h-[calc(100vh-54px)] bg-cover bg-center bg-fixed p-4"
+    class="relative min-h-[calc(100vh-54px)] bg-cover bg-center bg-fixed"
   >
     <div class="fixed inset-0 -z-10">
       <img :src="bgImage" alt="" class="h-full w-full object-cover" />
