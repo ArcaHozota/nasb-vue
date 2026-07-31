@@ -190,7 +190,7 @@ const goPersonal = () => {
       </header>
 
       <!-- ===== 各画面 ===== -->
-      <main class="mt-12">
+      <main class="mt-12 p-[3px]">
         <router-view />
       </main>
     </div>
