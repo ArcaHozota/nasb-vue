@@ -200,3 +200,16 @@ const goPersonal = () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+/* mainはoverflow-y-autoで中身が高いときにスクロールバーの見た目が出るが、
+   ガラス風デザインとの統一感のため、スクロール自体は維持しつつ見た目だけ隠す。 */
+main {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* 旧Edge/IE */
+}
+
+main::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/新Edge */
+}
+</style>
