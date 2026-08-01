@@ -68,7 +68,7 @@ const onKeyDown = (e: KeyboardEvent) => {
       <img :src="bgImage" alt="" class="h-full w-full object-cover" />
     </div>
 
-    <div class="randomfive-card noto-serif relative mt-2 overflow-hidden rounded-[18px]">
+    <div class="randomfive-card noto-serif relative overflow-hidden rounded-[18px]">
       <div class="flex items-center bg-gray-800 px-4 py-3 text-white">
         <LayoutGrid class="mr-2 h-5 w-5" />
         <h1 class="text-lg font-semibold">賛美歌ランドム選択</h1>

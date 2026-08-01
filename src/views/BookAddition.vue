@@ -120,7 +120,7 @@ const onStore = async () => {
       <img :src="bgImage" alt="" class="h-full w-full object-cover" />
     </div>
 
-    <div class="bookaddition-card noto-serif relative mt-2 overflow-hidden rounded-[18px]">
+    <div class="bookaddition-card noto-serif relative overflow-hidden rounded-[18px]">
       <div class="noto-serif flex items-center bg-gray-800 px-4 py-3 text-white">
         <BookOpen class="mr-2 h-5 w-5" />
         <h1 class="text-lg font-semibold">聖書章節入力</h1>
