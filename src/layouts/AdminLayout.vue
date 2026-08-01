@@ -140,6 +140,17 @@ const goPersonal = () => {
           ]"
           @click="item.action"
         >
+          <!-- タブノッチ(ブラウザタブの、タブ⇔バー境界にある凹んだ丸み)。
+               アクティブ項目の右上・右下の角の外側に、6px半径の凹みを置いて
+               ストライプへ滑らかに繋がって見えるようにする -->
+          <span
+            v-if="item.isActive()"
+            class="pointer-events-none absolute right-0 top-0 h-1.5 w-1.5 -translate-y-full bg-[radial-gradient(circle_at_top_left,#111827_6px,white_6px)]"
+          />
+          <span
+            v-if="item.isActive()"
+            class="pointer-events-none absolute right-0 bottom-0 h-1.5 w-1.5 translate-y-full bg-[radial-gradient(circle_at_bottom_left,#111827_6px,white_6px)]"
+          />
           <component :is="item.icon" class="h-5 w-5 shrink-0" />
           <span>{{ item.title }}</span>
         </button>
