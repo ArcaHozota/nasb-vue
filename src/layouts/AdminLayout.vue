@@ -130,7 +130,7 @@ const goPersonal = () => {
           class="relative flex w-full items-center gap-3 py-3 pl-4 pr-0 text-sm transition-colors"
           :class="[
             item.isActive()
-              ? 'rounded-l-full rounded-r-md bg-white text-gray-900'
+              ? 'rounded-l-full bg-white text-gray-900'
               : 'text-white hover:bg-white/10',
             // 区切り線は「非アクティブ同士が隣り合う境界」だけに表示し、
             // アクティブ項目とは接しないようにする(写真のブラウザタブと同じ挙動)
@@ -140,16 +140,17 @@ const goPersonal = () => {
           ]"
           @click="item.action"
         >
-          <!-- タブノッチ(ブラウザタブの、タブ⇔バー境界にある凹んだ丸み)。
-               アクティブ項目の右上・右下の角の外側に、6px半径の凹みを置いて
-               ストライプへ滑らかに繋がって見えるようにする -->
+          <!-- スパンドレル(タブノッチ)。直角が実際に生じるのはストライプの
+               "左端"(right-1.5の位置)であって、ストライプ自体の内側(right-0)
+               ではない — 以前はここを right-0 にしていたため、既に白一色の領域を
+               いじって余計な模様を作ってしまっていた。 -->
           <span
             v-if="item.isActive()"
-            class="pointer-events-none absolute right-0 top-0 h-1.5 w-1.5 -translate-y-full bg-[radial-gradient(circle_at_top_left,#111827_6px,white_6px)]"
+            class="pointer-events-none absolute right-1.5 top-0 h-1.5 w-1.5 -translate-y-full bg-[radial-gradient(circle_at_top_left,#111827_6px,white_6px)]"
           />
           <span
             v-if="item.isActive()"
-            class="pointer-events-none absolute right-0 bottom-0 h-1.5 w-1.5 translate-y-full bg-[radial-gradient(circle_at_bottom_left,#111827_6px,white_6px)]"
+            class="pointer-events-none absolute right-1.5 bottom-0 h-1.5 w-1.5 translate-y-full bg-[radial-gradient(circle_at_bottom_left,#111827_6px,white_6px)]"
           />
           <component :is="item.icon" class="h-5 w-5 shrink-0" />
           <span>{{ item.title }}</span>
