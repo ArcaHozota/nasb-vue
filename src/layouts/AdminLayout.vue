@@ -127,7 +127,7 @@ const goPersonal = () => {
           v-for="(item, idx) in navItems"
           :key="item.key"
           type="button"
-          class="relative flex w-full items-center gap-3 py-3 pl-4 pr-0 text-sm transition-colors"
+          class="relative flex h-11 w-full items-center gap-3 pl-4 pr-0 text-sm transition-colors"
           :class="[
             item.isActive()
               ? 'rounded-l-full bg-white text-gray-900'
@@ -140,17 +140,17 @@ const goPersonal = () => {
           ]"
           @click="item.action"
         >
-          <!-- スパンドレル(タブノッチ)。直角が実際に生じるのはストライプの
-               "左端"(right-1.5の位置)であって、ストライプ自体の内側(right-0)
-               ではない — 以前はここを right-0 にしていたため、既に白一色の領域を
-               いじって余計な模様を作ってしまっていた。 -->
+          <!-- スパンドレル(タブノッチ)。半径は左の半円(rounded-l-full、
+               ボタンの高さ44px÷2=22px)と同じ22pxに揃える。位置(right-1.5)は
+               直角が実際に生じるストライプの左端に合わせたまま変更しない。 -->
           <span
             v-if="item.isActive()"
-            class="pointer-events-none absolute right-1.5 top-0 h-1.5 w-1.5 -translate-y-full bg-[radial-gradient(circle_at_top_left,#111827_6px,white_6px)]"
+            class="pointer-events-none absolute right-1.5 top-0 h-[22px] w-[22px] -translate-y-full bg-[radial-gradient(circle_at_top_left,#111827_22px,white_22px)]"
           />
+
           <span
             v-if="item.isActive()"
-            class="pointer-events-none absolute right-1.5 bottom-0 h-1.5 w-1.5 translate-y-full bg-[radial-gradient(circle_at_bottom_left,#111827_6px,white_6px)]"
+            class="pointer-events-none absolute right-1.5 bottom-0 h-[22px] w-[22px] translate-y-full bg-[radial-gradient(circle_at_bottom_left,#111827_22px,white_22px)]"
           />
           <component :is="item.icon" class="h-5 w-5 shrink-0" />
           <span>{{ item.title }}</span>
