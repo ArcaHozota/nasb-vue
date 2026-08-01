@@ -3,8 +3,20 @@
 // 旧 views/HymnList.tsx を移植
 import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/vue-query";
-import { LayoutGrid, CirclePlus, Search, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight } from "@lucide/vue";
+import {
+  useQuery,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/vue-query";
+import {
+  LayoutGrid,
+  CirclePlus,
+  Search,
+  ChevronsLeft,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsRight,
+} from "@lucide/vue";
 import api from "@/api/axios";
 import { useFeedbackStore } from "@/stores/feedback";
 import { EMPTY_STRING, extractErrorMessage, utf8ToBase64 } from "@/constants";
@@ -20,8 +32,8 @@ type HymnRow = {
 
 const textSizeClass = (str: string) => {
   const len = (str ?? EMPTY_STRING).length;
-  if (len >= 33) return "hymn-text-xs";
-  if (len >= 19) return "hymn-text-sm";
+  if (len >= 39) return "hymn-text-xs";
+  if (len >= 26) return "hymn-text-sm";
   return EMPTY_STRING;
 };
 
@@ -140,15 +152,15 @@ const onPageSizeChange = (e: Event) => {
 </script>
 
 <template>
-  <div
-    class="relative min-h-full bg-cover bg-center bg-fixed"
-  >
+  <div class="relative min-h-full bg-cover bg-center bg-fixed">
     <div class="fixed inset-0 -z-10">
       <img :src="bgImage" alt="" class="h-full w-full object-cover" />
     </div>
 
     <div class="hymnlist-card relative overflow-hidden rounded-[18px]">
-      <div class="noto-serif flex items-center bg-gray-800 px-4 py-3 text-white">
+      <div
+        class="noto-serif flex items-center bg-gray-800 px-4 py-3 text-white"
+      >
         <LayoutGrid class="mr-2 h-5 w-5" />
         <h1 class="text-lg font-semibold">賛美歌情報メンテナンス</h1>
       </div>
@@ -217,14 +229,22 @@ const onPageSizeChange = (e: Event) => {
                 :key="row.id"
                 :class="rowClass(row.lineNumber)"
               >
-                <td class="col-name px-3 py-2" :class="textSizeClass(row.nameJp)">
+                <td
+                  class="col-name px-3 py-2"
+                  :class="textSizeClass(row.nameJp)"
+                >
                   {{ row.nameJp }}
                 </td>
-                <td class="col-name px-3 py-2" :class="textSizeClass(row.nameKr)">
+                <td
+                  class="col-name px-3 py-2"
+                  :class="textSizeClass(row.nameKr)"
+                >
                   {{ row.nameKr }}
                 </td>
                 <td class="px-3 py-2 text-center">
-                  <a :href="row.link" target="_blank" rel="noopener noreferrer">Link</a>
+                  <a :href="row.link" target="_blank" rel="noopener noreferrer"
+                    >Link</a
+                  >
                 </td>
                 <td class="px-3 py-2 text-center">
                   <a href="#" @click.prevent="downloadScore(row.id)">𝄞</a>
@@ -257,7 +277,9 @@ const onPageSizeChange = (e: Event) => {
         </div>
 
         <!-- 簡易ページネーション(旧 DataGrid の paginationMode="server" 相当) -->
-        <div class="mt-3 flex items-center justify-between text-sm text-gray-600">
+        <div
+          class="mt-3 flex items-center justify-between text-sm text-gray-600"
+        >
           <div>
             全{{ totalRecords }}件 / {{ page }} / {{ totalPages }}ページ
           </div>
@@ -272,7 +294,9 @@ const onPageSizeChange = (e: Event) => {
               </option>
             </select>
 
-            <div class="flex items-center gap-0.5 rounded-md border border-gray-300 bg-white p-0.5">
+            <div
+              class="flex items-center gap-0.5 rounded-md border border-gray-300 bg-white p-0.5"
+            >
               <button
                 type="button"
                 title="最初のページ"
@@ -291,7 +315,9 @@ const onPageSizeChange = (e: Event) => {
               >
                 <ChevronLeft class="h-4 w-4" />
               </button>
-              <span class="px-2 text-sm font-medium text-primary">{{ page }} / {{ totalPages }}</span>
+              <span class="px-2 text-sm font-medium text-primary"
+                >{{ page }} / {{ totalPages }}</span
+              >
               <button
                 type="button"
                 title="次のページ"
