@@ -15,7 +15,7 @@ button:not(:disabled) {
 @theme {
   --color-primary: #800020;
   --color-secondary: #002fa7;
-  --color-success: #006400;
+  --color-success: #006600;
   --color-warning: #f6c91c;
   --color-info: #353542;
 }
@@ -53,4 +53,3 @@ button:not(:disabled) {
       0 0 10px #03e9f4;
   }
 }
-
