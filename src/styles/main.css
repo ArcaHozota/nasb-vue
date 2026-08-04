@@ -2,7 +2,7 @@
 
 /*
  * 旧 theme.ts (MUI createTheme) の palette をそのまま踏襲。
- * primary: #800020, secondary: #002fa7, success: #006400,
+ * primary: #800020, secondary: #003399, success: #355E3B,
  * warning: #f6c91c, info: #353542
  */
 /* ブラウザの既定スタイルでは<button>はcursor:defaultのまま
@@ -15,7 +15,7 @@ button:not(:disabled) {
 @theme {
   --color-primary: #800020;
   --color-secondary: #003399;
-  --color-success: #006600;
+  --color-success: #355E3B;
   --color-warning: #f6c91c;
   --color-info: #353542;
 }
