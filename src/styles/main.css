@@ -14,7 +14,7 @@ button:not(:disabled) {
 
 @theme {
   --color-primary: #800020;
-  --color-secondary: #002fa7;
+  --color-secondary: #003399;
   --color-success: #006600;
   --color-warning: #f6c91c;
   --color-info: #353542;
