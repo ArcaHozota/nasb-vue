@@ -122,7 +122,9 @@ const onSubmit = async () => {
   }
   const uid = auth.userId;
   if (!uid) {
-    feedback.toast("ログイン情報の取得に失敗しました。再度ログインしてください。");
+    feedback.toast(
+      "ログイン情報の取得に失敗しました。再度ログインしてください。",
+    );
     return;
   }
   saving.value = true;
@@ -179,23 +181,28 @@ const listQueryStr = computed(() => buildListQuery());
 </script>
 
 <template>
-  <div
-    class="noto-sans relative min-h-full bg-cover bg-center bg-fixed"
-  >
+  <div class="noto-sans relative min-h-full bg-cover bg-center bg-fixed">
     <div class="fixed inset-0 -z-10">
       <img :src="bgImage" alt="" class="h-full w-full object-cover" />
     </div>
 
     <!-- パンくずリスト -->
     <nav class="mb-2 text-sm font-semibold text-[#fffff0]">
-      <RouterLink to="/mainmenu" class="hover:underline">メインメニュー</RouterLink>
+      <RouterLink to="/mainmenu" class="hover:underline"
+        >メインメニュー</RouterLink
+      >
       <span class="mx-1">/</span>
-      <RouterLink :to="`/hymns?${listQueryStr}`" class="hover:underline">データリスト</RouterLink>
+      <RouterLink :to="`/hymns?${listQueryStr}`" class="hover:underline"
+        >データリスト</RouterLink
+      >
       <span class="mx-1">/</span>
       <span>{{ isEdit ? "データ更新" : "データ追加" }}</span>
     </nav>
 
-    <div class="form-card relative overflow-hidden rounded-[18px]" :class="{ 'is-edit': isEdit }">
+    <div
+      class="form-card relative overflow-hidden rounded-[18px]"
+      :class="{ 'is-edit': isEdit }"
+    >
       <div
         class="flex items-center px-4 py-3 text-white"
         :class="isEdit ? 'bg-primary' : 'bg-success'"
@@ -214,10 +221,16 @@ const listQueryStr = computed(() => buildListQuery());
             type="text"
             placeholder="日本語名称を入力してください"
             class="w-full rounded-md border px-3 py-1.5 text-sm outline-none"
-            :class="errors.nameJp ? 'border-red-400' : `border-gray-300 ${isEdit ? 'focus:border-primary' : 'focus:border-success'}`"
+            :class="
+              errors.nameJp
+                ? 'border-red-400'
+                : `border-gray-300 ${isEdit ? 'focus:border-primary' : 'focus:border-success'}`
+            "
             @blur="checkNameJp"
           />
-          <p v-if="errors.nameJp" class="mt-1 text-xs text-red-600">{{ errors.nameJp }}</p>
+          <p v-if="errors.nameJp" class="mt-1 text-xs text-red-600">
+            {{ errors.nameJp }}
+          </p>
         </div>
 
         <div class="mb-5">
@@ -227,10 +240,16 @@ const listQueryStr = computed(() => buildListQuery());
             type="text"
             placeholder="韓国語名称を入力してください"
             class="w-full rounded-md border px-3 py-1.5 text-sm outline-none"
-            :class="errors.nameKr ? 'border-red-400' : `border-gray-300 ${isEdit ? 'focus:border-primary' : 'focus:border-success'}`"
+            :class="
+              errors.nameKr
+                ? 'border-red-400'
+                : `border-gray-300 ${isEdit ? 'focus:border-primary' : 'focus:border-success'}`
+            "
             @blur="checkNameKr"
           />
-          <p v-if="errors.nameKr" class="mt-1 text-xs text-red-600">{{ errors.nameKr }}</p>
+          <p v-if="errors.nameKr" class="mt-1 text-xs text-red-600">
+            {{ errors.nameKr }}
+          </p>
         </div>
 
         <div class="link-row mb-5">
@@ -241,13 +260,33 @@ const listQueryStr = computed(() => buildListQuery());
               type="text"
               placeholder="リンクを入力してください"
               class="w-full rounded-md border px-3 py-1.5 text-sm outline-none"
-              :class="errors.link ? 'border-red-400' : `border-gray-300 ${isEdit ? 'focus:border-primary' : 'focus:border-success'}`"
+              :class="
+                errors.link
+                  ? 'border-red-400'
+                  : `border-gray-300 ${isEdit ? 'focus:border-primary' : 'focus:border-success'}`
+              "
             />
-            <p v-if="errors.link" class="mt-1 text-xs text-red-600">{{ errors.link }}</p>
+            <p v-if="errors.link" class="mt-1 text-xs text-red-600">
+              {{ errors.link }}
+            </p>
           </div>
           <div class="classic-field">
             <div class="form-label">クラシック</div>
-            <input v-model="form.classic" type="checkbox" class="h-5 w-5" :class="isEdit ? 'accent-primary' : 'accent-success'" />
+            <label class="toggle-switch">
+              <input
+                v-model="form.classic"
+                type="checkbox"
+                class="sr-only peer"
+              />
+              <span
+                class="toggle-track"
+                :class="
+                  isEdit ? 'peer-checked:bg-primary' : 'peer-checked:bg-success'
+                "
+              >
+                <span class="toggle-thumb" />
+              </span>
+            </label>
           </div>
         </div>
 
@@ -258,9 +297,15 @@ const listQueryStr = computed(() => buildListQuery());
             rows="6"
             placeholder="セリフを入力してください"
             class="w-full rounded-md border px-3 py-1.5 text-sm outline-none"
-            :class="errors.lyric ? 'border-red-400' : `border-gray-300 ${isEdit ? 'focus:border-primary' : 'focus:border-success'}`"
+            :class="
+              errors.lyric
+                ? 'border-red-400'
+                : `border-gray-300 ${isEdit ? 'focus:border-primary' : 'focus:border-success'}`
+            "
           />
-          <p v-if="errors.lyric" class="mt-1 text-xs text-red-600">{{ errors.lyric }}</p>
+          <p v-if="errors.lyric" class="mt-1 text-xs text-red-600">
+            {{ errors.lyric }}
+          </p>
         </div>
 
         <p v-if="isEdit" class="text-xs text-gray-500">
@@ -276,7 +321,10 @@ const listQueryStr = computed(() => buildListQuery());
           :disabled="saving"
           @click="onSubmit"
         >
-          <LoaderCircle v-if="saving" class="inline-block h-4 w-4 animate-spin" />
+          <LoaderCircle
+            v-if="saving"
+            class="inline-block h-4 w-4 animate-spin"
+          />
           <span v-else>{{ isEdit ? "更新" : "追加" }}</span>
         </button>
         <button
@@ -382,5 +430,36 @@ const listQueryStr = computed(() => buildListQuery());
 .classic-field {
   flex-shrink: 0;
   width: 96px;
+}
+
+.toggle-switch {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.toggle-track {
+  display: block;
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  background-color: #d1d5db;
+  transition: background-color 0.2s ease;
+  position: relative;
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.peer:checked ~ .toggle-track .toggle-thumb {
+  transform: translateX(20px);
 }
 </style>
