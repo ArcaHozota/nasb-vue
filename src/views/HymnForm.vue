@@ -259,7 +259,7 @@ const listQueryStr = computed(() => buildListQuery());
               v-model="form.link"
               type="text"
               placeholder="リンクを入力してください"
-              class="w-full rounded-md border px-3 py-1.5 text-sm outline-none"
+              class="h-9 w-full rounded-md border px-3 text-sm outline-none"
               :class="
                 errors.link
                   ? 'border-red-400'
@@ -280,9 +280,7 @@ const listQueryStr = computed(() => buildListQuery());
               />
               <span
                 class="toggle-track"
-                :class="
-                  isEdit ? 'peer-checked:bg-primary' : 'peer-checked:bg-success'
-                "
+                :class="isEdit ? 'is-primary' : 'is-success'"
               >
                 <span class="toggle-thumb" />
               </span>
@@ -437,10 +435,11 @@ const listQueryStr = computed(() => buildListQuery());
   cursor: pointer;
 }
 
+/* 左の入力欄(py-1.5 + text-sm + border)の実測高さに合わせる */
 .toggle-track {
   display: block;
-  width: 44px;
-  height: 24px;
+  width: 60px;
+  height: 34px;
   border-radius: 999px;
   background-color: #d1d5db;
   transition: background-color 0.2s ease;
@@ -449,10 +448,10 @@ const listQueryStr = computed(() => buildListQuery());
 
 .toggle-thumb {
   position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 20px;
-  height: 20px;
+  top: 4px;
+  left: 4px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background-color: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
@@ -460,6 +459,18 @@ const listQueryStr = computed(() => buildListQuery());
 }
 
 .peer:checked ~ .toggle-track .toggle-thumb {
-  transform: translateX(20px);
+  transform: translateX(26px);
+}
+
+/* チェック時のトラック色。isEdit(更新系)はバーガンディ、追加系はダークグリーン。
+   Tailwindのpeer-checked:ユーティリティは「兄弟要素」にしか効かず、かつ
+   ビルド後のCSS結合順序によって自前のスコープ付きスタイルと詳細度が同点に
+   なり負けることがあるため、ここでは自前クラス+セレクタで確実に上書きする。 */
+.peer:checked ~ .toggle-track.is-primary {
+  background-color: #800020;
+}
+
+.peer:checked ~ .toggle-track.is-success {
+  background-color: #006400;
 }
 </style>
