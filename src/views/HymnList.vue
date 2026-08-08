@@ -32,8 +32,8 @@ type HymnRow = {
 
 const textSizeClass = (str: string) => {
   const len = (str ?? EMPTY_STRING).length;
-  if (len >= 39) return "hymn-text-xs";
-  if (len >= 26) return "hymn-text-sm";
+  if (len >= 66) return "hymn-text-xs";
+  if (len >= 42) return "hymn-text-sm";
   return EMPTY_STRING;
 };
 
