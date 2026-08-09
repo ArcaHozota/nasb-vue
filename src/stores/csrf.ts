@@ -1,7 +1,7 @@
 // src/stores/csrf.ts
 import { ref } from "vue";
 import { defineStore } from "pinia";
-import axios from "axios";
+import api from "@/api/axios";
 import { EMPTY_STRING } from "@/constants";
 
 type CsrfToken = {
@@ -16,11 +16,7 @@ export const useCsrfStore = defineStore("csrf", () => {
   const tokenValue = () => csrf.value?.token ?? EMPTY_STRING;
 
   const fetchCsrf = async (): Promise<void> => {
-    // axios直接使用: api.tsのinterceptorが未取得トークンに依存しないようにするため
-    const { data } = await axios.get<CsrfToken>(
-      `${import.meta.env.VITE_API_BASE_URL}/csrf`,
-      { withCredentials: true },
-    );
+    const { data } = await api.get<CsrfToken>("/csrf");
     csrf.value = data;
   };
 

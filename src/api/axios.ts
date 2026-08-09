@@ -3,7 +3,7 @@ import axios from "axios";
 import { useCsrfStore } from "@/stores/csrf";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: "/api",
   withCredentials: true,
 });
 
