@@ -4,6 +4,7 @@ import { defineStore } from "pinia";
 import axios from "axios";
 import api from "@/api/axios";
 import { EMPTY_STRING } from "@/constants";
+import { useCsrfStore } from "@/stores/csrf";
 
 type User = {
   id: string;
@@ -52,19 +53,30 @@ export const useAuthStore = defineStore("auth", () => {
   const logout = async (): Promise<void> => {
     await api.post("/logout");
     user.value = null;
+    const csrfStore = useCsrfStore();
+    await csrfStore.fetchCsrf(); // 新しいトークンを取得しておく
   };
 
   const login = async (username: string, password: string): Promise<void> => {
-    // Scala側の login ハンドラは application/x-www-form-urlencoded
-    // ("username=...&password=...") を期待している。axiosはURLSearchParamsを
-    // 渡すと自動でこのContent-Typeを設定するため、ここは変更不要。
     const body = new URLSearchParams({ username, password });
     const { data } = await api.post<{ message?: string }>("/login", body);
     if (data?.message) {
       localStorage.setItem("redirectMessage", data.message);
     }
     await fetchMe();
+    // セッションローテーションでCSRFトークンが変わっている可能性があるため再取得
+    const csrfStore = useCsrfStore();
+    await csrfStore.fetchCsrf();
   };
 
-  return { user, isLoggedIn, username, userId, hasRole, fetchMe, login, logout };
+  return {
+    user,
+    isLoggedIn,
+    username,
+    userId,
+    hasRole,
+    fetchMe,
+    login,
+    logout,
+  };
 });

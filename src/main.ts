@@ -6,6 +6,7 @@ import App from "./App.vue";
 import router from "./router";
 import { queryClient } from "./queryClient";
 import { useAuthStore } from "@/stores/auth";
+import { useCsrfStore } from "@/stores/csrf";
 
 const app = createApp(App);
 app.use(createPinia());
@@ -21,4 +22,15 @@ window.addEventListener("auth:unauthorized", () => {
   router.push("/home");
 });
 
-app.mount("#app");
+// CSRFトークンをマウント前に確定させておく。
+// 失敗してもアプリ自体は起動させ、以降のPOST/PUT/DELETEでresponse interceptor側の
+// 403リトライに委ねる(初回アクセス時のネットワーク瞬断などを致命傷にしないため)。
+(async () => {
+  const csrfStore = useCsrfStore();
+  try {
+    await csrfStore.fetchCsrf();
+  } catch (err) {
+    console.error("Failed to fetch initial CSRF token", err);
+  }
+  app.mount("#app");
+})();
