@@ -40,6 +40,29 @@ api.interceptors.response.use(
         isRetrying = false;
       }
     }
+
+    // 401 + SESSION_INVALIDATED: 別端末でのログインにより、このセッションが
+    // サーバー側(JsonExpiredSessionStrategy等)で失効させられた場合。
+    // 通常の「未ログイン401」(router guard 側の fetchMe() が処理する) とは区別し、
+    // ここでは強制ログアウト専用のメッセージ付きリダイレクトのみを行う。
+    if (
+      axios.isAxiosError(error) &&
+      error.response?.status === 401 &&
+      (error.response.data as { error?: string } | undefined)?.error ===
+        "SESSION_INVALIDATED"
+    ) {
+      localStorage.setItem(
+        "redirectMessage",
+        "別の端末でログインされたため、ログアウトされました。",
+      );
+      // フルリロードでPinia/Vue Query等のクライアント側状態を丸ごとリセットする。
+      // router.push だと axios.ts <-> router <-> stores/auth.ts の循環importを
+      // 避けられるという副次的なメリットもある。
+      window.location.href = "/home";
+      // ページ遷移するので、この先のエラーハンドラ(トースト表示等)は走らせない。
+      return new Promise(() => {});
+    }
+
     return Promise.reject(error);
   },
 );

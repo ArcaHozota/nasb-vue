@@ -47,6 +47,17 @@ const onMqlChange = (e: MediaQueryListEvent) => {
 onMounted(() => mql.addEventListener("change", onMqlChange));
 onUnmounted(() => mql.removeEventListener("change", onMqlChange));
 
+// 別端末ログインによる強制ログアウト(session.ts の401ハンドラ)等で
+// localStorageにセットされたメッセージをトースト表示する。
+// 旧 mainmenu.js / MainMenu.vue の redirectMessage 表示パターンと同じ。
+onMounted(() => {
+  const msg = localStorage.getItem("redirectMessage");
+  if (msg) {
+    feedback.toast(msg);
+    localStorage.removeItem("redirectMessage");
+  }
+});
+
 const PAGE_SIZE = computed(() => (isMobile.value ? 2 : 5));
 
 const page = ref(1);
