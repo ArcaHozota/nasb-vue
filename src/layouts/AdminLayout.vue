@@ -36,7 +36,7 @@ const userMenuOpen = ref(false);
 // 実際の失効判定・メッセージ表示・リダイレクトは axios.ts のレスポンス
 // インターセプター(SESSION_INVALIDATED 検知)が一元的に行うので、ここでは
 // ただ /me を叩いて「次のリクエスト」を発生させるだけでよい。
-const SESSION_CHECK_INTERVAL_MS = 33_000;
+const SESSION_CHECK_INTERVAL_MS = 15_000;
 let sessionCheckTimer: ReturnType<typeof setInterval> | undefined;
 
 onMounted(() => {
