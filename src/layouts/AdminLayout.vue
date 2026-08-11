@@ -4,7 +4,7 @@
 //
 // 認証チェック(旧: user が無ければ fetchMe() → 失敗時 /home へリダイレクト)は
 // router/index.ts の router.beforeEach に集約済みなので、ここでは重複させていない。
-import { ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
   Anchor,
@@ -17,6 +17,7 @@ import {
   ChevronUp,
   Search,
 } from "@lucide/vue";
+import api from "@/api/axios";
 import { useAuthStore } from "@/stores/auth";
 import { useFeedbackStore } from "@/stores/feedback";
 import { DELAY_APOLOGY, EMPTY_STRING } from "@/constants";
@@ -29,6 +30,28 @@ const feedback = useFeedbackStore();
 
 const keyword = ref(EMPTY_STRING);
 const userMenuOpen = ref(false);
+
+// 画面を開きっぱなしのブラウザでも、別端末ログインによる強制ログアウトに
+// 即座に気づけるよう定期的にログイン状態を確認する。
+// 実際の失効判定・メッセージ表示・リダイレクトは axios.ts のレスポンス
+// インターセプター(SESSION_INVALIDATED 検知)が一元的に行うので、ここでは
+// ただ /me を叩いて「次のリクエスト」を発生させるだけでよい。
+const SESSION_CHECK_INTERVAL_MS = 33_000;
+let sessionCheckTimer: ReturnType<typeof setInterval> | undefined;
+
+onMounted(() => {
+  sessionCheckTimer = setInterval(() => {
+    api.get("/me").catch(() => {
+      // 401(SESSION_INVALIDATEDを含む)はaxios.ts側で既に処理済み。
+      // それ以外の一時的な通信エラーでポーリング自体を止めたくないため、
+      // ここでは意図的に何もしない。
+    });
+  }, SESSION_CHECK_INTERVAL_MS);
+});
+
+onUnmounted(() => {
+  if (sessionCheckTimer) clearInterval(sessionCheckTimer);
+});
 
 const navItems = [
   {
@@ -55,7 +78,8 @@ const navItems = [
     // ただし /hymns/random-five は別ナビ項目なのでここには含めない。
     isActive: () =>
       route.path === "/hymns" ||
-      (route.path.startsWith("/hymns/") && !route.path.startsWith("/hymns/random-five")),
+      (route.path.startsWith("/hymns/") &&
+        !route.path.startsWith("/hymns/random-five")),
   },
   {
     key: "randomFive",
@@ -67,7 +91,10 @@ const navItems = [
 ];
 
 const onLogout = async () => {
-  const ok = await feedback.confirm("ログアウトしてよろしいでしょうか。", "警告");
+  const ok = await feedback.confirm(
+    "ログアウトしてよろしいでしょうか。",
+    "警告",
+  );
   if (!ok) return;
   await auth.logout();
   // 旧実装同様、状態を完全にリセットするためフルリロードする
@@ -112,7 +139,9 @@ const goPersonal = () => {
         @click="router.push('/mainmenu')"
       >
         <img :src="brandLogo" alt="" class="h-[49px] w-[49px] object-cover" />
-        <span class="effect-shine whitespace-nowrap text-[1.9rem] leading-none">NASB1995</span>
+        <span class="effect-shine whitespace-nowrap text-[1.9rem] leading-none"
+          >NASB1995</span
+        >
       </button>
       <hr class="border-white/10" />
 
@@ -175,7 +204,11 @@ const goPersonal = () => {
         </button>
 
         <!-- クリック外を検知して閉じるための透明レイヤー -->
-        <div v-if="userMenuOpen" class="fixed inset-0 z-10" @click="closeUserMenu" />
+        <div
+          v-if="userMenuOpen"
+          class="fixed inset-0 z-10"
+          @click="closeUserMenu"
+        />
 
         <div
           v-if="userMenuOpen"
@@ -191,7 +224,10 @@ const goPersonal = () => {
           <button
             type="button"
             class="flex w-full items-center gap-2 px-3 py-2 hover:bg-gray-100"
-            @click="closeUserMenu(); feedback.toast(DELAY_APOLOGY)"
+            @click="
+              closeUserMenu();
+              feedback.toast(DELAY_APOLOGY);
+            "
           >
             <MessageSquare class="h-4 w-4" /> メッセージ
           </button>
@@ -209,7 +245,9 @@ const goPersonal = () => {
 
     <div class="flex flex-1 flex-col overflow-hidden">
       <!-- ===== 上部バー(旧 AppBar) ===== -->
-      <header class="flex h-12 shrink-0 items-center justify-end gap-2 bg-gray-900 px-4">
+      <header
+        class="flex h-12 shrink-0 items-center justify-end gap-2 bg-gray-900 px-4"
+      >
         <div class="relative">
           <input
             v-model="keyword"
@@ -218,7 +256,9 @@ const goPersonal = () => {
             class="w-60 rounded bg-gray-100 py-1.5 pl-8 pr-2 text-sm text-gray-900 outline-none"
             @keydown="onSearchKeyDown"
           />
-          <Search class="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+          <Search
+            class="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500"
+          />
         </div>
         <button
           type="button"
