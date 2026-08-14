@@ -64,9 +64,7 @@ const originalForm = ref<FormState | null>(null);
 onMounted(async () => {
   if (!isEdit) return;
   try {
-    const { data } = await api.get("/hymns/get-info-id", {
-      params: { hymnId: editId },
-    });
+    const { data } = await api.get(`/hymns/${editId}`);
     Object.assign(form, data);
     originalForm.value = { ...form, ...data };
   } catch (e) {
@@ -79,7 +77,7 @@ const checkNameJp = async (e: FocusEvent) => {
   errors.nameJp = EMPTY_STRING;
   if (!name) return;
   try {
-    await api.get("/hymns/check-duplicated", {
+    await api.get("/hymns/duplicate-check-jp", {
       params: { id: form.id ?? EMPTY_STRING, nameJp: name },
     });
   } catch (e) {
@@ -92,7 +90,7 @@ const checkNameKr = async (e: FocusEvent) => {
   errors.nameKr = EMPTY_STRING;
   if (!name) return;
   try {
-    await api.get("/hymns/check-duplicated2", {
+    await api.get("/hymns/duplicate-check-kr", {
       params: { id: form.id ?? EMPTY_STRING, nameKr: name },
     });
   } catch (e) {
@@ -143,11 +141,11 @@ const onSubmit = async () => {
         id: form.id,
         updatedTime: form.updatedTime,
       };
-      const { data } = await api.put("/hymns/info-update", updatePayload);
+      const { data } = await api.put(`/hymns/${form.id}`, updatePayload);
       feedback.toast(typeof data === "string" ? data : "更新しました");
       router.push(`/hymns?${buildListQuery()}`);
     } else {
-      const { data } = await api.post("/hymns/info-storage", payload, {
+      const { data } = await api.post("/hymns", payload, {
         params: { pageSize: pageSize || 5 },
       });
       feedback.toast("追加済み");
