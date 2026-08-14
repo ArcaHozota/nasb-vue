@@ -83,7 +83,7 @@ const { data, isFetching, error } = useQuery<PaginationResponse>({
     submittedKeyword.value,
   ]),
   queryFn: async () => {
-    const { data } = await api.get("/hymns/pagination", {
+    const { data } = await api.get("/hymns", {
       params: {
         pageNum: page.value,
         pageSize: PAGE_SIZE.value,
@@ -120,7 +120,7 @@ const onSearchKeyDown = (e: KeyboardEvent) => {
 
 const downloadScore = async (id: number) => {
   try {
-    const res = await api.get(`/hymns/score-download?id=${id}`, {
+    const res = await api.get(`/hymns/${id}/score`, {
       responseType: "blob",
     });
     const url = window.URL.createObjectURL(res.data);
@@ -191,7 +191,10 @@ const pageItems = computed<(number | "ellipsis")[]>(() => {
     Array.from({ length: end - start + 1 }, (_, i) => start + i);
 
   const startPages = range(1, Math.min(boundaryCount, total));
-  const endPages = range(Math.max(total - boundaryCount + 1, boundaryCount + 1), total);
+  const endPages = range(
+    Math.max(total - boundaryCount + 1, boundaryCount + 1),
+    total,
+  );
 
   const siblingsStart = Math.max(
     Math.min(cur - siblingCount, total - boundaryCount - siblingCount * 2 - 1),
@@ -250,7 +253,9 @@ const pageItems = computed<(number | "ellipsis")[]>(() => {
           class="search-input"
           @keydown="onSearchKeyDown"
         />
-        <button type="button" class="search-btn" @click="onSearch"><Search class="h-4 w-4" /></button>
+        <button type="button" class="search-btn" @click="onSearch">
+          <Search class="h-4 w-4" />
+        </button>
       </div>
 
       <div class="card-row" :class="{ 'card-row--loading': isFetching }">
@@ -271,7 +276,11 @@ const pageItems = computed<(number | "ellipsis")[]>(() => {
           >
             {{ item.nameJp }} / {{ item.nameKr }}
           </a>
-          <button class="score-btn" title="楽譜ダウンロード" @click="downloadScore(item.id)">
+          <button
+            class="score-btn"
+            title="楽譜ダウンロード"
+            @click="downloadScore(item.id)"
+          >
             𝄞
           </button>
         </article>
@@ -282,7 +291,9 @@ const pageItems = computed<(number | "ellipsis")[]>(() => {
           {{ totalPages }}ページ中の{{ page }}ページ、{{ totalRecords }}件
         </span>
         <div class="pager-glass">
-          <button class="pager-item" :disabled="page <= 1" @click="page -= 1">‹</button>
+          <button class="pager-item" :disabled="page <= 1" @click="page -= 1">
+            ‹
+          </button>
           <template v-for="(item, idx) in pageItems" :key="idx">
             <span v-if="item === 'ellipsis'" class="pager-ellipsis">…</span>
             <button
@@ -294,12 +305,19 @@ const pageItems = computed<(number | "ellipsis")[]>(() => {
               {{ item }}
             </button>
           </template>
-          <button class="pager-item" :disabled="page >= totalPages" @click="page += 1">›</button>
+          <button
+            class="pager-item"
+            :disabled="page >= totalPages"
+            @click="page += 1"
+          >
+            ›
+          </button>
         </div>
       </div>
 
       <p v-if="isMobile" class="hint-verse">
-        "Heaven and Earth will pass away, but My words will not pass away." --- Luke 21:33
+        "Heaven and Earth will pass away, but My words will not pass away." ---
+        Luke 21:33
       </p>
     </main>
   </div>
