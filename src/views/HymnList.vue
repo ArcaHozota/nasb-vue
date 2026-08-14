@@ -64,7 +64,7 @@ const { data, isFetching } = useQuery({
     submittedKeyword.value,
   ]),
   queryFn: async () => {
-    const { data } = await api.get("/hymns/pagination", {
+    const { data } = await api.get("/hymns", {
       params: {
         pageNum: page.value,
         pageSize: pageSize.value,
@@ -107,7 +107,7 @@ const goScore = (id: number) =>
 
 const onDelete = async (item: HymnRow) => {
   try {
-    await api.get(`/hymns/delete-check?id=${item.id}`);
+    await api.get(`/hymns/${item.id}/delete-check`);
   } catch (e: unknown) {
     feedback.toast(extractErrorMessage(e, "削除できません"));
     return;
@@ -118,7 +118,7 @@ const onDelete = async (item: HymnRow) => {
   );
   if (!ok) return;
   try {
-    const { data } = await api.delete(`/hymns/info-delete?id=${item.id}`);
+    const { data } = await api.delete(`/hymns/${item.id}`);
     feedback.toast(data.message ?? "削除しました");
     queryClient.invalidateQueries({ queryKey: ["hymns-list"] });
   } catch (e: unknown) {
@@ -128,7 +128,7 @@ const onDelete = async (item: HymnRow) => {
 
 const downloadScore = async (id: number) => {
   try {
-    const res = await api.get(`/hymns/score-download?id=${id}`, {
+    const res = await api.get(`/hymns/${id}/score`, {
       responseType: "blob",
     });
     const url = window.URL.createObjectURL(res.data);
