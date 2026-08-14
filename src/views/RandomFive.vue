@@ -21,7 +21,7 @@ const loading = ref(false);
 const onRandom = async () => {
   loading.value = true;
   try {
-    const { data } = await api.get("/hymns/random-retrieve", {
+    const { data } = await api.get("/hymns/random", {
       params: { keyword: keyword.value.normalize("NFC") },
     });
     records.value = data;
@@ -61,14 +61,14 @@ const onKeyDown = (e: KeyboardEvent) => {
 </script>
 
 <template>
-  <div
-    class="relative min-h-full bg-cover bg-center bg-fixed"
-  >
+  <div class="relative min-h-full bg-cover bg-center bg-fixed">
     <div class="fixed inset-0 -z-10">
       <img :src="bgImage" alt="" class="h-full w-full object-cover" />
     </div>
 
-    <div class="randomfive-card noto-serif relative overflow-hidden rounded-[18px]">
+    <div
+      class="randomfive-card noto-serif relative overflow-hidden rounded-[18px]"
+    >
       <div class="flex items-center bg-gray-800 px-4 py-3 text-white">
         <LayoutGrid class="mr-2 h-5 w-5" />
         <h1 class="text-lg font-semibold">賛美歌ランドム選択</h1>
@@ -95,7 +95,9 @@ const onKeyDown = (e: KeyboardEvent) => {
         </div>
 
         <table class="glass-table">
-          <caption>ランドム選択した賛美歌情報一覧</caption>
+          <caption>
+            ランドム選択した賛美歌情報一覧
+          </caption>
           <thead>
             <tr class="header-row-mint">
               <th>名称</th>
