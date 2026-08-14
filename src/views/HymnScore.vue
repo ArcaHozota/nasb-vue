@@ -47,13 +47,12 @@ const onUpload = async () => {
     return;
   }
   const formData = new FormData();
-  formData.append("id", scoreId ?? EMPTY_STRING);
   formData.append("score", file.value);
   const controller = new AbortController();
   uploading.value = true;
   progress.value = 0;
   try {
-    const { data } = await api.post("/hymns/score-upload", formData, {
+    const { data } = await api.post(`/hymns/${scoreId}/score`, formData, {
       signal: controller.signal,
       timeout: 66_000,
       onUploadProgress: (evt) => {
@@ -77,17 +76,19 @@ const onUpload = async () => {
 </script>
 
 <template>
-  <div
-    class="noto-sans relative min-h-full bg-cover bg-center bg-fixed"
-  >
+  <div class="noto-sans relative min-h-full bg-cover bg-center bg-fixed">
     <div class="fixed inset-0 -z-10">
       <img :src="bgImage" alt="" class="h-full w-full object-cover" />
     </div>
 
     <nav class="mb-2 text-sm font-semibold text-[#fffff0]">
-      <RouterLink to="/mainmenu" class="hover:underline">メインメニュー</RouterLink>
+      <RouterLink to="/mainmenu" class="hover:underline"
+        >メインメニュー</RouterLink
+      >
       <span class="mx-1">/</span>
-      <RouterLink :to="`/hymns?${buildListQuery()}`" class="hover:underline">データリスト</RouterLink>
+      <RouterLink :to="`/hymns?${buildListQuery()}`" class="hover:underline"
+        >データリスト</RouterLink
+      >
       <span class="mx-1">/</span>
       <span>楽譜アプロード</span>
     </nav>
@@ -98,7 +99,9 @@ const onUpload = async () => {
         <h1 class="text-lg font-semibold">賛美歌楽譜アプロード</h1>
       </div>
 
-      <div class="flex flex-col items-center gap-2 p-8 sm:flex-row sm:justify-center">
+      <div
+        class="flex flex-col items-center gap-2 p-8 sm:flex-row sm:justify-center"
+      >
         <span class="sm:text-right">楽譜</span>
         <div>
           <input
@@ -129,8 +132,12 @@ const onUpload = async () => {
           :disabled="uploading"
           @click="onUpload"
         >
-          <span v-if="uploading" class="inline-block"><LoaderCircle class="h-4 w-4 animate-spin" /></span>
-          <span v-else class="flex items-center gap-1"><CloudUpload class="h-4 w-4" /> アプロード</span>
+          <span v-if="uploading" class="inline-block"
+            ><LoaderCircle class="h-4 w-4 animate-spin"
+          /></span>
+          <span v-else class="flex items-center gap-1"
+            ><CloudUpload class="h-4 w-4" /> アプロード</span
+          >
         </button>
       </div>
     </div>
