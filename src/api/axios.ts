@@ -5,6 +5,9 @@ import { useCsrfStore } from "@/stores/csrf";
 const api = axios.create({
   baseURL: "/api",
   withCredentials: true,
+  headers: {
+    Accept: "application/json",
+  },
 });
 
 api.interceptors.request.use((config) => {
