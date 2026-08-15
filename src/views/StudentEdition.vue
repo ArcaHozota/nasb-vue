@@ -62,9 +62,7 @@ const showPassword = ref(false);
 const fetchInitial = async () => {
   if (!form.id) return;
   try {
-    const { data } = await api.get("/students/initial", {
-      params: { editId: form.id },
-    });
+    const { data } = await api.get(`/students/${form.id}`);
     form.loginAccount = data.loginAccount;
     form.username = data.username;
     form.password = data.password;
@@ -82,7 +80,7 @@ const checkAccount = async () => {
   const name = form.loginAccount.trim();
   if (!name) return;
   try {
-    await api.get("/students/check-duplicated", {
+    await api.get("/students/duplicate-check", {
       params: { id: form.id ?? EMPTY_STRING, loginAccount: name },
     });
   } catch (e: unknown) {
@@ -108,7 +106,7 @@ const onUpdate = async () => {
   }
   saving.value = true;
   try {
-    const { data } = await api.put("/students/info-update", {
+    const { data } = await api.put(`/students/${form.id}`, {
       id: form.id,
       loginAccount: form.loginAccount.trim(),
       username: form.username.trim(),
@@ -142,15 +140,15 @@ const onRestore = async () => {
 </script>
 
 <template>
-  <div
-    class="noto-sans relative min-h-full bg-cover bg-center bg-fixed"
-  >
+  <div class="noto-sans relative min-h-full bg-cover bg-center bg-fixed">
     <div class="fixed inset-0 -z-10">
       <img :src="bgImage" alt="" class="h-full w-full object-cover" />
     </div>
 
     <nav class="mb-2 text-sm font-semibold text-[#fffff0]">
-      <RouterLink to="/mainmenu" class="hover:underline">メインメニュー</RouterLink>
+      <RouterLink to="/mainmenu" class="hover:underline"
+        >メインメニュー</RouterLink
+      >
       <span class="mx-1">/</span>
       <span>データリスト</span>
       <span class="mx-1">/</span>
@@ -158,7 +156,10 @@ const onRestore = async () => {
     </nav>
 
     <div class="studentedition-card relative overflow-hidden rounded-[18px]">
-      <div class="flex items-center px-4 py-3 text-white" style="background-color: #ff883e">
+      <div
+        class="flex items-center px-4 py-3 text-white"
+        style="background-color: #ff883e"
+      >
         <IdCard class="mr-2 h-5 w-5" />
         <h1 class="text-lg font-semibold">ユーザー情報更新</h1>
       </div>
@@ -171,10 +172,16 @@ const onRestore = async () => {
             type="text"
             placeholder="アカウントを入力してください"
             class="w-full rounded-md border px-3 py-1.5 text-sm outline-none"
-            :class="errors.loginAccount ? 'border-red-400' : 'border-gray-300 focus:border-primary'"
+            :class="
+              errors.loginAccount
+                ? 'border-red-400'
+                : 'border-gray-300 focus:border-primary'
+            "
             @blur="checkAccount"
           />
-          <p v-if="errors.loginAccount" class="mt-1 text-xs text-red-600">{{ errors.loginAccount }}</p>
+          <p v-if="errors.loginAccount" class="mt-1 text-xs text-red-600">
+            {{ errors.loginAccount }}
+          </p>
         </div>
 
         <div class="mb-5">
@@ -184,9 +191,15 @@ const onRestore = async () => {
             type="text"
             placeholder="名称を入力してください"
             class="w-full rounded-md border px-3 py-1.5 text-sm outline-none"
-            :class="errors.username ? 'border-red-400' : 'border-gray-300 focus:border-primary'"
+            :class="
+              errors.username
+                ? 'border-red-400'
+                : 'border-gray-300 focus:border-primary'
+            "
           />
-          <p v-if="errors.username" class="mt-1 text-xs text-red-600">{{ errors.username }}</p>
+          <p v-if="errors.username" class="mt-1 text-xs text-red-600">
+            {{ errors.username }}
+          </p>
         </div>
 
         <div class="mb-5">
@@ -197,7 +210,11 @@ const onRestore = async () => {
               :type="showPassword ? 'text' : 'password'"
               placeholder="パスワードを入力してください"
               class="w-full rounded-md border px-3 py-1.5 pr-9 text-sm outline-none"
-              :class="errors.password ? 'border-red-400' : 'border-gray-300 focus:border-primary'"
+              :class="
+                errors.password
+                  ? 'border-red-400'
+                  : 'border-gray-300 focus:border-primary'
+              "
             />
             <button
               type="button"
@@ -208,7 +225,9 @@ const onRestore = async () => {
               <Eye v-else class="h-4 w-4" />
             </button>
           </div>
-          <p v-if="errors.password" class="mt-1 text-xs text-red-600">{{ errors.password }}</p>
+          <p v-if="errors.password" class="mt-1 text-xs text-red-600">
+            {{ errors.password }}
+          </p>
         </div>
 
         <div class="mb-5">
@@ -217,9 +236,15 @@ const onRestore = async () => {
             v-model="form.dateOfBirth"
             type="date"
             class="w-full rounded-md border px-3 py-1.5 text-sm outline-none"
-            :class="errors.dateOfBirth ? 'border-red-400' : 'border-gray-300 focus:border-primary'"
+            :class="
+              errors.dateOfBirth
+                ? 'border-red-400'
+                : 'border-gray-300 focus:border-primary'
+            "
           />
-          <p v-if="errors.dateOfBirth" class="mt-1 text-xs text-red-600">{{ errors.dateOfBirth }}</p>
+          <p v-if="errors.dateOfBirth" class="mt-1 text-xs text-red-600">
+            {{ errors.dateOfBirth }}
+          </p>
         </div>
 
         <div class="mb-2">
@@ -229,9 +254,15 @@ const onRestore = async () => {
             type="text"
             placeholder="メールを入力してください"
             class="w-full rounded-md border px-3 py-1.5 text-sm outline-none"
-            :class="errors.email ? 'border-red-400' : 'border-gray-300 focus:border-primary'"
+            :class="
+              errors.email
+                ? 'border-red-400'
+                : 'border-gray-300 focus:border-primary'
+            "
           />
-          <p v-if="errors.email" class="mt-1 text-xs text-red-600">{{ errors.email }}</p>
+          <p v-if="errors.email" class="mt-1 text-xs text-red-600">
+            {{ errors.email }}
+          </p>
         </div>
       </div>
 
@@ -242,8 +273,13 @@ const onRestore = async () => {
           :disabled="saving"
           @click="onUpdate"
         >
-          <LoaderCircle v-if="saving" class="inline-block h-4 w-4 animate-spin" />
-          <span v-else class="flex items-center justify-center gap-1"><Zap class="h-4 w-4" /> 更新</span>
+          <LoaderCircle
+            v-if="saving"
+            class="inline-block h-4 w-4 animate-spin"
+          />
+          <span v-else class="flex items-center justify-center gap-1"
+            ><Zap class="h-4 w-4" /> 更新</span
+          >
         </button>
         <button
           type="button"
