@@ -16,7 +16,7 @@ export const useCsrfStore = defineStore("csrf", () => {
   const tokenValue = () => csrf.value?.token ?? EMPTY_STRING;
 
   const fetchCsrf = async (): Promise<void> => {
-    const { data } = await api.get<CsrfToken>("/csrf");
+    const { data } = await api.get<CsrfToken>("/common/csrf");
     csrf.value = data;
   };
 

@@ -33,7 +33,9 @@ export const useAuthStore = defineStore("auth", () => {
   const fetchMe = async (): Promise<User> => {
     try {
       // Scala側は { id: string, username: string } を返す(roles無し)。
-      const { data } = await api.get<{ id: string; username: string }>("/me");
+      const { data } = await api.get<{ id: string; username: string }>(
+        "/common/me",
+      );
       const fetched: User = {
         id: data.id,
         username: data.username,
