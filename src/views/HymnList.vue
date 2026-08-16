@@ -130,6 +130,7 @@ const downloadScore = async (id: number) => {
   try {
     const res = await api.get(`/hymns/${id}/score`, {
       responseType: "blob",
+      headers: { Accept: "*/*" },
     });
     const url = window.URL.createObjectURL(res.data);
     const a = document.createElement("a");
