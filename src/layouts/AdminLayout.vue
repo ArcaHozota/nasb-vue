@@ -41,7 +41,7 @@ let sessionCheckTimer: ReturnType<typeof setInterval> | undefined;
 
 onMounted(() => {
   sessionCheckTimer = setInterval(() => {
-    api.get("/me").catch(() => {
+    api.get("/common/me").catch(() => {
       // 401(SESSION_INVALIDATEDを含む)はaxios.ts側で既に処理済み。
       // それ以外の一時的な通信エラーでポーリング自体を止めたくないため、
       // ここでは意図的に何もしない。
