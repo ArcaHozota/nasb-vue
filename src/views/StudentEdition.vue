@@ -10,7 +10,7 @@ import {
   Zap,
   Trash2,
   LoaderCircle,
-  Youtube,
+  SquarePlay,
 } from "@lucide/vue";
 import api from "@/api/axios";
 import { useFeedbackStore } from "@/stores/feedback";
@@ -347,7 +347,7 @@ const onRestore = async () => {
             <span
               class="flex items-center gap-1.5 text-sm font-medium text-gray-700"
             >
-              <Youtube class="h-4 w-4 text-red-600" /> YouTube連携
+              <SquarePlay class="h-4 w-4 text-red-600" /> YouTube連携
             </span>
             <button
               type="button"
@@ -380,7 +380,7 @@ const onRestore = async () => {
             "
             @click="onYoutubeButtonClick"
           >
-            <Youtube class="h-4 w-4 text-red-600" />
+            <SquarePlay class="h-4 w-4 text-red-600" />
             <template v-if="youtubeLinked">
               <span>{{ youtubeAccountName }}</span>
               <span class="text-xs font-normal text-green-600">連携済み</span>
