@@ -145,12 +145,12 @@ const onSubmit = async () => {
       feedback.toast(typeof data === "string" ? data : "更新しました");
       router.push(`/hymns?${buildListQuery()}`);
     } else {
-      const { data } = await api.post("/hymns", payload, {
+      const { headers } = await api.post("/hymns", payload, {
         params: { pageSize: pageSize || 5 },
       });
       feedback.toast("追加済み");
       const qs = new URLSearchParams();
-      qs.set("pageNum", data.pageNum);
+      qs.set("pageNum", headers["x-page-num"]); // axiosはヘッダー名を小文字化して格納する
       if (pageSize) qs.set("pageSize", pageSize);
       router.push(`/hymns?${qs.toString()}`);
     }
