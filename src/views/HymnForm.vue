@@ -150,7 +150,7 @@ const onSubmit = async () => {
       });
       feedback.toast("追加済み");
       const qs = new URLSearchParams();
-      qs.set("pageNum", data);
+      qs.set("pageNum", data.pageNum);
       if (pageSize) qs.set("pageSize", pageSize);
       router.push(`/hymns?${qs.toString()}`);
     }
