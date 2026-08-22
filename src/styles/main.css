@@ -12,7 +12,7 @@ button:not(:disabled) {
   cursor: pointer;
 }
 
-@theme {
+:root {
   --color-primary: #800020;
   --color-secondary: #003399;
   --color-success: #355E3B;
