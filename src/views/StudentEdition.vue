@@ -89,10 +89,6 @@ const fetchYoutubeStatus = async () => {
   }
 };
 
-const onToggleYoutubeSection = () => {
-  youtubeEnabled.value = !youtubeEnabled.value;
-};
-
 const onYoutubeButtonClick = async () => {
   if (youtubeLoading.value) return;
 
@@ -323,8 +319,8 @@ const onRestore = async () => {
           </div>
         </div>
 
-        <div class="mb-2 flex items-end gap-4">
-          <div class="w-3/5">
+        <div class="link-row mb-2">
+          <div class="date-field">
             <div class="form-label">生年月日</div>
             <input
               v-model="form.dateOfBirth"
@@ -340,28 +336,18 @@ const onRestore = async () => {
               {{ errors.dateOfBirth }}
             </p>
           </div>
-
-          <div
-            class="flex flex-1 items-center justify-between rounded-md border border-gray-300 px-3 py-[7px]"
-          >
-            <span
-              class="flex items-center gap-1.5 text-sm font-medium text-gray-700"
-            >
-              <SquarePlay class="h-4 w-4 text-red-600" /> YouTube連携
-            </span>
-            <button
-              type="button"
-              role="switch"
-              :aria-checked="youtubeEnabled"
-              class="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors"
-              :class="youtubeEnabled ? 'bg-primary' : 'bg-gray-300'"
-              @click="onToggleYoutubeSection"
-            >
-              <span
-                class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
-                :class="youtubeEnabled ? 'translate-x-4' : 'translate-x-0.5'"
+          <div class="youtube-field">
+            <div class="form-label">YouTube連携</div>
+            <label class="toggle-switch">
+              <input
+                v-model="youtubeEnabled"
+                type="checkbox"
+                class="sr-only peer"
               />
-            </button>
+              <span class="toggle-track is-warning">
+                <span class="toggle-thumb" />
+              </span>
+            </label>
           </div>
         </div>
 
@@ -480,5 +466,57 @@ const onRestore = async () => {
   font-weight: 600;
   font-size: 0.95rem;
   margin-bottom: 6px;
+}
+
+.link-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.date-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.youtube-field {
+  flex-shrink: 0;
+  width: 130px;
+}
+
+.toggle-switch {
+  display: inline-block;
+  cursor: pointer;
+}
+
+/* 左の入力欄(py-1.5 + text-sm + border)の実測高さに合わせる */
+.toggle-track {
+  display: block;
+  width: 60px;
+  height: 34px;
+  border-radius: 999px;
+  background-color: #d1d5db;
+  transition: background-color 0.2s ease;
+  position: relative;
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.peer:checked ~ .toggle-track .toggle-thumb {
+  transform: translateX(26px);
+}
+
+.peer:checked ~ .toggle-track.is-warning {
+  background-color: #f6c91c;
 }
 </style>
