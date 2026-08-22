@@ -244,7 +244,7 @@ const onRestore = async () => {
             :class="
               errors.loginAccount
                 ? 'border-red-400'
-                : 'border-gray-300 focus:border-primary'
+                : 'border-gray-300 focus:border-warning'
             "
             @blur="checkAccount"
           />
@@ -263,7 +263,7 @@ const onRestore = async () => {
             :class="
               errors.username
                 ? 'border-red-400'
-                : 'border-gray-300 focus:border-primary'
+                : 'border-gray-300 focus:border-warning'
             "
           />
           <p v-if="errors.username" class="mt-1 text-xs text-red-600">
@@ -283,7 +283,7 @@ const onRestore = async () => {
                 :class="
                   errors.password
                     ? 'border-red-400'
-                    : 'border-gray-300 focus:border-primary'
+                    : 'border-gray-300 focus:border-warning'
                 "
               />
               <button
@@ -310,7 +310,7 @@ const onRestore = async () => {
               :class="
                 errors.email
                   ? 'border-red-400'
-                  : 'border-gray-300 focus:border-primary'
+                  : 'border-gray-300 focus:border-warning'
               "
             />
             <p v-if="errors.email" class="mt-1 text-xs text-red-600">
@@ -329,7 +329,7 @@ const onRestore = async () => {
               :class="
                 errors.dateOfBirth
                   ? 'border-red-400'
-                  : 'border-gray-300 focus:border-primary'
+                  : 'border-gray-300 focus:border-warning'
               "
             />
             <p v-if="errors.dateOfBirth" class="mt-1 text-xs text-red-600">
