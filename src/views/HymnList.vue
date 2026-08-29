@@ -143,8 +143,9 @@ const onDelete = async (item: HymnRow) => {
   );
   if (!ok) return;
   try {
-    const { data } = await api.delete(`/hymns/${item.id}`);
-    feedback.toast(data.message ?? "削除しました");
+    const { headers } = await api.delete(`/hymns/${item.id}`);
+    const msg = headers["x-message"] ?? "削除しました";
+    feedback.toast(msg);
     queryClient.invalidateQueries({ queryKey: ["hymns-list"] });
   } catch (e: unknown) {
     feedback.toast(extractErrorMessage(e, "削除に失敗しました"));
