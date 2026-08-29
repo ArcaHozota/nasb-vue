@@ -144,7 +144,7 @@ const onDelete = async (item: HymnRow) => {
   if (!ok) return;
   try {
     const { headers } = await api.delete(`/hymns/${item.id}`);
-    const msg = headers["x-message"] ?? "削除しました";
+    const msg = headers["x-page-num"] ?? "削除しました";
     feedback.toast(msg);
     queryClient.invalidateQueries({ queryKey: ["hymns-list"] });
   } catch (e: unknown) {
