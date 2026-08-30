@@ -1,6 +1,11 @@
 // src/api/axios.ts
-import axios from "axios";
+import axios, { type InternalAxiosRequestConfig } from "axios";
 import { useCsrfStore } from "@/stores/csrf";
+
+// CSRFリトライ済みかどうかをリクエスト単位で持たせるための拡張
+type CsrfRetryableConfig = InternalAxiosRequestConfig & {
+  _csrfRetried?: boolean;
+};
 
 const api = axios.create({
   baseURL: "/api",
@@ -23,25 +28,28 @@ api.interceptors.request.use((config) => {
 });
 
 // 403（CSRF拒否）時は一度だけトークンを再取得してリトライ
-let isRetrying = false;
+//
+// 注意: 以前はモジュールグローバルな `isRetrying` フラグで制御していたが、
+// `return api.request(error.config)` はPromiseを返すだけで完了を待たないため、
+// finallyでフラグがリトライ結果を待たずに即座にfalseへ戻ってしまい、
+// CSRF起因ではない本当の403（権限拒否など）に対して無限リトライが発生していた。
+// リクエスト（error.config）単位でリトライ済みフラグを持たせることで、
+// 「1リクエストにつき最大1回だけリトライする」ことを保証する。
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
     if (
       axios.isAxiosError(error) &&
       error.response?.status === 403 &&
-      !isRetrying &&
-      error.config
+      error.config &&
+      !(error.config as CsrfRetryableConfig)._csrfRetried
     ) {
-      isRetrying = true;
-      try {
-        const csrfStore = useCsrfStore();
-        await csrfStore.fetchCsrf();
-        error.config.headers[csrfStore.headerName()] = csrfStore.tokenValue();
-        return api.request(error.config);
-      } finally {
-        isRetrying = false;
-      }
+      const config = error.config as CsrfRetryableConfig;
+      config._csrfRetried = true;
+      const csrfStore = useCsrfStore();
+      await csrfStore.fetchCsrf();
+      config.headers[csrfStore.headerName()] = csrfStore.tokenValue();
+      return api.request(config);
     }
 
     // 401 + SESSION_INVALIDATED: 別端末でのログインにより、このセッションが
