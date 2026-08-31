@@ -50,11 +50,6 @@ const router = createRouter({
           component: () => import("@/views/HymnForm.vue"),
         },
         {
-          path: "hymns/score",
-          name: "hymns-score",
-          component: () => import("@/views/HymnScore.vue"),
-        },
-        {
           path: "hymns/random-five",
           name: "hymns-random-five",
           component: () => import("@/views/RandomFive.vue"),
