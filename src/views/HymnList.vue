@@ -21,6 +21,7 @@ import api from "@/api/axios";
 import { useFeedbackStore } from "@/stores/feedback";
 import { EMPTY_STRING, extractErrorMessage, utf8ToBase64 } from "@/constants";
 import bgImage from "@/assets/mainmenu-bg5.webp";
+import HymnScoreModal from "@/components/HymnScoreModal.vue";
 
 type HymnRow = {
   id: number;
@@ -125,10 +126,14 @@ const goEdit = (id: number) =>
     `/hymns/edit?editId=${id}&pageNum=${page.value}&pageSize=${pageSize.value}&keyword=${encodeURIComponent(submittedKeyword.value)}`,
   );
 
-const goScore = (id: number) =>
-  router.push(
-    `/hymns/score?scoreId=${id}&pageNum=${page.value}&pageSize=${pageSize.value}&keyword=${encodeURIComponent(submittedKeyword.value)}`,
-  );
+// 楽譜アップロードは専用画面への遷移ではなく、モーダルで行う
+const scoreModalHymnId = ref<number | null>(null);
+const openScoreModal = (id: number) => {
+  scoreModalHymnId.value = id;
+};
+const closeScoreModal = () => {
+  scoreModalHymnId.value = null;
+};
 
 const onDelete = async (item: HymnRow) => {
   try {
@@ -280,7 +285,7 @@ const onPageSizeChange = (e: Event) => {
                   <div class="flex justify-center gap-1">
                     <button
                       class="rounded bg-secondary px-2 py-1 text-xs text-white"
-                      @click="goScore(row.id)"
+                      @click="openScoreModal(row.id)"
                     >
                       楽譜
                     </button>
@@ -368,6 +373,12 @@ const onPageSizeChange = (e: Event) => {
         </div>
       </div>
     </div>
+
+    <HymnScoreModal
+      v-if="scoreModalHymnId !== null"
+      :hymn-id="scoreModalHymnId"
+      @close="closeScoreModal"
+    />
   </div>
 </template>
 
