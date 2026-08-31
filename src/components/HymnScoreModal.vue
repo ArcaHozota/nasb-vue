@@ -93,7 +93,7 @@ onBeforeUnmount(() => document.removeEventListener("keydown", onKeydown));
         role="dialog"
         aria-modal="true"
       >
-        <div class="bg-white px-4 pt-3">
+        <div class="bg-white pl-[10px] pr-4 pt-3">
           <div class="flex items-center justify-between">
             <h2 class="text-base font-semibold text-secondary">
               {{ title }}
@@ -132,15 +132,7 @@ onBeforeUnmount(() => document.removeEventListener("keydown", onKeydown));
           <p v-if="error" class="mt-1 text-sm text-red-600">{{ error }}</p>
         </div>
 
-        <div class="flex justify-end gap-2 px-6 pb-4">
-          <button
-            type="button"
-            class="rounded-md px-4 py-1.5 text-sm font-medium text-gray-600 disabled:opacity-60"
-            :disabled="uploading"
-            @click="close"
-          >
-            キャンセル
-          </button>
+        <div class="flex justify-end px-6 pb-4">
           <button
             type="button"
             class="rounded-md bg-secondary px-4 py-1.5 text-sm font-medium text-white disabled:opacity-60"
