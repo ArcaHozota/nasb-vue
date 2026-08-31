@@ -138,7 +138,7 @@ const goPersonal = () => {
         class="flex shrink-0 items-center gap-2 bg-[#fffff0] px-4 py-6 text-left"
         @click="router.push('/mainmenu')"
       >
-        <img :src="brandLogo" alt="" class="h-[49px] w-[49px] object-cover" />
+        <img :src="brandLogo" alt="" class="h-12.25 w-12.25 object-cover" />
         <span class="effect-shine whitespace-nowrap text-[1.9rem] leading-none"
           >NASB1995</span
         >

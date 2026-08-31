@@ -93,7 +93,7 @@ onBeforeUnmount(() => document.removeEventListener("keydown", onKeydown));
         role="dialog"
         aria-modal="true"
       >
-        <div class="bg-white pl-[10px] pr-4 pt-3">
+        <div class="bg-white pl-2.5 pr-4 pt-3">
           <div class="flex items-center justify-between">
             <h2 class="text-base font-semibold text-secondary">
               {{ title }}
@@ -108,7 +108,7 @@ onBeforeUnmount(() => document.removeEventListener("keydown", onKeydown));
               <X class="h-5 w-5" />
             </button>
           </div>
-          <div class="mx-1.5 mt-2 h-[3px] rounded-full bg-secondary"></div>
+          <div class="mx-1.5 mt-2 h-0.75 rounded-full bg-secondary"></div>
         </div>
 
         <div class="flex flex-col items-center gap-2 p-8">
