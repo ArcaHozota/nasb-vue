@@ -2,7 +2,7 @@
 // src/components/HymnScoreModal.vue
 // 旧 views/HymnScore.vue（専用画面）をモーダル化したもの。
 // HymnList.vue から表示する。ルーティングは行わない。
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import axios from "axios";
 import { CloudUpload, LoaderCircle, X } from "@lucide/vue";
 import api from "@/api/axios";
@@ -11,12 +11,15 @@ import { EMPTY_STRING, extractErrorMessage } from "@/constants";
 
 const props = defineProps<{
   hymnId: number;
+  hymnNameKr: string;
 }>();
 
 const emit = defineEmits<{
   close: [];
   uploaded: [];
 }>();
+
+const title = computed(() => `楽譜-${props.hymnNameKr}`);
 
 const feedback = useFeedbackStore();
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -90,19 +93,22 @@ onBeforeUnmount(() => document.removeEventListener("keydown", onKeydown));
         role="dialog"
         aria-modal="true"
       >
-        <div
-          class="flex items-center justify-between bg-secondary px-4 py-3 text-white"
-        >
-          <h2 class="text-base font-semibold">賛美歌楽譜アプロード</h2>
-          <button
-            type="button"
-            class="rounded p-1 hover:bg-white/20 disabled:opacity-50"
-            :disabled="uploading"
-            aria-label="閉じる"
-            @click="close"
-          >
-            <X class="h-5 w-5" />
-          </button>
+        <div class="bg-white px-4 pt-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-semibold text-secondary">
+              {{ title }}
+            </h2>
+            <button
+              type="button"
+              class="rounded p-1 text-secondary hover:bg-secondary/10 disabled:opacity-50"
+              :disabled="uploading"
+              aria-label="閉じる"
+              @click="close"
+            >
+              <X class="h-5 w-5" />
+            </button>
+          </div>
+          <div class="mx-1.5 mt-2 h-[3px] rounded-full bg-secondary"></div>
         </div>
 
         <div class="flex flex-col items-center gap-2 p-8">

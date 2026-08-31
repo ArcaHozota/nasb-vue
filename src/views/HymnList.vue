@@ -127,12 +127,12 @@ const goEdit = (id: number) =>
   );
 
 // 楽譜アップロードは専用画面への遷移ではなく、モーダルで行う
-const scoreModalHymnId = ref<number | null>(null);
-const openScoreModal = (id: number) => {
-  scoreModalHymnId.value = id;
+const scoreModalHymn = ref<{ id: number; nameKr: string } | null>(null);
+const openScoreModal = (row: HymnRow) => {
+  scoreModalHymn.value = { id: row.id, nameKr: row.nameKr };
 };
 const closeScoreModal = () => {
-  scoreModalHymnId.value = null;
+  scoreModalHymn.value = null;
 };
 
 const onDelete = async (item: HymnRow) => {
@@ -285,7 +285,7 @@ const onPageSizeChange = (e: Event) => {
                   <div class="flex justify-center gap-1">
                     <button
                       class="rounded bg-secondary px-2 py-1 text-xs text-white"
-                      @click="openScoreModal(row.id)"
+                      @click="openScoreModal(row)"
                     >
                       楽譜
                     </button>
@@ -375,8 +375,9 @@ const onPageSizeChange = (e: Event) => {
     </div>
 
     <HymnScoreModal
-      v-if="scoreModalHymnId !== null"
-      :hymn-id="scoreModalHymnId"
+      v-if="scoreModalHymn !== null"
+      :hymn-id="scoreModalHymn.id"
+      :hymn-name-kr="scoreModalHymn.nameKr"
       @close="closeScoreModal"
     />
   </div>
