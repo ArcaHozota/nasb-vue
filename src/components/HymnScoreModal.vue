@@ -111,7 +111,10 @@ onBeforeUnmount(() => document.removeEventListener("keydown", onKeydown));
               <X class="h-5 w-5" />
             </button>
           </div>
-          <div class="mx-1.5 mt-2 h-0.75 rounded-full bg-secondary"></div>
+          <div
+            class="mt-2 h-0.75 rounded-full bg-secondary"
+            style="margin-left: 6px; margin-right: 6px"
+          ></div>
         </div>
 
         <div class="flex flex-col items-center gap-2 p-8">
