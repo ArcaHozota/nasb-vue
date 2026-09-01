@@ -93,9 +93,9 @@ onBeforeUnmount(() => document.removeEventListener("keydown", onKeydown));
         role="dialog"
         aria-modal="true"
       >
-        <div class="bg-white pl-2.5 pr-4 pt-3">
+        <div class="bg-white pr-4 pt-3">
           <div class="flex items-center justify-between">
-            <h2 class="text-base font-semibold text-secondary">
+            <h2 class="text-base pl-2.5 font-semibold text-secondary">
               {{ title }}
             </h2>
             <button
