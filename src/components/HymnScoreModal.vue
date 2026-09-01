@@ -95,7 +95,10 @@ onBeforeUnmount(() => document.removeEventListener("keydown", onKeydown));
       >
         <div class="bg-white pr-4 pt-3">
           <div class="flex items-center justify-between">
-            <h2 class="text-base pl-2.5 font-semibold text-secondary">
+            <h2
+              class="text-base font-semibold text-secondary"
+              style="padding-left: 10px"
+            >
               {{ title }}
             </h2>
             <button
