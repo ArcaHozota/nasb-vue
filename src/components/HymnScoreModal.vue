@@ -144,9 +144,7 @@ onBeforeUnmount(() => document.removeEventListener("keydown", onKeydown));
               v-if="uploading"
               class="inline-block h-4 w-4 animate-spin"
             />
-            <span v-else class="flex items-center gap-1">
-              <CloudUpload class="h-4 w-4" /> アプロード
-            </span>
+            <span v-else class="flex items-center gap-1"> アプロード </span>
           </button>
         </div>
       </div>
