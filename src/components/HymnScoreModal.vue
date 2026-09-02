@@ -93,17 +93,15 @@ onBeforeUnmount(() => document.removeEventListener("keydown", onKeydown));
         role="dialog"
         aria-modal="true"
       >
-        <div class="bg-white pr-4 pt-3">
-          <div class="flex items-center justify-between">
-            <h2
-              class="text-base font-semibold text-secondary"
-              style="padding-left: 10px"
-            >
+        <div class="bg-white pt-3">
+          <div class="grid grid-cols-[1fr_auto_1fr] items-center">
+            <div aria-hidden="true"></div>
+            <h2 class="text-base font-semibold text-secondary text-center">
               {{ title }}
             </h2>
             <button
               type="button"
-              class="rounded p-1 text-secondary hover:bg-secondary/10 disabled:opacity-50"
+              class="justify-self-end rounded p-1 mr-2 text-secondary hover:bg-secondary/10 disabled:opacity-50"
               :disabled="uploading"
               aria-label="閉じる"
               @click="close"
@@ -111,10 +109,7 @@ onBeforeUnmount(() => document.removeEventListener("keydown", onKeydown));
               <X class="h-5 w-5" />
             </button>
           </div>
-          <div
-            class="mt-2 h-0.75 rounded-full bg-secondary"
-            style="margin-left: 6px; margin-right: 6px"
-          ></div>
+          <div class="mt-2 h-0.75 rounded-full bg-secondary mx-1.5"></div>
         </div>
 
         <div class="flex flex-col items-center gap-2 p-8">
