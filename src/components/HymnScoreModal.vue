@@ -89,7 +89,7 @@ onBeforeUnmount(() => document.removeEventListener("keydown", onKeydown));
       @click.self="close"
     >
       <div
-        class="score-modal noto-sans relative w-full max-w-md overflow-hidden rounded-[18px] bg-white"
+        class="score-modal noto-sans relative flex w-full max-w-md flex-col justify-between overflow-hidden rounded-[18px] bg-white h-[33vh]"
         role="dialog"
         aria-modal="true"
       >
@@ -122,7 +122,7 @@ onBeforeUnmount(() => document.removeEventListener("keydown", onKeydown));
           />
           <button
             type="button"
-            class="flex items-center gap-1 rounded-md border border-secondary px-4 py-1.5 text-sm font-medium text-secondary"
+            class="flex items-center gap-1 rounded-md border border-secondary px-4 py-1.5 text-sm font-medium text-secondary scale-[1.33]"
             @click="fileInput?.click()"
           >
             <CloudUpload class="h-4 w-4" /> ファイルを選択
