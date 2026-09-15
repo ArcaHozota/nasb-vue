@@ -58,7 +58,7 @@ onMounted(() => {
   }
 });
 
-const PAGE_SIZE = computed(() => (isMobile.value ? 2 : 5));
+const PAGE_SIZE = computed(() => (isMobile.value ? 2 : 7));
 
 const page = ref(1);
 const keyword = ref(EMPTY_STRING); // 入力欄の値(即時反映)
@@ -403,7 +403,7 @@ const pageItems = computed<(number | "ellipsis")[]>(() => {
 
 .card-row {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(7, 1fr); /* 5 → 7 に変更 */
   gap: 16px;
   transition: opacity 0.15s ease;
 }
