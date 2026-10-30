@@ -1,55 +1,30 @@
-@import "tailwindcss";
-
-/*
- * 旧 theme.ts (MUI createTheme) の palette をそのまま踏襲。
- * primary: #800020, secondary: #003399, success: #355E3B,
- * warning: #f6c91c, info: #353542
- */
-/* ブラウザの既定スタイルでは<button>はcursor:defaultのまま
-   (<a>と違い自動でpointerにはならない)。旧MUIのButtonは内部でこれを
-   設定していたので、アプリ全体に同じ挙動を持たせる。 */
-button:not(:disabled) {
-  cursor: pointer;
+/* アプリ共通の最小限のスタイル。個別画面の見た目は Vuetify のコンポーネント/ユーティリティで組む。 */
+.noto-serif,
+.noto-serif * {
+  font-family: "Noto Serif JP", "Noto Serif KR", serif;
+}
+.noto-sans,
+.noto-sans * {
+  font-family: "Noto Sans JP", sans-serif;
 }
 
-@theme {
-  --color-primary: #800020;
-  --color-secondary: #003399;
-  --color-success: #355E3B;
-  --color-warning: #f6c91c;
-  --color-info: #353542;
-}
-
-/* 旧 src/index.css より。ロゴ(HomeView)のみが使用するグローバルスタイル。
-   同ファイルの残りの部分(CSS変数群など)はCRA/Viteスキャフォールドの未使用
-   ボイラープレートだったため移植していない。 */
+/* ロゴ(旧 .effect-shine) */
 .effect-shine {
   font-family: "Niconne", cursive;
   font-size: 1.8rem;
-  color: #800020;
+  color: rgb(var(--v-theme-primary));
   transition: 500ms;
 }
-
 .effect-shine:hover {
   animation: shine 1500ms infinite alternate;
 }
-
 @keyframes shine {
   from {
     color: #fff;
-    text-shadow:
-      0 0 5px #03e9f4,
-      0 0 25px #03e9f4,
-      0 0 50px #03e9f4,
-      0 0 100px #03e9f4;
+    text-shadow: 0 0 5px #03e9f4, 0 0 25px #03e9f4, 0 0 50px #03e9f4, 0 0 100px #03e9f4;
   }
-
   to {
     color: #fff;
-    text-shadow:
-      0 0 2px #03e9f4,
-      0 0 5px #03e9f4,
-      0 0 7px #03e9f4,
-      0 0 10px #03e9f4;
+    text-shadow: 0 0 2px #03e9f4, 0 0 5px #03e9f4, 0 0 7px #03e9f4, 0 0 10px #03e9f4;
   }
 }

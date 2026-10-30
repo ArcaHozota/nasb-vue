@@ -1,0 +1,5 @@
+// Vuetify の Sass 変数(vite-plugin-vuetify 経由で読み込まれる)
+@use "vuetify/settings" with (
+  $body-font-family: ("Noto Sans JP", sans-serif),
+  $heading-font-family: ("Noto Sans JP", sans-serif)
+);

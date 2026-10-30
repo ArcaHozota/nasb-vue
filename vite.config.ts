@@ -1,24 +1,25 @@
+import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
-import tailwindcss from "@tailwindcss/vite";
-import path from "node:path";
+import vuetify from "vite-plugin-vuetify";
 
-// https://vite.dev/config/
+// 旧 next.config.ts の rewrites 相当:
+// 開発時のみ /api を剥がしてバックエンド(localhost:8277)へ転送する。
+// 本番は前段(nginx/CloudFront等)が /api をバックエンドへ直接ルーティングする。
 export default defineConfig({
-  plugins: [vue(), tailwindcss()],
+  plugins: [
+    vue(),
+    vuetify({ autoImport: true, styles: { configFile: "src/styles/settings.scss" } }),
+  ],
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
+    alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
   },
   server: {
-    // 旧 next.config.ts の rewrites() と同等。
-    // /api を剥がしてバックエンド(localhost:8277)へ転送する。
     proxy: {
       "/api": {
         target: "http://localhost:8277",
         changeOrigin: true,
-        rewrite: (p) => p.replace(/^\/api/, ""),
+        rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
   },

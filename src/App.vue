@@ -1,8 +1,5 @@
-<script setup lang="ts">
-import FeedbackHost from "@/components/FeedbackHost.vue";
-</script>
-
 <template>
-  <router-view />
-  <FeedbackHost />
+  <v-app>
+    <router-view />
+  </v-app>
 </template>
