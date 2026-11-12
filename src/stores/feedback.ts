@@ -1,0 +1,83 @@
+// src/stores/feedback.ts
+// トーストと確認ダイアログ。表示は FeedbackHost.vue(フェーズ3)が受け持ち、
+// トーストは v-snackbar-queue、確認ダイアログは v-dialog で描画する。
+import { defineStore } from "pinia";
+import { ref } from "vue";
+import { EMPTY_STRING } from "@/lib/constants";
+
+export type DialogVariant = "primary" | "success";
+
+export type DialogState = {
+  show: boolean;
+  title: string;
+  text: string;
+  variant: DialogVariant;
+  cancelLabel: string;
+  confirmLabel: string;
+  resolve: ((ok: boolean) => void) | null;
+};
+
+export type ConfirmOptions = {
+  variant?: DialogVariant;
+  cancelLabel?: string;
+  confirmLabel?: string;
+};
+
+/** v-snackbar-queue の v-model にそのまま渡せる形 */
+export type ToastItem = { text: string; timeout: number };
+
+/** 旧 MUI Snackbar の autoHideDuration={3000} に合わせる */
+export const TOAST_TIMEOUT_MS = 3000;
+
+const DEFAULT_DIALOG: DialogState = {
+  show: false,
+  title: "確認",
+  text: EMPTY_STRING,
+  variant: "primary",
+  cancelLabel: "キャンセル",
+  confirmLabel: "OK",
+  resolve: null,
+};
+
+export const useFeedbackStore = defineStore("feedback", () => {
+  const dialog = ref<DialogState>({ ...DEFAULT_DIALOG });
+  // v-snackbar-queue は表示した項目を配列から取り除いていく
+  const toasts = ref<ToastItem[]>([]);
+
+  // 旧 layer.msg(トースト)相当。呼び出し側の API(toast("..."))は従来通り。
+  const toast = (text: string) => {
+    toasts.value.push({ text, timeout: TOAST_TIMEOUT_MS });
+  };
+
+  // 旧 Swal.fire の confirm 相当。await confirm('...') で true/false が返る。
+  // variant: "primary"(既定、burgundy red) | "success"(green)。
+  const confirm = (
+    text: string,
+    title = "確認",
+    options: ConfirmOptions = {},
+  ) =>
+    new Promise<boolean>((resolve) => {
+      // 前のダイアログが未回答のまま次の confirm が来た場合は、前の方を false で閉じる
+      dialog.value.resolve?.(false);
+      dialog.value = {
+        show: true,
+        title,
+        text,
+        variant: options.variant ?? "primary",
+        cancelLabel: options.cancelLabel ?? "キャンセル",
+        confirmLabel: options.confirmLabel ?? "OK",
+        resolve,
+      };
+    });
+
+  const answer = (ok: boolean) => {
+    const { resolve } = dialog.value;
+    // ボタン押下と v-dialog の外側クリック等で2回呼ばれても、2回目は無視する。
+    if (!resolve) return;
+    resolve(ok);
+    // タイトルや本文は残したまま show だけ落とす(閉じるアニメーション中に文言が消えないように)
+    dialog.value = { ...dialog.value, show: false, resolve: null };
+  };
+
+  return { dialog, toasts, toast, confirm, answer };
+});

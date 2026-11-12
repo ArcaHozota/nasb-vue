@@ -28,3 +28,12 @@
     text-shadow: 0 0 2px #03e9f4, 0 0 5px #03e9f4, 0 0 7px #03e9f4, 0 0 10px #03e9f4;
   }
 }
+
+/* 賛美歌名称の長さに応じた縮小(lib/text.ts の hymnNameSizeClass が返す) */
+.hymn-name-sm {
+  font-size: 0.8em;
+}
+.hymn-name-xs {
+  font-size: 0.66em;
+  line-height: 1.375;
+}
