@@ -37,3 +37,11 @@
   font-size: 0.66em;
   line-height: 1.375;
 }
+
+/* 背景画像(PageBackground、z-index:-1)が v-app の背景色に隠れないよう、背景は body に持たせる */
+body {
+  background: #fff;
+}
+.v-application {
+  background: transparent !important;
+}
