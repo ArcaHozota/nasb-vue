@@ -58,9 +58,10 @@ const onListKeyDown = (e: KeyboardEvent) => {
     Math.max(0, selectedIndex.value + (e.key === "ArrowDown" ? 1 : -1)),
   );
   selectedId.value = props.records[next]?.id ?? null;
-  list.value
-    ?.querySelectorAll<HTMLButtonElement>("button[data-hymn-row]")
-    [next]?.focus();
+  const rows = list.value?.querySelectorAll<HTMLButtonElement>(
+    "button[data-hymn-row]",
+  );
+  rows?.[next]?.focus();
 };
 
 const firstLoad = computed(
