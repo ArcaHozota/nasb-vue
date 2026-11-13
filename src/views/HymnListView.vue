@@ -223,17 +223,20 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
               賛美歌情報追加
             </v-btn>
             <Hint v-slot="{ props }" label="プレイリスト作成">
+              <!-- 左の「賛美歌情報追加」と同じ既定の大きさ(高さ 36px)にする。icon ボタンにすると丸く大きさが変わるため、
+                   通常のボタンの中にアイコンだけを置く -->
               <v-btn
                 v-bind="props"
-                icon="mdi-playlist-music"
                 color="primary"
                 variant="flat"
-                size="small"
-                rounded="md"
+                min-width="36"
+                class="px-0"
                 aria-label="プレイリスト作成"
                 :loading="playlist.creating.value"
                 @click="onCreatePlaylist"
-              />
+              >
+                <v-icon icon="mdi-playlist-music" />
+              </v-btn>
             </Hint>
           </div>
         </div>

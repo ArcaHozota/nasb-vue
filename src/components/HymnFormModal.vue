@@ -266,9 +266,6 @@ const discard = () => {
           {{ isEdit ? "賛美歌情報更新" : "賛美歌情報追加" }}
         </span>
       </template>
-      <template v-if="isEdit" #subtitle>
-        最終更新者：{{ form.updatedUser }}＠{{ form.updatedTime }}日本標準時間
-      </template>
 
       <v-divider />
 
@@ -330,6 +327,10 @@ const discard = () => {
             />
           </v-col>
         </v-row>
+        <!-- 追加と更新でタイトル部分の高さを同じにするため、最終更新者はタイトルではなく入力欄の下に出す -->
+        <p v-if="isEdit" class="text-body-small text-medium-emphasis">
+          最終更新者：{{ form.updatedUser }}＠{{ form.updatedTime }}日本標準時間
+        </p>
       </v-card-text>
 
       <v-divider />

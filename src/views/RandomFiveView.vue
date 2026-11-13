@@ -243,6 +243,7 @@ const onCreatePlaylist = () =>
           <a
             v-for="(item, i) in records"
             :key="item.id ?? item.nameJp"
+            v-ripple
             :href="item.link"
             target="_blank"
             rel="noopener noreferrer"
@@ -309,7 +310,11 @@ const onCreatePlaylist = () =>
   flex-direction: column;
   gap: 6px;
 }
+/* 押すと Vuetify の波紋(v-ripple)、ホバーで薄い影(Vuetify の list-item / card と同じ重ね方)。
+   波紋と影が行の外へはみ出さないよう relative + overflow:hidden */
 .random-five__item {
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   gap: 16px;
@@ -317,6 +322,21 @@ const onCreatePlaylist = () =>
   border-radius: 6px;
   color: inherit;
   text-decoration: none;
+}
+.random-five__item:not(.random-five__item--skeleton)::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.random-five__item:not(.random-five__item--skeleton):hover::after {
+  opacity: 0.04;
+}
+.random-five__item:not(.random-five__item--skeleton):focus-visible::after {
+  opacity: 0.12;
 }
 .random-five__item--skeleton {
   flex-direction: column;

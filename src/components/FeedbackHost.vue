@@ -54,7 +54,7 @@ const color = computed(() =>
       <div class="pa-6">
         <p
           id="feedback-dialog-text"
-          class="text-body-medium text-medium-emphasis"
+          class="text-body-medium text-medium-emphasis text-center"
         >
           {{ dialog.text }}
         </p>
@@ -62,7 +62,6 @@ const color = computed(() =>
           <!-- 先頭のキャンセルに初期フォーカスが当たる(誤操作で OK しないように) -->
           <v-btn
             variant="text"
-            size="small"
             class="text-medium-emphasis"
             @click="feedback.answer(false)"
           >
@@ -71,7 +70,6 @@ const color = computed(() =>
           <v-btn
             :color="color"
             variant="flat"
-            size="small"
             @click="feedback.answer(true)"
           >
             {{ dialog.confirmLabel }}
