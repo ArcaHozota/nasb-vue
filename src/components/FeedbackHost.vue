@@ -10,9 +10,8 @@ import { useFeedbackStore } from "@/stores/feedback";
 const feedback = useFeedbackStore();
 const { dialog, toasts } = storeToRefs(feedback);
 
-const color = computed(() =>
-  dialog.value.variant === "success" ? "success" : "primary",
-);
+// 色はテーマ色の名前そのまま(primary / success / secondary)
+const color = computed(() => dialog.value.variant);
 </script>
 
 <template>

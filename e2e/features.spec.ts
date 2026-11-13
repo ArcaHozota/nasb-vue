@@ -18,7 +18,7 @@ test("賛美歌一覧のプレイリスト作成は、検索条件だけを送�
   await page.getByRole("button", { name: "プレイリスト作成" }).click();
   const dialog = page.getByRole("alertdialog");
   await expect(dialog).toContainText("プレイリストを作成しました");
-  await dialog.getByRole("button", { name: "いいえ" }).click();
+  await dialog.getByRole("button", { name: "キャンセル" }).click();
 
   const posts = api.calls.filter((c) => c.path === "/youtube/create-playlist");
   expect(posts.map((c) => c.body)).toEqual([{ keyword: "賛美" }]);

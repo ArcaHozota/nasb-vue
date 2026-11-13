@@ -2,7 +2,7 @@
 // 賛美歌の追加・編集モーダル(旧 components/HymnFormModal.tsx)。
 // 賛美歌一覧から v-if で開く。ルーティングやURLパラメータは使わず、一覧側の状態(pageSize 等)を props で受け取る。
 // Esc・背景クリック・「閉じる」のどれで閉じようとしても close() を通り、入力中の内容があれば確認する。
-import { computed, reactive, ref, watch } from "vue";
+import { computed, reactive, watch } from "vue";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { storeToRefs } from "pinia";
 import api from "@/api/axios";
@@ -230,20 +230,19 @@ const isDirty = computed(() => {
 // 編集内容があるまま、タブを閉じる・再読み込み・別サイトへ移動しようとしたらブラウザが確認する
 useUnsavedChanges(isDirty);
 
-// 編集内容を捨てて閉じてよいかの確認ダイアログ
-const discardOpen = ref(false);
-
-const close = () => {
+// 編集内容があるときは、捨てて閉じてよいか確認する(アプリ共通の確認ダイアログ)
+const close = async () => {
   if (saving.value) return; // 保存中は誤って閉じられないようにする
   if (isDirty.value) {
-    discardOpen.value = true;
-    return;
+    const ok = await feedback.confirm(
+      isEdit.value
+        ? "変更を破棄して閉じますか？"
+        : "入力した内容を破棄して閉じますか？",
+      "お知らせ",
+      { variant: "success" },
+    );
+    if (!ok) return;
   }
-  emit("close");
-};
-
-const discard = () => {
-  discardOpen.value = false;
   emit("close");
 };
 </script>
@@ -265,6 +264,14 @@ const discard = () => {
         <span id="hymn-form-title">
           {{ isEdit ? "賛美歌情報更新" : "賛美歌情報追加" }}
         </span>
+      </template>
+      <!-- 更新は最終更新者をサブタイトルに出す。追加はサブタイトルが無いので、
+           同じ高さの空行を置いてタイトル部分の高さを更新とそろえる -->
+      <template #subtitle>
+        <template v-if="isEdit">
+          最終更新者：{{ form.updatedUser }}＠{{ form.updatedTime }}日本標準時間
+        </template>
+        <span v-else aria-hidden="true">&nbsp;</span>
       </template>
 
       <v-divider />
@@ -327,10 +334,6 @@ const discard = () => {
             />
           </v-col>
         </v-row>
-        <!-- 追加と更新でタイトル部分の高さを同じにするため、最終更新者はタイトルではなく入力欄の下に出す -->
-        <p v-if="isEdit" class="text-body-small text-medium-emphasis">
-          最終更新者：{{ form.updatedUser }}＠{{ form.updatedTime }}日本標準時間
-        </p>
       </v-card-text>
 
       <v-divider />
@@ -351,34 +354,5 @@ const discard = () => {
         </v-btn>
       </v-card-actions>
     </v-card>
-
-    <!-- 編集内容の破棄確認 -->
-    <v-dialog
-      v-model="discardOpen"
-      max-width="400"
-      aria-labelledby="hymn-discard-title"
-    >
-      <v-card class="noto-sans">
-        <template #title>
-          <span id="hymn-discard-title">編集内容があります</span>
-        </template>
-        <v-card-text>
-          {{
-            isEdit
-              ? "変更を破棄して閉じますか?"
-              : "入力した内容を破棄して閉じますか?"
-          }}
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn variant="plain" @click="discardOpen = false">
-            編集を続ける
-          </v-btn>
-          <v-btn :color="color" variant="tonal" @click="discard">
-            破棄して閉じる
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </v-dialog>
 </template>

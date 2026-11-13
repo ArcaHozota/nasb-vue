@@ -44,8 +44,8 @@ export async function confirmDiscardUnsaved(): Promise<boolean> {
   if (!guard.dirty || guard.bypass) return true;
   return useFeedbackStore().confirm(
     "編集中の内容があります。破棄して移動しますか？",
-    "確認",
-    { cancelLabel: "編集を続ける", confirmLabel: "破棄して移動" },
+    "お知らせ",
+    { variant: "success" },
   );
 }
 

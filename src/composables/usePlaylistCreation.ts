@@ -47,23 +47,21 @@ export function usePlaylistCreation() {
       const proceed = await feedback.confirm(
         "プレイリストを作成しました。今はYouTubeへ移動してよろしいでしょうか。",
         "お知らせ",
-        { variant: "success", cancelLabel: "いいえ", confirmLabel: "はい" },
+        { variant: "success" },
       );
       if (proceed) {
         window.open(YOUTUBE_PLAYLISTS_URL, "_blank", "noopener,noreferrer");
       }
     } catch (e: unknown) {
       if (isConflict(e)) {
-        // 連携トークン失効・取り消し(再認証が必要)の場合は、専用文言で「はい／いいえ」を確認する
+        // 連携トークン失効・取り消し(再認証が必要)の場合は、専用文言で確認する
         const reauthText = getYoutubeReauthConfirmText(e);
-        const ok = reauthText
-          ? await feedback.confirm(reauthText, "確認", {
-              cancelLabel: "いいえ",
-              confirmLabel: "はい",
-            })
-          : await feedback.confirm(
-              "YouTube連携がまだ完了していません。連携ページへ移動しますか？",
-            );
+        const ok = await feedback.confirm(
+          reauthText ??
+            "YouTube連携がまだ完了していません。連携ページへ移動しますか？",
+          "お知らせ",
+          { variant: "success" },
+        );
         if (ok) await router.push("/personal");
         return;
       }

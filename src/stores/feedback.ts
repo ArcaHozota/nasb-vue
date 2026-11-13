@@ -5,7 +5,13 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import { EMPTY_STRING } from "@/lib/constants";
 
-export type DialogVariant = "primary" | "success";
+/**
+ * 確認ダイアログの色(タイトル・下線・OK ボタン)。
+ *   primary(臙脂)  : 警告(ログアウト・削除)
+ *   success(緑)    : お知らせ(編集の破棄・プレイリスト作成)
+ *   secondary(青)  : 通知(上書き)
+ */
+export type DialogVariant = "primary" | "success" | "secondary";
 
 export type DialogState = {
   show: boolean;
@@ -50,7 +56,7 @@ export const useFeedbackStore = defineStore("feedback", () => {
   };
 
   // 旧 Swal.fire の confirm 相当。await confirm('...') で true/false が返る。
-  // variant: "primary"(既定、burgundy red) | "success"(green)。
+  // ボタンはアプリ全体で「キャンセル」「OK」に統一している(cancelLabel / confirmLabel は特別な場合だけ使う)。
   const confirm = (
     text: string,
     title = "確認",

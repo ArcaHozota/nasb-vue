@@ -44,7 +44,6 @@ const verseId = ref(EMPTY_STRING);
 const edited = ref<VerseText | null>(null);
 const saving = ref(false);
 const errors = reactive({ textEn: false, textJp: false, verseId: false });
-const confirmOpen = ref(false);
 
 const textEnEditor = ref<InstanceType<typeof RedLetterEditor> | null>(null);
 const textJpEditor = ref<InstanceType<typeof RedLetterEditor> | null>(null);
@@ -209,7 +208,6 @@ const onWrapSelection = () => {
 };
 
 const doSave = async () => {
-  confirmOpen.value = false;
   saving.value = true;
   try {
     const { data } = await api.post("/books", {
@@ -229,7 +227,7 @@ const doSave = async () => {
   }
 };
 
-const onStore = () => {
+const onStore = async () => {
   Object.assign(errors, {
     textEn: !isFilled(textEn.value),
     textJp: !isFilled(textJp.value),
@@ -240,9 +238,16 @@ const onStore = () => {
     return;
   }
   // 登録済み(更新になる)場合、または既存かどうか確認できなかった場合は、上書き確認を出す
+  // (アプリ共通の確認ダイアログ。タイトル「通知」・青)
   if (lookup.value === "found" || lookup.value === "error") {
-    confirmOpen.value = true;
-    return;
+    const ok = await feedback.confirm(
+      isUpdate.value
+        ? `${verseLabel.value} は既に登録されています。入力した内容で上書きして更新しますか？`
+        : "既存の節かどうか確認できませんでした。既に登録されている場合は上書きされます。保存しますか？",
+      "通知",
+      { variant: "secondary" },
+    );
+    if (!ok) return;
   }
   void doSave();
 };
@@ -411,34 +416,6 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
       </div>
     </div>
 
-    <!-- 上書き確認 -->
-    <v-dialog
-      v-model="confirmOpen"
-      max-width="512"
-      role="alertdialog"
-      aria-labelledby="book-overwrite-title"
-    >
-      <v-card class="noto-serif pa-6" rounded="lg">
-        <h2 id="book-overwrite-title" class="text-title-large font-weight-bold">
-          上書きの確認
-        </h2>
-        <p class="text-body-medium text-medium-emphasis mt-2">
-          {{
-            isUpdate
-              ? `${verseLabel} は既に登録されています。入力した内容で上書きして更新しますか?`
-              : "既存の節かどうか確認できませんでした。既に登録されている場合は上書きされます。保存しますか?"
-          }}
-        </p>
-        <div class="d-flex justify-end ga-2 mt-6">
-          <v-btn variant="outlined" @click="confirmOpen = false"
-            >キャンセル</v-btn
-          >
-          <v-btn color="primary" variant="flat" @click="doSave">
-            {{ isUpdate ? "更新する" : "保存する" }}
-          </v-btn>
-        </div>
-      </v-card>
-    </v-dialog>
   </div>
 </template>
 
