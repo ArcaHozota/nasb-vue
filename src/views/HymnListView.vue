@@ -33,6 +33,9 @@ const MATCH_LEVEL: Record<string, { label: string; chip: string }> = {
   NAPLES: { label: "やや一致", chip: "match-chip--naples" },
 };
 const MATCH_RELATED = { label: "関連", chip: "match-chip--related" };
+// 操作列のアイコンボタンの見た目(Vuetify の v-btn の variant)。
+// text: 枠・背景なしの丸いボタン(ホバーで薄い丸、押すと波紋)。tonal / outlined / flat / plain にも変えられる
+const ACTION_VARIANT = "text" as const;
 const PAGE_SIZE_OPTIONS = [5, 10, 15].map((n) => ({
   value: n,
   title: `${n}件/ページ`,
@@ -318,12 +321,13 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
                   @pointerdown.stop
                   @touchstart.stop
                 >
-                  <div class="d-flex justify-center ga-1">
+                  <div class="d-flex justify-center">
                     <Hint v-slot="{ props }" label="楽譜アップロード">
                       <v-btn
                         v-bind="props"
                         icon="mdi-music"
-                        class="action-btn"
+                        :variant="ACTION_VARIANT"
+                        size="small"
                         aria-label="楽譜アップロード"
                         @click="
                           scoreModalHymn = { id: row.id, nameKr: row.nameKr }
@@ -334,7 +338,8 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
                       <v-btn
                         v-bind="props"
                         icon="mdi-notebook-edit-outline"
-                        class="action-btn"
+                        :variant="ACTION_VARIANT"
+                        size="small"
                         aria-label="編集"
                         @click="formModal = { mode: 'edit', id: row.id }"
                       />
@@ -343,7 +348,9 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
                       <v-btn
                         v-bind="props"
                         icon="mdi-trash-can-outline"
-                        class="action-btn action-btn--danger"
+                        :variant="ACTION_VARIANT"
+                        size="small"
+                        color="error"
                         aria-label="削除"
                         @click="onDelete(row)"
                       />
@@ -361,7 +368,8 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
                           v-bind="props"
                           :ref="anchorRef"
                           icon="mdi-file-download-outline"
-                          class="action-btn"
+                          :variant="ACTION_VARIANT"
+                          size="small"
                           :loading="loading"
                           aria-label="楽譜をダウンロード"
                           aria-haspopup="menu"
@@ -530,21 +538,6 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
 .match-chip--related {
   background: #f3f4f6;
   color: #4b5563;
-}
-/* 操作列のアイコンボタン(白地・薄い枠・角丸の正方形) */
-.action-btn {
-  width: 32px !important;
-  height: 32px !important;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px !important;
-  background: #fff;
-  color: #374151;
-  box-shadow: none !important;
-  font-size: 0.75rem;
-}
-/* 削除は赤。.action-btn の色(この CSS は Vuetify の層の外なので text-* ユーティリティより強い)を上書きする */
-.action-btn--danger {
-  color: #dc2626;
 }
 .hymn-list__pager {
   display: flex;

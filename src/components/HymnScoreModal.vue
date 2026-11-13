@@ -148,8 +148,8 @@ const chordText = () =>
   >
     <v-card class="score-modal noto-sans" rounded="xl">
       <div class="pt-3">
+        <!-- タイトルは中央、閉じるボタンは右上に固定する -->
         <div class="score-modal__head">
-          <div aria-hidden="true" />
           <h2
             id="score-modal-title"
             class="text-center text-title-medium font-weight-bold text-secondary"
@@ -161,7 +161,7 @@ const chordText = () =>
             variant="text"
             size="small"
             color="secondary"
-            class="mr-2 justify-self-end"
+            class="score-modal__close"
             :disabled="uploading"
             aria-label="閉じる"
             @click="close"
@@ -288,9 +288,14 @@ const chordText = () =>
   min-height: 33vh;
 }
 .score-modal__head {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
+  position: relative;
+  /* 右上の閉じるボタンと重ならないよう、左右に同じ幅の余白を取って中央寄せ */
+  padding: 0 44px;
+}
+.score-modal__close {
+  position: absolute;
+  top: -8px;
+  right: 4px;
 }
 .score-modal__bar {
   height: 3px;

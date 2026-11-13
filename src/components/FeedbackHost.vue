@@ -43,7 +43,7 @@ const color = computed(() =>
         <div
           id="feedback-dialog-title"
           :class="[
-            'text-center text-title-large font-weight-bold',
+            'text-center text-title-medium font-weight-bold',
             `text-${color}`,
           ]"
         >
