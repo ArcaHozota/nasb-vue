@@ -21,7 +21,7 @@ export type DialogState = {
   cancelLabel: string;
   confirmLabel: string;
   resolve: ((ok: boolean) => void) | null;
-  /** キャンセルのボタンを押したときだけ呼ぶ(Esc で閉じたときは呼ばない) */
+  /** 「戻る」のボタンを押したときだけ呼ぶ(Esc で閉じたときは呼ばない) */
   onCancel: (() => void) | null;
 };
 
@@ -29,7 +29,7 @@ export type ConfirmOptions = {
   variant?: DialogVariant;
   cancelLabel?: string;
   confirmLabel?: string;
-  /** キャンセルのボタンを押したときだけ行う処理(例: 楽譜の上書き確認の「考え」で既存の楽譜をダウンロード) */
+  /** 「戻る」のボタンを押したときだけ行う処理(例: 楽譜の上書き確認の「戻る」で既存の楽譜をダウンロード) */
   onCancel?: () => void;
 };
 
@@ -44,7 +44,7 @@ const DEFAULT_DIALOG: DialogState = {
   title: "確認",
   text: EMPTY_STRING,
   variant: "primary",
-  cancelLabel: "キャンセル",
+  cancelLabel: "戻る",
   confirmLabel: "OK",
   resolve: null,
   onCancel: null,
@@ -61,7 +61,7 @@ export const useFeedbackStore = defineStore("feedback", () => {
   };
 
   // 旧 Swal.fire の confirm 相当。await confirm('...') で true/false が返る。
-  // ボタンはアプリ全体で「キャンセル」「OK」に統一している。上書き確認だけは「考え」「OK」(cancelLabel)。
+  // ボタンはアプリ全体で「戻る」「OK」に統一している。
   const confirm = (
     text: string,
     title = "確認",
@@ -75,7 +75,7 @@ export const useFeedbackStore = defineStore("feedback", () => {
         title,
         text,
         variant: options.variant ?? "primary",
-        cancelLabel: options.cancelLabel ?? "キャンセル",
+        cancelLabel: options.cancelLabel ?? "戻る",
         confirmLabel: options.confirmLabel ?? "OK",
         resolve,
         onCancel: options.onCancel ?? null,
@@ -88,10 +88,15 @@ export const useFeedbackStore = defineStore("feedback", () => {
     if (!resolve) return;
     resolve(ok);
     // タイトルや本文は残したまま show だけ落とす(閉じるアニメーション中に文言が消えないように)
-    dialog.value = { ...dialog.value, show: false, resolve: null, onCancel: null };
+    dialog.value = {
+      ...dialog.value,
+      show: false,
+      resolve: null,
+      onCancel: null,
+    };
   };
 
-  /** キャンセルのボタン(Esc ではなく)を押したとき */
+  /** 「戻る」のボタン(Esc ではなく)を押したとき */
   const cancel = () => {
     if (!dialog.value.resolve) return;
     const { onCancel } = dialog.value;

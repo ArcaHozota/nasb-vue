@@ -106,13 +106,13 @@ const doUpload = async (overwrite: boolean) => {
 
 // 上書き確認(アプリ共通の確認ダイアログ。タイトル「通知」・青)。
 //   OK  : 上書きして再送する
-//   考え: 上書きせず、登録済みの楽譜をダウンロードして中身を確かめる(このモーダルは開いたまま)
+//   戻る: 上書きせず、登録済みの楽譜をダウンロードして中身を確かめる(このモーダルは開いたまま)
 //   Esc : 何もしない
 const confirmOverwrite = async () => {
   const ok = await feedback.confirm(
     `${chordText()}の楽譜は登録済みです。上書きしますか？`,
     "通知",
-    { variant: "secondary", cancelLabel: "考え", onCancel: downloadExisting },
+    { variant: "secondary", onCancel: downloadExisting },
   );
   if (ok) await doUpload(true);
 };
@@ -248,7 +248,6 @@ const chordText = () =>
         </v-btn>
       </div>
     </v-card>
-
   </v-dialog>
 </template>
 

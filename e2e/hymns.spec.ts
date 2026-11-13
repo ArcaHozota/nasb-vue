@@ -32,14 +32,14 @@ test.describe("賛美歌一覧", () => {
     expect(api.hymns).toHaveLength(10);
   });
 
-  test("削除の確認でキャンセルすると削除しない", async ({ page }) => {
+  test("削除の確認で「戻る」を押すと削除しない", async ({ page }) => {
     const api = await mockApi(page, { loggedIn: true, hymns: makeHymns(3) });
     await page.goto("/hymns");
 
     await page.getByRole("button", { name: "削除" }).first().click();
     await page
       .getByRole("alertdialog")
-      .getByRole("button", { name: "キャンセル" })
+      .getByRole("button", { name: "戻る" })
       .click();
 
     await expect(page.getByRole("alertdialog")).toHaveCount(0);

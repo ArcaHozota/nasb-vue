@@ -5,13 +5,13 @@ import { useFeedbackStore } from "./feedback";
 beforeEach(() => setActivePinia(createPinia()));
 
 describe("確認ダイアログ", () => {
-  it("ボタンの文言は既定で「キャンセル」「OK」", () => {
+  it("ボタンの文言は既定で「戻る」「OK」", () => {
     const feedback = useFeedbackStore();
     void feedback.confirm("本文", "警告");
     expect(feedback.dialog).toMatchObject({
       show: true,
       title: "警告",
-      cancelLabel: "キャンセル",
+      cancelLabel: "戻る",
       confirmLabel: "OK",
       variant: "primary",
     });
@@ -25,15 +25,14 @@ describe("確認ダイアログ", () => {
     expect(feedback.dialog.show).toBe(false);
   });
 
-  it("キャンセルのボタンなら false を返し、onCancel を呼ぶ", async () => {
+  it("「戻る」のボタンなら false を返し、onCancel を呼ぶ", async () => {
     const feedback = useFeedbackStore();
     const onCancel = vi.fn();
     const p = feedback.confirm("上書きしますか？", "通知", {
       variant: "secondary",
-      cancelLabel: "考え",
       onCancel,
     });
-    expect(feedback.dialog.cancelLabel).toBe("考え");
+    expect(feedback.dialog.cancelLabel).toBe("戻る");
     feedback.cancel();
     await expect(p).resolves.toBe(false);
     expect(onCancel).toHaveBeenCalledTimes(1);

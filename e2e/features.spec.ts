@@ -18,7 +18,7 @@ test("賛美歌一覧のプレイリスト作成は、検索条件だけを送�
   await page.getByRole("button", { name: "プレイリスト作成" }).click();
   const dialog = page.getByRole("alertdialog");
   await expect(dialog).toContainText("プレイリストを作成しました");
-  await dialog.getByRole("button", { name: "キャンセル" }).click();
+  await dialog.getByRole("button", { name: "戻る" }).click();
 
   const posts = api.calls.filter((c) => c.path === "/youtube/create-playlist");
   expect(posts.map((c) => c.body)).toEqual([{ keyword: "賛美" }]);
@@ -55,16 +55,18 @@ test.describe("ランダム選択", () => {
 
     await expect(page).toHaveURL(/\/hymns\/random-five\?keyword=/);
     await expect(page.getByText("賛美歌1", { exact: true })).toBeVisible();
-    await expect(
-      page.getByRole("search").getByLabel("キーワード"),
-    ).toHaveValue("恵み");
+    await expect(page.getByRole("search").getByLabel("キーワード")).toHaveValue(
+      "恵み",
+    );
     expect(
       api.calls.filter((c) => c.path === "/common/search").map((c) => c.query),
     ).toEqual([{ keyword: "恵み" }]);
   });
 });
 
-test("編集モーダル: 読み込んだ内容を表示し、廃棄で元に戻す", async ({ page }) => {
+test("編集モーダル: 読み込んだ内容を表示し、廃棄で元に戻す", async ({
+  page,
+}) => {
   await mockApi(page, { loggedIn: true, hymns: makeHymns(2) });
   await page.goto("/hymns");
 

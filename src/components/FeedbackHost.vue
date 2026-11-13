@@ -24,7 +24,7 @@ const color = computed(() => dialog.value.variant);
   />
 
   <!-- 確認ダイアログ(旧 AlertDialog 相当)。
-       外側クリックでは閉じない(persistent)。Esc はキャンセル扱い。 -->
+       外側クリックでは閉じない(persistent)。Esc は「戻る」と同じく false を返す(onCancel は呼ばない)。 -->
   <v-dialog
     :model-value="dialog.show"
     persistent
@@ -53,12 +53,12 @@ const color = computed(() => dialog.value.variant);
       <div class="pa-6">
         <p
           id="feedback-dialog-text"
-          class="text-body-medium text-medium-emphasis text-center"
+          class="feedback-dialog-text text-medium-emphasis text-center"
         >
           {{ dialog.text }}
         </p>
-        <div class="d-flex justify-end ga-2 mt-6">
-          <!-- 先頭のキャンセルに初期フォーカスが当たる(誤操作で OK しないように) -->
+        <div class="feedback-dialog-actions d-flex justify-end ga-2 mt-6">
+          <!-- 先頭の「戻る」に初期フォーカスが当たる(誤操作で OK しないように) -->
           <v-btn
             variant="text"
             class="text-medium-emphasis"
@@ -66,11 +66,7 @@ const color = computed(() => dialog.value.variant);
           >
             {{ dialog.cancelLabel }}
           </v-btn>
-          <v-btn
-            :color="color"
-            variant="flat"
-            @click="feedback.answer(true)"
-          >
+          <v-btn :color="color" variant="flat" @click="feedback.answer(true)">
             {{ dialog.confirmLabel }}
           </v-btn>
         </div>
@@ -80,6 +76,15 @@ const color = computed(() => dialog.value.variant);
 </template>
 
 <style scoped>
+/* 本文: 1.156rem(太さは既定のまま) */
+.feedback-dialog-text {
+  font-size: 1.156rem;
+  line-height: 1.6;
+}
+/* ボタン: 文字の大きさは v-btn の既定のまま、太さだけ 600 */
+.feedback-dialog-actions .v-btn {
+  font-weight: 600;
+}
 .feedback-dialog-bar {
   height: 3px;
   border-radius: 9999px;
