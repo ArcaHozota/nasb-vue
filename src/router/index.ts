@@ -26,6 +26,10 @@ const router = createRouter({
         { path: "books/add", component: pending, meta: { title: "聖書章節入力" } },
         { path: "personal", component: pending, meta: { title: "個人スペース" } },
         { path: "error", component: () => import("@/views/ErrorView.vue") },
+        // 【一時的・開発用】フェーズ4の部品の確認ページ(フェーズ5で削除)
+        ...(import.meta.env.DEV
+          ? [{ path: "__components", component: () => import("@/views/DevComponentsView.vue") }]
+          : []),
       ],
     },
     {

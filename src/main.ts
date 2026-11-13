@@ -8,6 +8,7 @@ import { queryClient } from "./plugins/queryClient";
 import { useCsrfStore } from "./stores/csrf";
 import "./plugins/fonts";
 import "./styles/main.css";
+import "./styles/app.css";
 
 const app = createApp(App);
 // Pinia を先に登録する(ルーターのガードや axios のインターセプターがストアを使うため)

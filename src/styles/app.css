@@ -1,0 +1,285 @@
+/* nasb-next の app/globals.css から、画面固有のクラス(Tailwind・shadcn/ui のトークン以外)を移したもの。
+   font-family の var(--font-*) は next/font 用だったので外し、フォント名を直接指定している。 */
+
+/* <button> の既定は cursor:default。旧 MUI / shadcn と同じく押せるボタンは pointer にする */
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+/* ===== HomeView(モバイルのカルーセル。PC版は末尾の「開いた讃美歌集」) ===== */
+
+/* カードは横長〜正方形。名前が長い曲は高さが伸び、同じ行のカードもそれに揃う */
+.glass-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 170px;
+  padding: 20px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.33);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+}
+
+.glass-card.is-burgundy {
+  background: rgba(128, 0, 32, 0.42);
+}
+
+.glass-card.is-naples {
+  background: rgba(246, 201, 28, 0.42);
+}
+
+.glass-card.is-cadmium {
+  background: rgba(13, 92, 51, 0.42);
+}
+
+/* モバイルのカルーセル内のカード: 1枚を大きく見せる(次のカードの端がのぞく) */
+.glass-card.is-slide {
+  min-height: 44vh;
+  padding: 24px;
+}
+
+/* 一致した語のハイライト(抜粋・全文の両方) */
+.lyric-mark {
+  padding: 0 2px;
+  border-radius: 3px;
+  background: rgba(255, 236, 140, 0.92);
+  color: #3a2a00;
+  text-shadow: none;
+}
+
+/* 歌詞の全文(シート・ダイアログ) */
+.lyric-text {
+  white-space: pre-wrap;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  font-size: 1rem;
+  line-height: 1.9;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+/* ===== 共通ガラスカード(HymnList/HymnForm/RandomFive/BookAddition/StudentEdition) ===== */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: border-color 0.3s ease;
+}
+
+/* ホバーで枠線を白くはっきりさせる(回る枠線の代わり)。
+   .glass-panel の border はレイヤー外の指定なので、Tailwind の hover:border-* では上書きできず、ここに書く */
+.glass-panel:hover {
+  border-color: rgba(255, 255, 255, 0.8);
+}
+
+/* HymnForm / StudentEdition のトグルスイッチは shadcn/ui の Switch(size="lg")に置き換え済み */
+
+/* ===== RandomFive ===== */
+/* 見出し帯(ミント) */
+.header-mint {
+  background: rgba(168, 230, 196, 0.5);
+}
+
+/* 1件分の行(shadcn/ui の Item)。旧 .body-row-glass のすりガラス表現を踏襲 */
+.glass-item {
+  background: rgba(255, 255, 255, 0.33);
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+a.glass-item:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+/* ===== RedLetterEditor ===== */
+.red-letter-editor {
+  padding: 16.5px 14px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.23);
+  font-size: 1rem;
+  line-height: 1.4375;
+  outline: none;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: #fff;
+}
+
+.red-letter-editor.is-error {
+  border-color: #d32f2f;
+}
+
+.red-letter-editor:focus {
+  border-color: #c62828;
+  border-width: 2px;
+  padding: 15.5px 13px;
+}
+
+.red-letter-editor:empty:before {
+  content: attr(data-placeholder);
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.red-letter-editor .red-letter {
+  color: #c62828;
+}
+
+/* ===== HymnScoreModal ===== */
+.score-modal {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+/* ===== PC版ホーム「開いた讃美歌集」(components/home/OpenHymnalHome.tsx) ===== */
+.open-hymnal {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+  background: #2b1519;
+  color: #2b1d14;
+  font-family: "Noto Serif JP", "Noto Serif KR", serif;
+}
+
+.open-hymnal .noto-serif-kr {
+  font-family: "Noto Serif KR", serif;
+}
+
+.open-hymnal .book-sans {
+  font-family: "Noto Sans JP", sans-serif;
+}
+
+.open-hymnal-header {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  height: 64px;
+  padding: 0 40px;
+}
+
+.open-hymnal-logo {
+  font-family: "Niconne", cursive;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.open-hymnal-main {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 24px 26px;
+}
+
+/* 見開きの本。高さは画面に合わせる。大きな画面では目次の下が空きすぎないよう上限を設けて上下中央に置き、
+   低すぎる画面では最低限を確保してページ全体をスクロールさせる */
+.book {
+  display: flex;
+  width: min(1250px, 100%);
+  height: calc(100svh - 64px - 32px);
+  min-height: 760px;
+  max-height: 780px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+.book-page {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.book-page--left {
+  width: 40%;
+  max-width: 498px;
+  /* 470px × 125/118 */
+  flex-shrink: 0;
+  padding: 24px 30px 14px 32px;
+  background: #f8f1e1;
+  border-right: 1px solid #d8c7a6;
+  box-shadow: inset -18px 0 24px -18px rgba(74, 48, 20, 0.35);
+}
+
+.book-page--right {
+  flex: 1;
+  gap: 10px;
+  padding: 28px 48px 20px 44px;
+  background: #fcf7ea;
+  box-shadow: inset 18px 0 24px -18px rgba(74, 48, 20, 0.3);
+}
+
+.book-caption {
+  margin: 0 0 6px;
+  padding-bottom: 10px;
+  border-bottom: 3px double #800020;
+  color: #6b5338;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-align: center;
+}
+
+.book-pager {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding-top: 10px;
+  color: #6b5338;
+  font-size: 13px;
+}
+
+.book-lyric {
+  color: #2d2318;
+  font-family: "Noto Serif KR", serif;
+  font-size: 17px;
+  line-height: 2.05;
+  white-space: pre-wrap;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+/* 本の中の一致箇所は、黄色の背景ではなく臙脂の下線で示す */
+.lyric-mark.book-mark {
+  padding: 0;
+  background: none;
+  color: #800020;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  text-shadow: none;
+}
+
+
+/* 最大2行で省略(ClampText) */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+/* 視覚的には隠し、読み上げには残す */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

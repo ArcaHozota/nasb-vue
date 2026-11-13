@@ -1,11 +1,11 @@
 /* アプリ共通の最小限のスタイル。個別画面の見た目は Vuetify のコンポーネント/ユーティリティで組む。 */
 .noto-serif,
 .noto-serif * {
-  font-family: "Noto Serif JP", "Noto Serif KR", serif;
+  font-family: "Noto Serif JP", "Noto Serif KR", serif !important;
 }
 .noto-sans,
 .noto-sans * {
-  font-family: "Noto Sans JP", sans-serif;
+  font-family: "Noto Sans JP", sans-serif !important;
 }
 
 /* ロゴ(旧 .effect-shine) */
