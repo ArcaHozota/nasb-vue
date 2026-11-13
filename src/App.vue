@@ -41,12 +41,7 @@ const reload = () => window.location.reload();
       </div>
     </main>
     <router-view v-else-if="ready" />
-    <div
-      v-else
-      class="app-loading"
-      role="status"
-      aria-label="読み込み中"
-    >
+    <div v-else class="app-loading" role="status" aria-label="読み込み中">
       <v-progress-circular indeterminate size="24" width="2" />
     </div>
     <FeedbackHost />

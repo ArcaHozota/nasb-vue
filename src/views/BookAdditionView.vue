@@ -56,7 +56,9 @@ const booksQuery = useQuery({
   staleTime: Infinity,
 });
 const books = computed(() => booksQuery.data.value ?? []);
-const bookId = computed(() => pickedBookId.value || books.value[0]?.id || EMPTY_STRING);
+const bookId = computed(
+  () => pickedBookId.value || books.value[0]?.id || EMPTY_STRING,
+);
 
 const chaptersQuery = useQuery(
   computed(() => ({
@@ -68,7 +70,9 @@ const chaptersQuery = useQuery(
   })),
 );
 const chapters = computed(() => chaptersQuery.data.value ?? []);
-const chapterLoading = computed(() => !!bookId.value && chaptersQuery.isPending.value);
+const chapterLoading = computed(
+  () => !!bookId.value && chaptersQuery.isPending.value,
+);
 const chapterId = computed(() =>
   chapters.value.some((c) => String(c.id) === String(pickedChapterId.value))
     ? pickedChapterId.value
@@ -99,7 +103,9 @@ watch(chaptersQuery.error, (e) => {
 // ===== 既存の節の確認(章・節を入力して一定時間たったら問い合わせる) =====
 // 登録済みなら編集モード(ボタンが「更新」になり、本文を読み込む)
 const lookupVerse = computed(() => verseId.value.trim());
-const lookupReady = computed(() => !!chapterId.value && /^\d+$/.test(lookupVerse.value));
+const lookupReady = computed(
+  () => !!chapterId.value && /^\d+$/.test(lookupVerse.value),
+);
 const lookupKey = computed(() => `${chapterId.value}|${lookupVerse.value}`);
 const debouncedKey = useDebouncedValue(lookupKey, LOOKUP_DELAY);
 const verseQuery = useQuery(
@@ -163,9 +169,14 @@ useUnsavedChanges(isDirty);
 
 // 入力中でも該当欄が埋まった時点でアラート(エラー表示)を消す
 const changeText = (next: Partial<VerseText>) => {
-  const value: VerseText = { textEn: textEn.value, textJp: textJp.value, ...next };
+  const value: VerseText = {
+    textEn: textEn.value,
+    textJp: textJp.value,
+    ...next,
+  };
   // 両方空になったら「未入力」に戻す(節を変えたとき既存の本文が読み込まれる)
-  edited.value = isFilled(value.textEn) || isFilled(value.textJp) ? value : null;
+  edited.value =
+    isFilled(value.textEn) || isFilled(value.textJp) ? value : null;
 };
 const textEnModel = computed({
   get: () => textEn.value,
@@ -241,10 +252,13 @@ const isUpdate = computed(() => lookup.value === "found");
 const differsFromExisting = computed(
   () =>
     !!existing.value &&
-    (existing.value.textEn !== textEn.value || existing.value.textJp !== textJp.value),
+    (existing.value.textEn !== textEn.value ||
+      existing.value.textJp !== textJp.value),
 );
 // 確認ダイアログに出す節の表記は VerseDTO の name を使う(無ければ入力値で代替)
-const verseLabel = computed(() => existing.value?.name || `${verseId.value.trim()}節`);
+const verseLabel = computed(
+  () => existing.value?.name || `${verseId.value.trim()}節`,
+);
 const enError = computed(() => errors.textEn && !isFilled(textEn.value));
 const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
 </script>
@@ -301,7 +315,9 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
 
         <!-- 既存の節の確認状況(行の高さが変わらないよう min-height を確保) -->
         <div class="noto-serif mb-3 book-addition__status" aria-live="polite">
-          <span v-if="lookup === 'loading'" class="text-medium-emphasis">既存の節を確認中…</span>
+          <span v-if="lookup === 'loading'" class="text-medium-emphasis"
+            >既存の節を確認中…</span
+          >
           <span v-else-if="lookup === 'found'" class="text-red-darken-3">
             この節は登録済みです。保存すると上書き更新されます。
             <button
@@ -320,14 +336,26 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
 
         <div class="book-addition__fields">
           <div class="book-addition__field book-addition__field--book">
-            <label for="book-select" class="book-addition__field-label">書</label>
-            <BookCombobox id="book-select" v-model="bookModel" :books="books" class="noto-serif" />
+            <label for="book-select" class="book-addition__field-label"
+              >書</label
+            >
+            <BookCombobox
+              id="book-select"
+              v-model="bookModel"
+              :books="books"
+              class="noto-serif"
+            />
           </div>
 
           <div class="book-addition__field book-addition__field--chapter">
             <label for="chapter-select" class="book-addition__field-label">
               章
-              <v-progress-circular v-if="chapterLoading" indeterminate size="12" width="2" />
+              <v-progress-circular
+                v-if="chapterLoading"
+                indeterminate
+                size="12"
+                width="2"
+              />
             </label>
             <!-- 詩篇(150章)でも数字を打てば絞り込める(「23」→「第23章」) -->
             <BookCombobox
@@ -342,7 +370,9 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
           </div>
 
           <div class="book-addition__field book-addition__field--verse">
-            <label for="verse-input" class="book-addition__field-label">節</label>
+            <label for="verse-input" class="book-addition__field-label"
+              >節</label
+            >
             <v-text-field
               id="verse-input"
               v-model="verseId"
@@ -359,7 +389,11 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
 
           <!-- ボタンも他の列と同じ構造にする(見えないラベルで高さを揃える。縦積みの時は空きを作らない) -->
           <div class="book-addition__field book-addition__field--action">
-            <span aria-hidden="true" class="book-addition__field-label book-addition__ghost">追加</span>
+            <span
+              aria-hidden="true"
+              class="book-addition__field-label book-addition__ghost"
+              >追加</span
+            >
             <v-btn
               block
               color="primary"
@@ -378,9 +412,16 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
     </div>
 
     <!-- 上書き確認 -->
-    <v-dialog v-model="confirmOpen" max-width="512" role="alertdialog" aria-labelledby="book-overwrite-title">
+    <v-dialog
+      v-model="confirmOpen"
+      max-width="512"
+      role="alertdialog"
+      aria-labelledby="book-overwrite-title"
+    >
       <v-card class="noto-serif pa-6" rounded="lg">
-        <h2 id="book-overwrite-title" class="text-title-large font-weight-bold">上書きの確認</h2>
+        <h2 id="book-overwrite-title" class="text-title-large font-weight-bold">
+          上書きの確認
+        </h2>
         <p class="text-body-medium text-medium-emphasis mt-2">
           {{
             isUpdate
@@ -389,7 +430,9 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
           }}
         </p>
         <div class="d-flex justify-end ga-2 mt-6">
-          <v-btn variant="outlined" @click="confirmOpen = false">キャンセル</v-btn>
+          <v-btn variant="outlined" @click="confirmOpen = false"
+            >キャンセル</v-btn
+          >
           <v-btn color="primary" variant="flat" @click="doSave">
             {{ isUpdate ? "更新する" : "保存する" }}
           </v-btn>

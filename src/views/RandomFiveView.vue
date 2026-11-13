@@ -65,17 +65,25 @@ const randomQuery = useQuery(
   }),
 );
 const records = computed(() => randomQuery.data.value ?? []);
-const loading = computed(() => request.value !== null && randomQuery.isFetching.value);
+const loading = computed(
+  () => request.value !== null && randomQuery.isFetching.value,
+);
 // 検索して結果が届いたか(未検索の案内と「該当データなし」を出し分けるため。
 // 通信エラーのときは「該当データなし」とは言わず、トーストで知らせる)
-const searched = computed(() => request.value !== null && randomQuery.isSuccess.value);
+const searched = computed(
+  () => request.value !== null && randomQuery.isSuccess.value,
+);
 
 watch(randomQuery.error, (err) => {
   if (err) feedback.toast(extractErrorMessage(err, "通信エラー"));
 });
 
 const onRandom = () => {
-  request.value = { path: "/hymns/random", keyword: keyword.value, nonce: String(Date.now()) };
+  request.value = {
+    path: "/hymns/random",
+    keyword: keyword.value,
+    nonce: String(Date.now()),
+  };
 };
 
 // 検索欄は <form> にして、Enter での送信(日本語変換中の Enter は除く)をブラウザに任せる
@@ -96,7 +104,11 @@ const onWindowKeyDown = (e: KeyboardEvent) => {
     )
   )
     return;
-  if (document.querySelector(".v-overlay--active [role=dialog], .v-overlay--active [role=alertdialog], .v-overlay--active .v-dialog"))
+  if (
+    document.querySelector(
+      ".v-overlay--active [role=dialog], .v-overlay--active [role=alertdialog], .v-overlay--active .v-dialog",
+    )
+  )
     return;
   e.preventDefault();
   onRandom();
@@ -127,7 +139,11 @@ const onCreatePlaylist = () =>
 
       <div class="pa-6">
         <div class="random-five__toolbar mb-6">
-          <form role="search" class="random-five__search" @submit.prevent="onSubmit">
+          <form
+            role="search"
+            class="random-five__search"
+            @submit.prevent="onSubmit"
+          >
             <v-text-field
               v-model="keyword"
               type="text"
@@ -171,19 +187,40 @@ const onCreatePlaylist = () =>
           >
             プレイリスト作成
             <template #loader>
-              <v-progress-circular indeterminate size="16" width="2" class="mr-2" />
+              <v-progress-circular
+                indeterminate
+                size="16"
+                width="2"
+                class="mr-2"
+              />
               {{ progress }}
             </template>
           </v-btn>
         </div>
 
-        <p class="mb-1 text-center text-body-small random-five__caption">ランダム選択した賛美歌情報一覧</p>
-        <div class="header-mint mb-2 px-2 py-2 text-center font-weight-bold">名称</div>
+        <p class="mb-1 text-center text-body-small random-five__caption">
+          ランダム選択した賛美歌情報一覧
+        </p>
+        <div class="header-mint mb-2 px-2 py-2 text-center font-weight-bold">
+          名称
+        </div>
 
         <div v-if="loading" class="random-five__list" aria-busy="true">
-          <div v-for="i in SKELETON_ROWS" :key="i" class="glass-item random-five__item random-five__item--skeleton">
-            <v-skeleton-loader type="text" width="40%" class="mx-auto bg-transparent" />
-            <v-skeleton-loader type="text" width="25%" class="mx-auto bg-transparent" />
+          <div
+            v-for="i in SKELETON_ROWS"
+            :key="i"
+            class="glass-item random-five__item random-five__item--skeleton"
+          >
+            <v-skeleton-loader
+              type="text"
+              width="40%"
+              class="mx-auto bg-transparent"
+            />
+            <v-skeleton-loader
+              type="text"
+              width="25%"
+              class="mx-auto bg-transparent"
+            />
           </div>
         </div>
         <v-empty-state
@@ -194,7 +231,9 @@ const onCreatePlaylist = () =>
           size="40"
         >
           <template #text>
-            <template v-if="searched">別のキーワードで試してください。</template>
+            <template v-if="searched"
+              >別のキーワードで試してください。</template
+            >
             <template v-else>
               キーワードを入力して検索ボタンを押すと、<br />賛美歌をランダムに選びます。
             </template>
@@ -215,7 +254,12 @@ const onCreatePlaylist = () =>
               <span class="random-five__jp">{{ item.nameJp }}</span>
               <span class="random-five__kr">{{ item.nameKr }}</span>
             </span>
-            <v-icon icon="mdi-youtube" size="20" class="random-five__yt" aria-hidden="true" />
+            <v-icon
+              icon="mdi-youtube"
+              size="20"
+              class="random-five__yt"
+              aria-hidden="true"
+            />
           </a>
         </div>
       </div>
@@ -243,7 +287,10 @@ const onCreatePlaylist = () =>
 .random-five__toolbar {
   display: grid;
   /* 検索欄を中央に置く。狭い画面ではプレイリストのボタンが切れないよう、右の列は内容の幅まで広がる */
-  grid-template-columns: minmax(0, 1fr) minmax(0, 30rem) minmax(max-content, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 30rem) minmax(
+      max-content,
+      1fr
+    );
   align-items: center;
   gap: 16px;
 }

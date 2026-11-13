@@ -64,7 +64,9 @@ const studentQuery = useQuery(
   computed(() => ({
     queryKey: studentKey(userId.value),
     queryFn: async (): Promise<StudentForm> => {
-      const { data } = await api.get<StudentDetail>(`/students/${userId.value}`);
+      const { data } = await api.get<StudentDetail>(
+        `/students/${userId.value}`,
+      );
       return {
         id: userId.value,
         loginAccount: data.loginAccount,
@@ -120,7 +122,8 @@ const showPassword = ref(false);
 const youtubeQuery = useQuery(
   computed(() => ({
     queryKey: YOUTUBE_STATUS_KEY,
-    queryFn: async () => !!(await api.get<{ linked: boolean }>("/youtube/status")).data.linked,
+    queryFn: async () =>
+      !!(await api.get<{ linked: boolean }>("/youtube/status")).data.linked,
     enabled: !!userId.value,
     // 未ログイン等はルーターの認証チェックに任せ、ここでは静かに無視する
     retry: false,
@@ -129,7 +132,9 @@ const youtubeQuery = useQuery(
 const youtubeLinked = computed(() => youtubeQuery.data.value ?? false);
 // トグルは、ユーザーが触るまでは連携状態に合わせる
 const toggleOverride = ref<boolean | null>(null);
-const youtubeToggleOn = computed(() => toggleOverride.value ?? youtubeLinked.value);
+const youtubeToggleOn = computed(
+  () => toggleOverride.value ?? youtubeLinked.value,
+);
 
 const unlinkMutation = useMutation({
   mutationFn: () => api.post("/youtube/unlink"),
@@ -192,7 +197,10 @@ const checkAccount = async () => {
       params: { id: form.value.id ?? EMPTY_STRING, loginAccount: name },
     });
   } catch (e: unknown) {
-    errors.loginAccount = extractErrorMessage(e, "このアカウントは既に使われています。");
+    errors.loginAccount = extractErrorMessage(
+      e,
+      "このアカウントは既に使われています。",
+    );
   }
 };
 
@@ -256,12 +264,19 @@ const inputProps = {
 
     <v-breadcrumbs
       class="personal__breadcrumbs"
-      :items="[{ title: 'メインメニュー', to: '/mainmenu' }, { title: 'ユーザー情報', disabled: true }]"
+      :items="[
+        { title: 'メインメニュー', to: '/mainmenu' },
+        { title: 'ユーザー情報', disabled: true },
+      ]"
     />
 
     <div class="studentedition-card glass-panel personal__card">
       <div class="personal__header">
-        <v-icon icon="mdi-card-account-details-outline" size="20" class="mr-2" />
+        <v-icon
+          icon="mdi-card-account-details-outline"
+          size="20"
+          class="mr-2"
+        />
         <h1 class="text-title-large">ユーザー情報更新</h1>
       </div>
 
@@ -271,7 +286,9 @@ const inputProps = {
           <legend class="personal__legend">基本情報</legend>
           <v-row density="compact">
             <v-col cols="12" sm="6">
-              <label for="personal-account" class="form-label">アカウント</label>
+              <label for="personal-account" class="form-label"
+                >アカウント</label
+              >
               <v-text-field
                 id="personal-account"
                 v-model="loginAccount"
@@ -333,7 +350,9 @@ const inputProps = {
                 :icon="showPassword ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
                 variant="text"
                 size="x-small"
-                :aria-label="showPassword ? 'パスワードを隠す' : 'パスワードを表示'"
+                :aria-label="
+                  showPassword ? 'パスワードを隠す' : 'パスワードを表示'
+                "
                 @click="showPassword = !showPassword"
               />
             </template>
@@ -348,27 +367,40 @@ const inputProps = {
           <div class="personal__link-row">
             <!-- 左: アイコン・タイトル・状態 -->
             <div class="d-flex align-center ga-3" style="min-width: 0">
-              <v-icon icon="mdi-youtube" size="32" :color="youtubeLinked ? 'grey' : 'red-darken-1'" />
+              <v-icon
+                icon="mdi-youtube"
+                size="32"
+                :color="youtubeLinked ? 'grey' : 'red-darken-1'"
+              />
               <div style="min-width: 0">
-                <label for="personal-youtube" class="form-label">YouTube連携</label>
+                <label for="personal-youtube" class="form-label"
+                  >YouTube連携</label
+                >
                 <div class="d-flex align-center ga-2">
                   <v-chip
                     size="small"
                     label
                     variant="flat"
-                    :color="youtubeLinked ? 'green-lighten-4' : 'grey-lighten-3'"
+                    :color="
+                      youtubeLinked ? 'green-lighten-4' : 'grey-lighten-3'
+                    "
                     class="font-weight-bold"
                   >
                     {{ youtubeLinked ? "連携済み" : "未連携" }}
                   </v-chip>
-                  <span class="text-body-small text-medium-emphasis">ONにすると連携ボタンが押せます</span>
+                  <span class="text-body-small text-medium-emphasis"
+                    >ONにすると連携ボタンが押せます</span
+                  >
                 </div>
               </div>
             </div>
 
             <!-- 右: トグル + 連携ボタン(連携処理中はスイッチに読み込み表示を出す) -->
             <div class="d-flex align-center ga-3 flex-shrink-0">
-              <Hint v-slot="{ props }" label="ONで連携ボタンが押せるようになります">
+              <Hint
+                v-slot="{ props }"
+                label="ONで連携ボタンが押せるようになります"
+              >
                 <span v-bind="props" class="d-inline-flex">
                   <v-switch
                     id="personal-youtube"
@@ -392,7 +424,11 @@ const inputProps = {
                   :disabled="!youtubeToggleOn || youtubeLinked || youtubeBusy"
                   @click="onYoutubeConnect"
                 >
-                  <v-icon icon="mdi-youtube" :color="youtubeLinked ? 'grey' : 'red-darken-1'" class="mr-1" />
+                  <v-icon
+                    icon="mdi-youtube"
+                    :color="youtubeLinked ? 'grey' : 'red-darken-1'"
+                    class="mr-1"
+                  />
                   {{ youtubeLinked ? "連携済み" : "YouTubeと連携" }}
                 </v-btn>
               </Hint>
@@ -402,10 +438,21 @@ const inputProps = {
       </div>
 
       <div class="personal__footer">
-        <v-btn color="primary" variant="flat" prepend-icon="mdi-lightning-bolt" :loading="saving" @click="onUpdate">
+        <v-btn
+          color="primary"
+          variant="flat"
+          prepend-icon="mdi-lightning-bolt"
+          :loading="saving"
+          @click="onUpdate"
+        >
           更新
         </v-btn>
-        <v-btn color="#6b7280" variant="flat" prepend-icon="mdi-trash-can-outline" @click="onRestore">
+        <v-btn
+          color="#6b7280"
+          variant="flat"
+          prepend-icon="mdi-trash-can-outline"
+          @click="onRestore"
+        >
           廃棄
         </v-btn>
       </div>

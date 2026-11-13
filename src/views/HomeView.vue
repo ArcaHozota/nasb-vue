@@ -13,11 +13,20 @@ import {
   useQueryClient,
 } from "@tanstack/vue-query";
 import type { AxiosError } from "axios";
-import { fetchHymnPage, hymnKeys, type HymnPage, type HymnSummary } from "@/api/hymns";
+import {
+  fetchHymnPage,
+  hymnKeys,
+  type HymnPage,
+  type HymnSummary,
+} from "@/api/hymns";
 import type { ScoreKey } from "@/lib/scoreKeys";
 import { fetchScoreKeysOrToast } from "@/lib/scoreKeys";
 import { extractTerms } from "@/lib/lyrics";
-import { searchIndexQueryOptions, searchLocal, shouldSearchOnServer } from "@/lib/localSearch";
+import {
+  searchIndexQueryOptions,
+  searchLocal,
+  shouldSearchOnServer,
+} from "@/lib/localSearch";
 import { downloadScoreOrToast } from "@/lib/download";
 import { consumeRedirectMessage } from "@/lib/session";
 import { EMPTY_STRING } from "@/lib/constants";
@@ -58,13 +67,20 @@ const submittedKeyword = ref(EMPTY_STRING); // 検索確定値(クエリキー�
 // ハングルを含む / 先頭が * ★ # / & を含む入力はサーバー検索(従来どおり)。
 // それ以外(日本語・英語など)は、画面側で曲名・日本語/英語の歌詞に照らして並べる。
 const localCandidate = computed(
-  () => submittedKeyword.value.trim() !== "" && !shouldSearchOnServer(submittedKeyword.value),
+  () =>
+    submittedKeyword.value.trim() !== "" &&
+    !shouldSearchOnServer(submittedKeyword.value),
 );
 const indexQuery = useQuery(
-  computed(() => ({ ...searchIndexQueryOptions, enabled: localCandidate.value })),
+  computed(() => ({
+    ...searchIndexQueryOptions,
+    enabled: localCandidate.value,
+  })),
 );
 // 索引の取得に失敗したときは、画面検索をあきらめてサーバー検索に戻す
-const isLocal = computed(() => localCandidate.value && !indexQuery.isError.value);
+const isLocal = computed(
+  () => localCandidate.value && !indexQuery.isError.value,
+);
 const local = computed(() =>
   isLocal.value && indexQuery.data.value
     ? searchLocal(indexQuery.data.value, submittedKeyword.value)
@@ -132,9 +148,13 @@ const records = computed<HymnSummary[]>(() =>
     : (desktopQuery.data.value?.records ?? []),
 );
 const totalRecords = computed(() =>
-  isLocal.value ? localAll.value.length : (desktopQuery.data.value?.totalRecords ?? 0),
+  isLocal.value
+    ? localAll.value.length
+    : (desktopQuery.data.value?.totalRecords ?? 0),
 );
-const totalPages = computed(() => Math.max(1, Math.ceil(totalRecords.value / PAGE_SIZE)));
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(totalRecords.value / PAGE_SIZE)),
+);
 // 画面検索では、索引を取得し終えるまでが「読み込み中」
 const desktopBusy = computed(() =>
   isLocal.value ? indexQuery.isPending.value : desktopQuery.isFetching.value,
@@ -148,7 +168,9 @@ const mobileRecords = computed<HymnSummary[]>(() =>
     : (mobileQuery.data.value?.pages.flatMap((p) => p.records) ?? []),
 );
 const mobileTotal = computed(() =>
-  isLocal.value ? localAll.value.length : (mobileQuery.data.value?.pages[0]?.totalRecords ?? 0),
+  isLocal.value
+    ? localAll.value.length
+    : (mobileQuery.data.value?.pages[0]?.totalRecords ?? 0),
 );
 const mobileBusy = computed(() =>
   isLocal.value ? indexQuery.isPending.value : mobileQuery.isFetching.value,
@@ -174,20 +196,27 @@ const onTrackScroll = () => {
     const first = el?.firstElementChild as HTMLElement | null;
     if (!el || !first) return;
     // 1枚分の送り幅(カード幅 + すき間)
-    const step = first.offsetWidth + parseFloat(getComputedStyle(el).columnGap || "0");
+    const step =
+      first.offsetWidth + parseFloat(getComputedStyle(el).columnGap || "0");
     currentSlide.value = Math.max(0, Math.round(el.scrollLeft / step));
   });
 };
 
 watch(
-  () => [currentSlide.value, mobileRecords.value.length, mobileQuery.hasNextPage.value] as const,
+  () =>
+    [
+      currentSlide.value,
+      mobileRecords.value.length,
+      mobileQuery.hasNextPage.value,
+    ] as const,
   () => {
     if (
       isMobile.value &&
       !isLocal.value &&
       mobileQuery.hasNextPage.value &&
       !mobileQuery.isFetchingNextPage.value &&
-      currentSlide.value >= mobileRecords.value.length - MOBILE_PREFETCH_REMAINING
+      currentSlide.value >=
+        mobileRecords.value.length - MOBILE_PREFETCH_REMAINING
     ) {
       void mobileQuery.fetchNextPage();
     }
@@ -282,7 +311,12 @@ const reload = () => {
 
     <header class="home-nav">
       <button type="button" class="home-nav__brand" @click="reload">
-        <img src="/assets/jerusalem-cross2.svg" alt="NASB1995" width="66" height="66" />
+        <img
+          src="/assets/jerusalem-cross2.svg"
+          alt="NASB1995"
+          width="66"
+          height="66"
+        />
         <span class="effect-shine home-nav__title">NASB1995</span>
       </button>
     </header>
@@ -290,7 +324,11 @@ const reload = () => {
     <main class="home__main">
       <form role="search" class="home__search" @submit.prevent="onSearch">
         <!-- 読み込み中は、検索欄のまわりに細いリングを脈打たせる -->
-        <span v-if="desktopBusy || mobileBusy" aria-hidden="true" class="home__search-ring" />
+        <span
+          v-if="desktopBusy || mobileBusy"
+          aria-hidden="true"
+          class="home__search-ring"
+        />
         <input
           v-model="keyword"
           type="text"
@@ -298,13 +336,25 @@ const reload = () => {
           aria-label="キーワード"
           class="home__search-input"
         />
-        <v-btn type="submit" icon="mdi-magnify" size="small" variant="text" aria-label="検索" class="home__search-btn" />
+        <v-btn
+          type="submit"
+          icon="mdi-magnify"
+          size="small"
+          variant="text"
+          aria-label="検索"
+          class="home__search-btn"
+        />
       </form>
 
-      <p v-if="localNotice" role="status" class="home__notice">{{ localNotice }}</p>
+      <p v-if="localNotice" role="status" class="home__notice">
+        {{ localNotice }}
+      </p>
 
       <!-- 1枚+次の端がのぞくカルーセル -->
-      <div v-if="mobileBusy && mobileRecords.length === 0" class="home__track home__track--loading">
+      <div
+        v-if="mobileBusy && mobileRecords.length === 0"
+        class="home__track home__track--loading"
+      >
         <div class="home__slide"><HymnCard /></div>
         <div class="home__slide"><HymnCard /></div>
       </div>
@@ -325,7 +375,13 @@ const reload = () => {
         @scroll.passive="onTrackScroll"
       >
         <!-- key は位置(i)で固定: 読み込み完了でスライド自体を差し替えず、中身だけ入れ替える -->
-        <div v-for="i in mobileTotal" :key="i" class="home__slide" role="group" aria-roledescription="slide">
+        <div
+          v-for="i in mobileTotal"
+          :key="i"
+          class="home__slide"
+          role="group"
+          aria-roledescription="slide"
+        >
           <HymnCard
             v-if="slideKind(i - 1) !== 'placeholder'"
             :item="mobileRecords[i - 1]"
@@ -336,7 +392,11 @@ const reload = () => {
           <div v-else class="home__placeholder" aria-hidden="true" />
         </div>
       </div>
-      <p v-if="mobileTotal > 0" class="page-info home__page-info" aria-live="polite">
+      <p
+        v-if="mobileTotal > 0"
+        class="page-info home__page-info"
+        aria-live="polite"
+      >
         {{ Math.min(currentSlide + 1, mobileTotal) }} / {{ mobileTotal }}件
       </p>
 
@@ -350,15 +410,22 @@ const reload = () => {
 
       <ScoreKeyDialog
         v-model="keyDialogOpen"
-        :title="keyDialog ? `${keyDialog.item.nameJp} / ${keyDialog.item.nameKr}` : undefined"
+        :title="
+          keyDialog
+            ? `${keyDialog.item.nameJp} / ${keyDialog.item.nameKr}`
+            : undefined
+        "
         :keys="keyDialog?.keys ?? []"
         :content-class="bubbleClass(keyDialog?.item.lineNumber)"
         item-class="bubble-item"
-        @select="(chord) => keyDialog && downloadScoreOrToast(keyDialog.item.id, chord)"
+        @select="
+          (chord) => keyDialog && downloadScoreOrToast(keyDialog.item.id, chord)
+        "
       />
 
       <p class="hint-verse home__verse">
-        "Heaven and Earth will pass away, but My words will not pass away." --- Luke 21:33
+        "Heaven and Earth will pass away, but My words will not pass away." ---
+        Luke 21:33
       </p>
     </main>
   </div>

@@ -1,9 +1,18 @@
 <script setup lang="ts">
 // 賛美歌一覧(旧 (admin)/hymns/page.tsx)
 import { computed, ref, watch } from "vue";
-import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/vue-query";
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/vue-query";
 import api from "@/api/axios";
-import { fetchHymnPage, hymnKeys, invalidateHymns, type HymnSummary } from "@/api/hymns";
+import {
+  fetchHymnPage,
+  hymnKeys,
+  invalidateHymns,
+  type HymnSummary,
+} from "@/api/hymns";
 import { usePlaylistCreation } from "@/composables/usePlaylistCreation";
 import { useFeedbackStore } from "@/stores/feedback";
 import { EMPTY_STRING, extractErrorMessage } from "@/lib/constants";
@@ -24,7 +33,10 @@ const MATCH_LEVEL: Record<string, { label: string; chip: string }> = {
   NAPLES: { label: "やや一致", chip: "match-chip--naples" },
 };
 const MATCH_RELATED = { label: "関連", chip: "match-chip--related" };
-const PAGE_SIZE_OPTIONS = [5, 10, 15].map((n) => ({ value: n, title: `${n}件/ページ` }));
+const PAGE_SIZE_OPTIONS = [5, 10, 15].map((n) => ({
+  value: n,
+  title: `${n}件/ページ`,
+}));
 
 const feedback = useFeedbackStore();
 const queryClient = useQueryClient();
@@ -51,7 +63,9 @@ const { data, isFetching } = useQuery(
 
 const records = computed(() => data.value?.records ?? []);
 const totalRecords = computed(() => data.value?.totalRecords ?? 0);
-const totalPages = computed(() => Math.max(1, Math.ceil(totalRecords.value / pageSize.value)));
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(totalRecords.value / pageSize.value)),
+);
 
 // 最後のページの最後の1件を削除した等で、今のページが総ページ数を超えたら最終ページへ戻す
 // (取得中は前ページのデータなので判定しない)
@@ -62,9 +76,13 @@ watch([isFetching, totalPages], () => {
 });
 
 // 検索中は「番号」列を一致度に切り替える(検索確定後のキーワードで判定)
-const isSearching = computed(() => submittedKeyword.value.trim() !== EMPTY_STRING);
-const matchLevel = (row: HymnSummary) => MATCH_LEVEL[row.lineNumber] ?? MATCH_RELATED;
-const rowNumber = (i: number) => String((page.value - 1) * pageSize.value + i + 1).padStart(2, "0");
+const isSearching = computed(
+  () => submittedKeyword.value.trim() !== EMPTY_STRING,
+);
+const matchLevel = (row: HymnSummary) =>
+  MATCH_LEVEL[row.lineNumber] ?? MATCH_RELATED;
+const rowNumber = (i: number) =>
+  String((page.value - 1) * pageSize.value + i + 1).padStart(2, "0");
 
 // 行クリック: 曲のYouTubeリンクを新しいタブで開く
 const openYoutube = (row: HymnSummary) => {
@@ -84,7 +102,9 @@ const onPageSizeChange = (value: number) => {
 
 // ===== 追加・編集(モーダル。一覧の page / pageSize / keyword はそのまま保たれる) =====
 // HYMNS.ID は Snowflake の19桁でJS numberでは精度が壊れるため、IDは string で持つ。
-const formModal = ref<{ mode: "add" } | { mode: "edit"; id: string } | null>(null);
+const formModal = ref<{ mode: "add" } | { mode: "edit"; id: string } | null>(
+  null,
+);
 
 const onFormSaved = (result: { mode: "add" | "edit"; pageNum?: number }) => {
   formModal.value = null;
@@ -153,7 +173,11 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
 
       <div class="pa-6">
         <div class="hymn-list__toolbar mb-4">
-          <form role="search" class="hymn-list__search" @submit.prevent="onSearch">
+          <form
+            role="search"
+            class="hymn-list__search"
+            @submit.prevent="onSearch"
+          >
             <v-text-field
               v-model="keyword"
               type="text"
@@ -169,7 +193,14 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
                 <!-- v-field は中から上がってくる click を取り消す(preventDefault)ため、ここに type="submit" を置くと
                      フォームが送信されない(Enter も効かなくなる)。ボタンは type="button" で検索を直接呼び、
                      Enter は「入力欄1つ・送信ボタンなし」のフォームの暗黙の送信に任せる。 -->
-                <v-btn icon="mdi-magnify" type="button" size="x-small" variant="text" aria-label="検索" @click="onSearch" />
+                <v-btn
+                  icon="mdi-magnify"
+                  type="button"
+                  size="x-small"
+                  variant="text"
+                  aria-label="検索"
+                  @click="onSearch"
+                />
               </template>
             </v-text-field>
           </form>
@@ -179,8 +210,13 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
 
           <!-- 操作列と同じ幅のセルに収め、列内で中央寄せにする -->
           <div class="d-flex align-center justify-center ga-2">
-            <v-btn color="success" variant="flat" class="font-weight-bold" prepend-icon="mdi-plus-circle-outline"
-              @click="formModal = { mode: 'add' }">
+            <v-btn
+              color="success"
+              variant="flat"
+              class="font-weight-bold"
+              prepend-icon="mdi-plus-circle-outline"
+              @click="formModal = { mode: 'add' }"
+            >
               賛美歌情報追加
             </v-btn>
             <Hint v-slot="{ props }" label="プレイリスト作成">
@@ -222,49 +258,88 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
                   <td><v-skeleton-loader type="text" width="32" /></td>
                   <td><v-skeleton-loader type="text" width="75%" /></td>
                   <td><v-skeleton-loader type="text" width="66%" /></td>
-                  <td><v-skeleton-loader type="button" width="128" class="mx-auto" /></td>
+                  <td>
+                    <v-skeleton-loader
+                      type="button"
+                      width="128"
+                      class="mx-auto"
+                    />
+                  </td>
                 </tr>
               </template>
               <tr v-else-if="!isFetching && records.length === 0">
-                <td colspan="4" class="py-6 text-center text-disabled">データがありません</td>
+                <td colspan="4" class="py-6 text-center text-disabled">
+                  データがありません
+                </td>
               </tr>
               <!-- 行をクリック(またはEnter)すると YouTube を新しいタブで開く -->
               <tr
                 v-for="(row, i) in records"
                 :key="row.id"
                 :tabindex="row.link ? 0 : undefined"
-                :aria-label="row.link ? `${row.nameJp}をYouTubeで開く` : undefined"
-                :class="['hymn-list__row', { 'is-link': row.link, 'is-stale': isFetching }]"
+                :aria-label="
+                  row.link ? `${row.nameJp}をYouTubeで開く` : undefined
+                "
+                :class="[
+                  'hymn-list__row',
+                  { 'is-link': row.link, 'is-stale': isFetching },
+                ]"
                 @click="openYoutube(row)"
                 @keydown.enter.self="openYoutube(row)"
               >
                 <td>
-                  <span v-if="isSearching" :class="['match-chip', matchLevel(row).chip]">
+                  <span
+                    v-if="isSearching"
+                    :class="['match-chip', matchLevel(row).chip]"
+                  >
                     {{ matchLevel(row).label }}
                   </span>
                   <span v-else class="hymn-list__no">{{ rowNumber(i) }}</span>
                 </td>
                 <!-- 長い名称は文字サイズを縮小。2行まで折り返し、それ以上は「…」で省略(省略時のみホバーで全文) -->
                 <td class="hymn-list__name">
-                  <ClampText :text="row.nameJp" :class="hymnNameSizeClass(row.nameJp)" />
+                  <ClampText
+                    :text="row.nameJp"
+                    :class="hymnNameSizeClass(row.nameJp)"
+                  />
                 </td>
                 <td class="hymn-list__name hymn-list__name--kr">
-                  <ClampText :text="row.nameKr" :class="hymnNameSizeClass(row.nameKr)" />
+                  <ClampText
+                    :text="row.nameKr"
+                    :class="hymnNameSizeClass(row.nameKr)"
+                  />
                 </td>
                 <!-- 操作列のクリックは行(YouTube)へ伝えない -->
                 <td @click.stop @keydown.stop>
                   <div class="d-flex justify-center ga-1">
                     <Hint v-slot="{ props }" label="楽譜アップロード">
-                      <v-btn v-bind="props" icon="mdi-music" class="action-btn" aria-label="楽譜アップロード"
-                        @click="scoreModalHymn = { id: row.id, nameKr: row.nameKr }" />
+                      <v-btn
+                        v-bind="props"
+                        icon="mdi-music"
+                        class="action-btn"
+                        aria-label="楽譜アップロード"
+                        @click="
+                          scoreModalHymn = { id: row.id, nameKr: row.nameKr }
+                        "
+                      />
                     </Hint>
                     <Hint v-slot="{ props }" label="編集">
-                      <v-btn v-bind="props" icon="mdi-notebook-edit-outline" class="action-btn" aria-label="編集"
-                        @click="formModal = { mode: 'edit', id: row.id }" />
+                      <v-btn
+                        v-bind="props"
+                        icon="mdi-notebook-edit-outline"
+                        class="action-btn"
+                        aria-label="編集"
+                        @click="formModal = { mode: 'edit', id: row.id }"
+                      />
                     </Hint>
                     <Hint v-slot="{ props }" label="削除">
-                      <v-btn v-bind="props" icon="mdi-trash-can-outline" class="action-btn action-btn--danger"
-                        aria-label="削除" @click="onDelete(row)" />
+                      <v-btn
+                        v-bind="props"
+                        icon="mdi-trash-can-outline"
+                        class="action-btn action-btn--danger"
+                        aria-label="削除"
+                        @click="onDelete(row)"
+                      />
                     </Hint>
                     <!-- 楽譜が複数あるときは、アイコンの右にふきだしで調を選ばせる -->
                     <ScoreKeyPopover
@@ -297,7 +372,9 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
 
         <!-- ページネーション -->
         <div class="hymn-list__pager mt-3">
-          <div>全{{ totalRecords }}件 / {{ page }} / {{ totalPages }}ページ</div>
+          <div>
+            全{{ totalRecords }}件 / {{ page }} / {{ totalPages }}ページ
+          </div>
           <div class="d-flex align-center flex-wrap ga-3">
             <v-select
               :model-value="pageSize"

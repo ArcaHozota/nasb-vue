@@ -42,7 +42,9 @@ onMounted(() => {
 
 <template>
   <div>
-    <h1 class="text-headline-medium font-weight-bold text-primary mb-8">メインメニュー</h1>
+    <h1 class="text-headline-medium font-weight-bold text-primary mb-8">
+      メインメニュー
+    </h1>
 
     <div class="menu-grid">
       <!-- 押せる面なので <button> を土台にする。浮き上がり・カードごとの色の光・押したときの縮みは CSS で -->
@@ -84,13 +86,19 @@ onMounted(() => {
   border: 0;
   border-radius: 8px;
   background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
   text-align: left;
-  transition: translate 0.3s, scale 0.3s, box-shadow 0.3s;
+  transition:
+    translate 0.3s,
+    scale 0.3s,
+    box-shadow 0.3s;
 }
 .menu-card:hover {
   translate: 0 -4px;
-  box-shadow: 0 12px 32px color-mix(in srgb, var(--hover-color) 45%, transparent);
+  box-shadow: 0 12px 32px
+    color-mix(in srgb, var(--hover-color) 45%, transparent);
 }
 .menu-card:active {
   scale: 0.98;

@@ -3,21 +3,47 @@
 /* 要素の既定の余白を消す(旧 Tailwind の preflight 相当)。Vuetify 4 の reset は p / h1 などの margin を残すため。
    Vuetify の一番弱い層(vuetify-core.reset)に入れるので、Vuetify の部品や mb-4 等のユーティリティが常に勝つ。 */
 @layer vuetify-core.reset {
-  h1, h2, h3, h4, h5, h6, p, blockquote, figure, dl, dd, hr, pre, fieldset {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  blockquote,
+  figure,
+  dl,
+  dd,
+  hr,
+  pre,
+  fieldset {
     margin: 0;
   }
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-size: inherit;
     font-weight: inherit;
   }
-  ol, ul, menu {
+
+  ol,
+  ul,
+  menu {
     margin: 0;
     padding: 0;
     list-style: none;
   }
-  fieldset, legend {
+
+  fieldset,
+  legend {
     padding: 0;
   }
+
   button {
     border: 0;
     background: transparent;
@@ -25,10 +51,12 @@
     color: inherit;
   }
 }
+
 .noto-serif,
 .noto-serif * {
   font-family: "Noto Serif JP", "Noto Serif KR", serif !important;
 }
+
 .noto-sans,
 .noto-sans * {
   font-family: "Noto Sans JP", sans-serif !important;
@@ -41,14 +69,17 @@
   color: rgb(var(--v-theme-primary));
   transition: 500ms;
 }
+
 .effect-shine:hover {
   animation: shine 1500ms infinite alternate;
 }
+
 @keyframes shine {
   from {
     color: #fff;
     text-shadow: 0 0 5px #03e9f4, 0 0 25px #03e9f4, 0 0 50px #03e9f4, 0 0 100px #03e9f4;
   }
+
   to {
     color: #fff;
     text-shadow: 0 0 2px #03e9f4, 0 0 5px #03e9f4, 0 0 7px #03e9f4, 0 0 10px #03e9f4;
@@ -59,6 +90,7 @@
 .hymn-name-sm {
   font-size: 0.8em;
 }
+
 .hymn-name-xs {
   font-size: 0.66em;
   line-height: 1.375;
@@ -68,6 +100,7 @@
 body {
   background: #fff;
 }
+
 .v-application {
   background: transparent !important;
 }

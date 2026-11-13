@@ -83,7 +83,14 @@ const onLogin = async () => {
           class="mb-4 login-card__error"
         />
 
-        <v-btn type="submit" color="primary" variant="flat" block :loading="loading" class="font-weight-bold">
+        <v-btn
+          type="submit"
+          color="primary"
+          variant="flat"
+          block
+          :loading="loading"
+          class="font-weight-bold"
+        >
           ログイン
         </v-btn>
       </form>
