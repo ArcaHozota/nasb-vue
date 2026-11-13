@@ -2,28 +2,37 @@
 // 最大2行で「…」省略するテキスト(旧 components/ClampText.tsx)。
 // 実際に省略されている時だけ、ホバーで全文をツールチップ表示する
 // (省略されていない短い名称にまでツールチップが出るとうるさいため)。
-import { ref } from "vue";
+//
+// v-tooltip は一度開くと中身を DOM に残す(Radix は閉じると消す)ので、省略されている間だけ
+// v-tooltip 自体を置く(省略されなくなったら中身ごと消える)。省略されているかは表示時と大きさが変わった時に測る。
+import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 
-defineProps<{ text: string }>();
+const props = defineProps<{ text: string }>();
 
 const el = ref<HTMLElement | null>(null);
-const open = ref(false);
+const clamped = ref(false);
 
-// 開こうとした時だけ、はみ出しているか(=省略されているか)を測る
-const onUpdate = (next: boolean) => {
-  open.value = next && !!el.value && el.value.scrollHeight > el.value.clientHeight + 1;
+const measure = () => {
+  const e = el.value;
+  clamped.value = !!e && e.scrollHeight > e.clientHeight + 1;
 };
+
+let observer: ResizeObserver | undefined;
+onMounted(() => {
+  measure();
+  if (typeof ResizeObserver !== "undefined" && el.value) {
+    observer = new ResizeObserver(measure);
+    observer.observe(el.value);
+  }
+});
+onBeforeUnmount(() => observer?.disconnect());
+// 文字が変わったら(ページ送りで行が使い回された時など)測り直す
+watch(() => props.text, () => requestAnimationFrame(measure));
 </script>
 
 <template>
   <span ref="el" class="line-clamp-2">
     {{ text }}
-    <v-tooltip
-      :model-value="open"
-      activator="parent"
-      max-width="384"
-      :text="text"
-      @update:model-value="onUpdate"
-    />
+    <v-tooltip v-if="clamped" activator="parent" max-width="384" :text="text" />
   </span>
 </template>

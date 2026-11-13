@@ -262,12 +262,13 @@ a.glass-item:hover {
 }
 
 
-/* 最大2行で省略(ClampText) */
+/* 最大2行で省略(ClampText)。旧 Tailwind の line-clamp-2 と同じく -webkit- 版だけを使う。
+   標準の line-clamp を足すと、新しい Chrome では隠れた行が描画されなくなり、
+   scrollHeight で「省略されているか」を測れなくなる(ClampText のツールチップが出なくなる)。 */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-  line-clamp: 2;
   overflow: hidden;
 }
 

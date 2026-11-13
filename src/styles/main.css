@@ -1,4 +1,30 @@
 /* アプリ共通の最小限のスタイル。個別画面の見た目は Vuetify のコンポーネント/ユーティリティで組む。 */
+
+/* 要素の既定の余白を消す(旧 Tailwind の preflight 相当)。Vuetify 4 の reset は p / h1 などの margin を残すため。
+   Vuetify の一番弱い層(vuetify-core.reset)に入れるので、Vuetify の部品や mb-4 等のユーティリティが常に勝つ。 */
+@layer vuetify-core.reset {
+  h1, h2, h3, h4, h5, h6, p, blockquote, figure, dl, dd, hr, pre, fieldset {
+    margin: 0;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+  ol, ul, menu {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  fieldset, legend {
+    padding: 0;
+  }
+  button {
+    border: 0;
+    background: transparent;
+    font: inherit;
+    color: inherit;
+  }
+}
 .noto-serif,
 .noto-serif * {
   font-family: "Noto Serif JP", "Noto Serif KR", serif !important;

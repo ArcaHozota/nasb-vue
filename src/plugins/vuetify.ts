@@ -1,6 +1,7 @@
 import "vuetify/styles";
 import { createVuetify, type ThemeDefinition } from "vuetify";
 import { aliases } from "vuetify/iconsets/mdi-svg";
+import { ja } from "vuetify/locale";
 import { mdiByName } from "./icons";
 import { MOBILE_BREAKPOINT } from "@/composables/useIsMobile";
 
@@ -21,6 +22,8 @@ const nasbLight: ThemeDefinition = {
 };
 
 export default createVuetify({
+  // Vuetify の部品の文言(ページ送りの読み上げ名・「データがありません」等)を日本語にする
+  locale: { locale: "ja", messages: { ja } },
   // アイコン: "mdi-xxx" は plugins/icons.ts の SVG、Vuetify 内部のアイコン($close 等)は mdi-svg の別名
   icons: { defaultSet: "mdi", aliases, sets: { mdi: mdiByName } },
   // useDisplay().mobile を「768px 未満」にする(旧 Tailwind の md と同じ境目)

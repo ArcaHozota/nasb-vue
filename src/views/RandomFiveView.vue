@@ -140,15 +140,19 @@ const onCreatePlaylist = () =>
               hide-details
             >
               <template #append-inner>
+                <!-- v-field は中から上がってくる click を取り消す(preventDefault)ため、ここに type="submit" を置くと
+                     フォームが送信されない(Enter も効かなくなる)。ボタンは type="button" で検索を直接呼び、
+                     Enter は「入力欄1つ・送信ボタンなし」のフォームの暗黙の送信に任せる。 -->
                 <Hint v-slot="{ props }" label="ランダム選択">
                   <v-btn
                     v-bind="props"
                     icon="mdi-magnify"
-                    type="submit"
+                    type="button"
                     size="x-small"
                     variant="text"
                     aria-label="ランダム選択"
                     :loading="loading"
+                    @click="onSubmit"
                   />
                 </Hint>
               </template>

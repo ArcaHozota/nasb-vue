@@ -7,6 +7,7 @@ Next.js + shadcn/ui 版(nasb-next)からの移行先。業務ロジックは nas
 - `npm run build` : `vue-tsc` で型チェック後、`dist/` に静的ファイルを生成
 - `npm test` : ユニットテスト(Vitest。`npm run test:watch` で監視)
 - `npm run lint` : ESLint(Vue 推奨 + TypeScript)
+- `npm run e2e` : 画面を通したテスト(Playwright。nasb-next の e2e/ と同じ。`/api/**` はブラウザ側で差し替えるのでバックエンド不要)
 - `docker build .` : nginx で静的配信(ポート3000、SPAフォールバック付き)
 
 ## 構成

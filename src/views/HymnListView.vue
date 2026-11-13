@@ -166,7 +166,10 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
               hide-details
             >
               <template #append-inner>
-                <v-btn icon="mdi-magnify" type="submit" size="x-small" variant="text" aria-label="検索" />
+                <!-- v-field は中から上がってくる click を取り消す(preventDefault)ため、ここに type="submit" を置くと
+                     フォームが送信されない(Enter も効かなくなる)。ボタンは type="button" で検索を直接呼び、
+                     Enter は「入力欄1つ・送信ボタンなし」のフォームの暗黙の送信に任せる。 -->
+                <v-btn icon="mdi-magnify" type="button" size="x-small" variant="text" aria-label="検索" @click="onSearch" />
               </template>
             </v-text-field>
           </form>
@@ -260,7 +263,7 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
                         @click="formModal = { mode: 'edit', id: row.id }" />
                     </Hint>
                     <Hint v-slot="{ props }" label="削除">
-                      <v-btn v-bind="props" icon="mdi-trash-can-outline" class="action-btn text-red-darken-1"
+                      <v-btn v-bind="props" icon="mdi-trash-can-outline" class="action-btn action-btn--danger"
                         aria-label="削除" @click="onDelete(row)" />
                     </Hint>
                     <!-- 楽譜が複数あるときは、アイコンの右にふきだしで調を選ばせる -->
@@ -318,7 +321,6 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
               size="small"
               rounded="md"
               class="hymn-list__pagination"
-              aria-label="ページ"
             />
           </div>
         </div>
@@ -378,8 +380,10 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
   border: 1px solid #e5e7eb;
   border-radius: 6px;
 }
+/* 背景画像が透けるガラスのカードの上に置くので、表は透明にする(v-table の既定は白) */
 .hymn-list__table {
   table-layout: fixed;
+  background: transparent;
 }
 .hymn-list__table :deep(table) {
   table-layout: fixed;
@@ -451,6 +455,10 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
   color: #374151;
   box-shadow: none !important;
   font-size: 0.75rem;
+}
+/* 削除は赤。.action-btn の色(この CSS は Vuetify の層の外なので text-* ユーティリティより強い)を上書きする */
+.action-btn--danger {
+  color: #dc2626;
 }
 .hymn-list__pager {
   display: flex;
