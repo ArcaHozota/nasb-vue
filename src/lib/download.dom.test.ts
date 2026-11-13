@@ -16,15 +16,15 @@ describe("saveBlob", () => {
 
   it("ファイル名つきのリンクをクリックし、リンクは片付ける", () => {
     const clicked: { href: string; download: string; inDom: boolean }[] = [];
-    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(
-      function (this: HTMLAnchorElement) {
-        clicked.push({
-          href: this.href,
-          download: this.download,
-          inDom: document.body.contains(this),
-        });
-      },
-    );
+    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (
+      this: HTMLAnchorElement,
+    ) {
+      clicked.push({
+        href: this.href,
+        download: this.download,
+        inDom: document.body.contains(this),
+      });
+    });
 
     saveBlob(new Blob(["pdf"]), "123(Bb).pdf");
 

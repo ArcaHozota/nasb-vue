@@ -2,7 +2,10 @@
 // ルーターの全体ガード。旧 (admin)/layout.tsx に分散していた処理をここに集める。
 //  - requireAuth   : meta.requiresAuth の画面は、ログインを確認してから表示する(未ログインならホームへ)
 //  - confirmUnsaved: 編集中の内容があるまま画面内を移動するとき、先に確認する
-import type { NavigationGuardWithThis, RouteLocationNormalized } from "vue-router";
+import type {
+  NavigationGuardWithThis,
+  RouteLocationNormalized,
+} from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useFeedbackStore } from "@/stores/feedback";
 import { useUnsavedGuard } from "@/stores/unsavedGuard";
@@ -30,8 +33,10 @@ export const requireAuth: NavigationGuardWithThis<undefined> = async (to) => {
 };
 
 /** 同じ画面(パスが同じでクエリだけ違う)への移動は確認しない */
-const isSamePage = (to: RouteLocationNormalized, from: RouteLocationNormalized) =>
-  to.path === from.path;
+const isSamePage = (
+  to: RouteLocationNormalized,
+  from: RouteLocationNormalized,
+) => to.path === from.path;
 
 /** 未保存の内容を破棄してよいか確認する(ログアウト前など、ルーター外からも使う) */
 export async function confirmDiscardUnsaved(): Promise<boolean> {

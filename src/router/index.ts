@@ -13,11 +13,23 @@ const router = createRouter({
       component: () => import("@/layouts/AdminLayout.vue"),
       meta: { requiresAuth: true },
       children: [
-        { path: "mainmenu", component: () => import("@/views/MainMenuView.vue") },
+        {
+          path: "mainmenu",
+          component: () => import("@/views/MainMenuView.vue"),
+        },
         { path: "hymns", component: () => import("@/views/HymnListView.vue") },
-        { path: "hymns/random-five", component: () => import("@/views/RandomFiveView.vue") },
-        { path: "books/add", component: () => import("@/views/BookAdditionView.vue") },
-        { path: "personal", component: () => import("@/views/PersonalView.vue") },
+        {
+          path: "hymns/random-five",
+          component: () => import("@/views/RandomFiveView.vue"),
+        },
+        {
+          path: "books/add",
+          component: () => import("@/views/BookAdditionView.vue"),
+        },
+        {
+          path: "personal",
+          component: () => import("@/views/PersonalView.vue"),
+        },
         { path: "error", component: () => import("@/views/ErrorView.vue") },
       ],
     },

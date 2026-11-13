@@ -81,6 +81,8 @@ export async function downloadScoreOrToast(id: string, chord?: string) {
   try {
     await downloadScore(id, chord);
   } catch (e: unknown) {
-    useFeedbackStore().toast(e instanceof Error ? e.message : "楽譜の取得に失敗しました");
+    useFeedbackStore().toast(
+      e instanceof Error ? e.message : "楽譜の取得に失敗しました",
+    );
   }
 }

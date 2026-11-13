@@ -39,9 +39,10 @@ describe("extractBlobErrorMessage", () => {
       "123",
       '""',
     ]) {
-      expect(await extractBlobErrorMessage(blobError(body), FALLBACK), body).toBe(
-        FALLBACK,
-      );
+      expect(
+        await extractBlobErrorMessage(blobError(body), FALLBACK),
+        body,
+      ).toBe(FALLBACK);
     }
   });
 

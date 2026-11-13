@@ -87,7 +87,9 @@ export const mdiByName: IconSet = {
     const name = String(props.icon);
     const path = ICONS[name];
     if (!path && import.meta.env.DEV) {
-      console.warn(`[icons] "${name}" が plugins/icons.ts の ICONS にありません`);
+      console.warn(
+        `[icons] "${name}" が plugins/icons.ts の ICONS にありません`,
+      );
     }
     return h(mdiSvg.component, { ...props, icon: path ?? name });
   },

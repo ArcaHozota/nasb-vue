@@ -16,9 +16,9 @@ describe("utf8ToBase64 / base64ToUtf8", () => {
 
 describe("extractErrorMessage", () => {
   it("応答本文が文字列ならそれを返す", () => {
-    expect(extractErrorMessage({ response: { data: "重複しています" } }, "fb")).toBe(
-      "重複しています",
-    );
+    expect(
+      extractErrorMessage({ response: { data: "重複しています" } }, "fb"),
+    ).toBe("重複しています");
   });
 
   it("応答本文の message を返す", () => {
@@ -30,9 +30,9 @@ describe("extractErrorMessage", () => {
   it("読めなければ fallback", () => {
     expect(extractErrorMessage(new Error("x"), "fb")).toBe("fb");
     expect(extractErrorMessage(null, "fb")).toBe("fb");
-    expect(extractErrorMessage({ response: { data: { other: 1 } } }, "fb")).toBe(
-      "fb",
-    );
+    expect(
+      extractErrorMessage({ response: { data: { other: 1 } } }, "fb"),
+    ).toBe("fb");
   });
 });
 

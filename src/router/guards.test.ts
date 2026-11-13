@@ -16,11 +16,16 @@ const loc = (path: string, requiresAuth = false) =>
 // ガードは this も next も使わないので、引数だけ渡して呼ぶ
 const runAuth = (to: RouteLocationNormalized) =>
   (requireAuth as (to: RouteLocationNormalized) => unknown)(to);
-const runUnsaved = (to: RouteLocationNormalized, from: RouteLocationNormalized) =>
-  (confirmUnsaved as (to: RouteLocationNormalized, from: RouteLocationNormalized) => unknown)(
-    to,
-    from,
-  );
+const runUnsaved = (
+  to: RouteLocationNormalized,
+  from: RouteLocationNormalized,
+) =>
+  (
+    confirmUnsaved as (
+      to: RouteLocationNormalized,
+      from: RouteLocationNormalized,
+    ) => unknown
+  )(to, from);
 
 beforeEach(() => setActivePinia(createPinia()));
 
@@ -52,13 +57,19 @@ describe("requireAuth", () => {
   it("未ログイン(401)ならホームへ", async () => {
     const auth = useAuthStore();
     auth.fetchMe = vi.fn(async () => null);
-    expect(await runAuth(loc("/hymns", true))).toEqual({ path: "/home", replace: true });
+    expect(await runAuth(loc("/hymns", true))).toEqual({
+      path: "/home",
+      replace: true,
+    });
   });
 
   it("/me が想定外のエラーでもホームへ", async () => {
     const auth = useAuthStore();
     auth.fetchMe = vi.fn().mockRejectedValue(new Error("network"));
-    expect(await runAuth(loc("/hymns", true))).toEqual({ path: "/home", replace: true });
+    expect(await runAuth(loc("/hymns", true))).toEqual({
+      path: "/home",
+      replace: true,
+    });
   });
 });
 
@@ -73,7 +84,10 @@ describe("confirmUnsaved", () => {
   it("編集中に別の画面へ移るときは確認し、その答えに従う", async () => {
     useUnsavedGuard().setDirty(true);
     const feedback = useFeedbackStore();
-    feedback.confirm = vi.fn().mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+    feedback.confirm = vi
+      .fn()
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(true);
     expect(await runUnsaved(loc("/hymns"), loc("/books/add"))).toBe(false);
     expect(await runUnsaved(loc("/hymns"), loc("/books/add"))).toBe(true);
   });
