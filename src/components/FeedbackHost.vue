@@ -62,7 +62,7 @@ const color = computed(() => dialog.value.variant);
           <v-btn
             variant="text"
             class="text-medium-emphasis"
-            @click="feedback.answer(false)"
+            @click="feedback.cancel()"
           >
             {{ dialog.cancelLabel }}
           </v-btn>

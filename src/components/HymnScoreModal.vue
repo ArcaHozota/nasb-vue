@@ -44,9 +44,6 @@ const chord = ref<string>(EMPTY_STRING);
 const isOriginal = ref(false);
 const error = ref(EMPTY_STRING);
 const uploading = ref(false);
-// 同じ調の楽譜が既にある場合の上書き確認ダイアログ
-const confirmOpen = ref(false);
-const downloading = ref(false);
 
 const close = () => {
   if (uploading.value) return; // アップロード中は誤って閉じられないようにする
@@ -77,7 +74,7 @@ const onFilePick = (e: Event) => {
 };
 
 // overwrite=false: 同じ調に違う内容の楽譜があればサーバーが 409 を返す(上書きしない)
-// overwrite=true : 確認ダイアログで「上書きする」を選んだあとの再送
+// overwrite=true : 上書き確認で「OK」を選んだあとの再送
 const doUpload = async (overwrite: boolean) => {
   if (!file.value) return;
   const formData = new FormData();
@@ -86,6 +83,7 @@ const doUpload = async (overwrite: boolean) => {
   formData.append("isOriginal", String(isOriginal.value));
   formData.append("overwrite", String(overwrite));
   uploading.value = true;
+  let conflict = false;
   try {
     const { data } = await api.post(`/hymns/${props.hymnId}/score`, formData, {
       timeout: 66_000,
@@ -95,14 +93,28 @@ const doUpload = async (overwrite: boolean) => {
     emit("close");
   } catch (e: unknown) {
     if (axios.isAxiosError(e) && e.response?.status === 409) {
-      // この調の楽譜は登録済み: ファイル・調・オリジナルの入力はそのまま残して確認する
-      confirmOpen.value = true;
+      // この調の楽譜は登録済み: ファイル・調・オリジナルの入力はそのまま残して、下で確認する
+      conflict = true;
     } else {
       feedback.toast(extractErrorMessage(e, "通信エラーが発生しました。"));
     }
   } finally {
     uploading.value = false;
   }
+  if (conflict) await confirmOverwrite();
+};
+
+// 上書き確認(アプリ共通の確認ダイアログ。タイトル「通知」・青)。
+//   OK  : 上書きして再送する
+//   考え: 上書きせず、登録済みの楽譜をダウンロードして中身を確かめる(このモーダルは開いたまま)
+//   Esc : 何もしない
+const confirmOverwrite = async () => {
+  const ok = await feedback.confirm(
+    `${chordText()}の楽譜は登録済みです。上書きしますか？`,
+    "通知",
+    { variant: "secondary", cancelLabel: "考え", onCancel: downloadExisting },
+  );
+  if (ok) await doUpload(true);
 };
 
 const onUpload = async () => {
@@ -117,20 +129,12 @@ const onUpload = async () => {
   await doUpload(false);
 };
 
-const onOverwrite = async () => {
-  confirmOpen.value = false;
-  await doUpload(true);
-};
-
-// 登録済みの楽譜をダウンロードして中身を確認する(確認ダイアログは開いたまま)
-const onDownloadExisting = async () => {
-  downloading.value = true;
+// 登録済みの楽譜をダウンロードして中身を確認する
+const downloadExisting = async () => {
   try {
     await downloadScore(props.hymnId, chord.value);
   } catch (e: unknown) {
     feedback.toast(e instanceof Error ? e.message : "楽譜の取得に失敗しました");
-  } finally {
-    downloading.value = false;
   }
 };
 
@@ -245,38 +249,6 @@ const chordText = () =>
       </div>
     </v-card>
 
-    <!-- 上書き確認 -->
-    <v-dialog
-      v-model="confirmOpen"
-      :persistent="uploading"
-      max-width="384"
-      aria-labelledby="score-overwrite-title"
-    >
-      <v-card class="noto-sans pa-6" rounded="xl">
-        <h2
-          id="score-overwrite-title"
-          class="text-title-large font-weight-bold text-secondary"
-        >
-          {{ chordText() }}の楽譜は登録済みです
-        </h2>
-        <p class="text-body-medium text-medium-emphasis mt-2">
-          上書きしますか?
-        </p>
-        <div class="d-flex justify-end flex-wrap ga-2 mt-4">
-          <v-btn
-            variant="outlined"
-            color="secondary"
-            :loading="downloading"
-            @click="onDownloadExisting"
-          >
-            既存をダウンロード
-          </v-btn>
-          <v-btn color="secondary" variant="flat" @click="onOverwrite"
-            >上書きする</v-btn
-          >
-        </div>
-      </v-card>
-    </v-dialog>
   </v-dialog>
 </template>
 

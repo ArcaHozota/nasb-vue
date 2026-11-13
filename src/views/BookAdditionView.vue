@@ -245,7 +245,7 @@ const onStore = async () => {
         ? `${verseLabel.value} は既に登録されています。入力した内容で上書きして更新しますか？`
         : "既存の節かどうか確認できませんでした。既に登録されている場合は上書きされます。保存しますか？",
       "通知",
-      { variant: "secondary" },
+      { variant: "secondary", cancelLabel: "考え" },
     );
     if (!ok) return;
   }

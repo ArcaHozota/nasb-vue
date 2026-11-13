@@ -21,12 +21,16 @@ export type DialogState = {
   cancelLabel: string;
   confirmLabel: string;
   resolve: ((ok: boolean) => void) | null;
+  /** キャンセルのボタンを押したときだけ呼ぶ(Esc で閉じたときは呼ばない) */
+  onCancel: (() => void) | null;
 };
 
 export type ConfirmOptions = {
   variant?: DialogVariant;
   cancelLabel?: string;
   confirmLabel?: string;
+  /** キャンセルのボタンを押したときだけ行う処理(例: 楽譜の上書き確認の「考え」で既存の楽譜をダウンロード) */
+  onCancel?: () => void;
 };
 
 /** v-snackbar-queue の v-model にそのまま渡せる形 */
@@ -43,6 +47,7 @@ const DEFAULT_DIALOG: DialogState = {
   cancelLabel: "キャンセル",
   confirmLabel: "OK",
   resolve: null,
+  onCancel: null,
 };
 
 export const useFeedbackStore = defineStore("feedback", () => {
@@ -56,7 +61,7 @@ export const useFeedbackStore = defineStore("feedback", () => {
   };
 
   // 旧 Swal.fire の confirm 相当。await confirm('...') で true/false が返る。
-  // ボタンはアプリ全体で「キャンセル」「OK」に統一している(cancelLabel / confirmLabel は特別な場合だけ使う)。
+  // ボタンはアプリ全体で「キャンセル」「OK」に統一している。上書き確認だけは「考え」「OK」(cancelLabel)。
   const confirm = (
     text: string,
     title = "確認",
@@ -73,6 +78,7 @@ export const useFeedbackStore = defineStore("feedback", () => {
         cancelLabel: options.cancelLabel ?? "キャンセル",
         confirmLabel: options.confirmLabel ?? "OK",
         resolve,
+        onCancel: options.onCancel ?? null,
       };
     });
 
@@ -82,8 +88,16 @@ export const useFeedbackStore = defineStore("feedback", () => {
     if (!resolve) return;
     resolve(ok);
     // タイトルや本文は残したまま show だけ落とす(閉じるアニメーション中に文言が消えないように)
-    dialog.value = { ...dialog.value, show: false, resolve: null };
+    dialog.value = { ...dialog.value, show: false, resolve: null, onCancel: null };
   };
 
-  return { dialog, toasts, toast, confirm, answer };
+  /** キャンセルのボタン(Esc ではなく)を押したとき */
+  const cancel = () => {
+    if (!dialog.value.resolve) return;
+    const { onCancel } = dialog.value;
+    answer(false);
+    onCancel?.();
+  };
+
+  return { dialog, toasts, toast, confirm, answer, cancel };
 });
