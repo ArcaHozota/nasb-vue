@@ -56,6 +56,7 @@ const flatPath = (cx: number, cy: number) => {
 <template>
   <!-- 五線譜そのものがボタン。薄い罫線の面にする -->
   <button
+    v-ripple="!disabled"
     type="button"
     class="key-staff"
     :disabled="disabled"
@@ -134,7 +135,10 @@ const flatPath = (cx: number, cy: number) => {
 </template>
 
 <style scoped>
+/* v-ripple(Vuetify の波紋)が枠の外へはみ出さないよう relative + overflow:hidden にする */
 .key-staff {
+  position: relative;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   align-self: flex-start;

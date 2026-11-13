@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // 賛美歌の追加・編集モーダル(旧 components/HymnFormModal.tsx)。
 // 賛美歌一覧から v-if で開く。ルーティングやURLパラメータは使わず、一覧側の状態(pageSize 等)を props で受け取る。
-// Esc・背景クリック・×のどれで閉じようとしても close() を通り、入力中の内容があれば確認する。
+// Esc・背景クリック・「閉じる」のどれで閉じようとしても close() を通り、入力中の内容があれば確認する。
 import { computed, reactive, ref, watch } from "vue";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { storeToRefs } from "pinia";
@@ -249,225 +249,135 @@ const discard = () => {
 </script>
 
 <template>
+  <!-- Vuetify の一般的なフォームダイアログの形: タイトル / 入力欄 / 下のボタン(右寄せ) -->
   <v-dialog
     :model-value="true"
-    max-width="768"
+    max-width="640"
     scrollable
     aria-labelledby="hymn-form-title"
-    aria-describedby="hymn-form-desc"
     @update:model-value="(v) => !v && close()"
   >
-    <!-- モーダルでは暗い下地の上に載るので、半透明ではなく白ベタにする -->
-    <v-card class="form-card glass-panel hymn-form noto-sans" rounded="xl">
-      <div :class="['hymn-form__header', `bg-${color}`]">
-        <v-icon icon="mdi-view-grid-outline" size="20" class="mr-2" />
-        <h2 id="hymn-form-title" class="text-title-large">
+    <v-card
+      class="noto-sans"
+      :prepend-icon="isEdit ? 'mdi-notebook-edit-outline' : 'mdi-plus-circle-outline'"
+    >
+      <template #title>
+        <span id="hymn-form-title">
           {{ isEdit ? "賛美歌情報更新" : "賛美歌情報追加" }}
-        </h2>
-        <v-btn
-          icon="mdi-close"
-          variant="text"
-          size="small"
-          class="ml-auto"
-          :disabled="saving"
-          aria-label="閉じる"
-          @click="close"
-        />
-      </div>
-      <p id="hymn-form-desc" class="sr-only">
-        {{ isEdit ? "賛美歌情報を更新します" : "賛美歌情報を追加します" }}
-      </p>
+        </span>
+      </template>
+      <template v-if="isEdit" #subtitle>
+        最終更新者：{{ form.updatedUser }}＠{{ form.updatedTime }}日本標準時間
+      </template>
 
-      <v-card-text class="pa-6">
-        <!-- ===== 基本情報 ===== -->
-        <fieldset class="hymn-form__set">
-          <legend class="hymn-form__legend">基本情報</legend>
-          <v-row density="compact">
-            <v-col cols="12" sm="6">
-              <label for="hymn-name-jp" class="form-label">日本語名称</label>
-              <v-text-field
-                id="hymn-name-jp"
-                v-model="nameJp"
-                :disabled="saving"
-                placeholder="日本語名称を入力してください"
-                :error-messages="errors.nameJp || undefined"
-                :color="color"
-                variant="outlined"
-                density="compact"
-                bg-color="white"
-                @blur="checkNameJp"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <label for="hymn-name-kr" class="form-label">韓国語名称</label>
-              <v-text-field
-                id="hymn-name-kr"
-                v-model="nameKr"
-                :disabled="saving"
-                placeholder="韓国語名称を入力してください"
-                :error-messages="errors.nameKr || undefined"
-                :color="color"
-                variant="outlined"
-                density="compact"
-                bg-color="white"
-                @blur="checkNameKr"
-              />
-            </v-col>
-          </v-row>
-        </fieldset>
+      <v-divider />
 
-        <v-divider class="my-5" />
-
-        <!-- ===== リンク・分類 ===== -->
-        <fieldset class="hymn-form__set">
-          <legend class="hymn-form__legend">リンク・分類</legend>
-          <label for="hymn-link" class="form-label">リンク</label>
-          <v-text-field
-            id="hymn-link"
-            v-model="link"
-            :disabled="saving"
-            placeholder="リンクを入力してください"
-            :error-messages="errors.link || undefined"
-            :color="color"
-            variant="outlined"
-            density="compact"
-            bg-color="white"
-          />
-          <!-- ラベルとスイッチを同じ行に置く(personal の外部連携行と同じ見た目) -->
-          <div class="hymn-form__switch-row mt-2">
-            <label for="hymn-classic" class="form-label">クラシック</label>
+      <v-card-text>
+        <v-row density="compact">
+          <v-col cols="12" sm="6">
+            <v-text-field
+              id="hymn-name-jp"
+              v-model="nameJp"
+              label="日本語名称"
+              :disabled="saving"
+              :error-messages="errors.nameJp || undefined"
+              :color="color"
+              @blur="checkNameJp"
+            />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-text-field
+              id="hymn-name-kr"
+              v-model="nameKr"
+              label="韓国語名称"
+              :disabled="saving"
+              :error-messages="errors.nameKr || undefined"
+              :color="color"
+              @blur="checkNameKr"
+            />
+          </v-col>
+          <v-col cols="12">
+            <v-text-field
+              id="hymn-link"
+              v-model="link"
+              label="リンク"
+              :disabled="saving"
+              :error-messages="errors.link || undefined"
+              :color="color"
+            />
+          </v-col>
+          <v-col cols="12">
             <v-switch
               id="hymn-classic"
               v-model="classic"
+              label="クラシック"
               :disabled="saving"
               :color="color"
               inset
               hide-details
-              density="compact"
             />
-          </div>
-        </fieldset>
-
-        <v-divider class="my-5" />
-
-        <!-- ===== 歌詞 ===== -->
-        <fieldset class="hymn-form__set">
-          <legend class="hymn-form__legend">歌詞</legend>
-          <label for="hymn-lyric" class="sr-only">歌詞</label>
-          <v-textarea
-            id="hymn-lyric"
-            v-model="lyric"
-            rows="8"
-            no-resize
-            :disabled="saving"
-            placeholder="セリフを入力してください"
-            :error-messages="errors.lyric || undefined"
-            :color="color"
-            variant="outlined"
-            bg-color="white"
-          />
-        </fieldset>
+          </v-col>
+          <v-col cols="12">
+            <v-textarea
+              id="hymn-lyric"
+              v-model="lyric"
+              label="歌詞"
+              rows="8"
+              no-resize
+              :disabled="saving"
+              :error-messages="errors.lyric || undefined"
+              :color="color"
+            />
+          </v-col>
+        </v-row>
       </v-card-text>
 
-      <div class="hymn-form__footer">
-        <p v-if="isEdit" class="mr-auto text-body-small text-medium-emphasis">
-          最終更新者：{{ form.updatedUser }}＠{{ form.updatedTime }}日本標準時間
-        </p>
+      <v-divider />
+
+      <v-card-actions>
+        <v-btn variant="plain" :disabled="saving" @click="onReset">
+          {{ isEdit ? "廃棄" : "リセット" }}
+        </v-btn>
+        <v-spacer />
+        <v-btn variant="plain" :disabled="saving" @click="close">閉じる</v-btn>
         <v-btn
           :color="color"
-          variant="flat"
+          variant="tonal"
           :loading="saving"
-          :prepend-icon="
-            isEdit ? 'mdi-lightning-bolt' : 'mdi-archive-arrow-down-outline'
-          "
           @click="onSubmit"
         >
           {{ isEdit ? "更新" : "追加" }}
         </v-btn>
-        <v-btn
-          color="#6b7280"
-          variant="flat"
-          :disabled="saving"
-          :prepend-icon="isEdit ? 'mdi-trash-can-outline' : 'mdi-restore'"
-          @click="onReset"
-        >
-          {{ isEdit ? "廃棄" : "リセット" }}
-        </v-btn>
-      </div>
+      </v-card-actions>
     </v-card>
 
     <!-- 編集内容の破棄確認 -->
     <v-dialog
       v-model="discardOpen"
-      max-width="384"
+      max-width="400"
       aria-labelledby="hymn-discard-title"
     >
-      <v-card class="noto-sans pa-6" rounded="xl">
-        <h2
-          id="hymn-discard-title"
-          :class="['text-title-large font-weight-bold', `text-${color}`]"
-        >
-          編集内容があります
-        </h2>
-        <p class="text-body-medium text-medium-emphasis mt-2">
+      <v-card class="noto-sans">
+        <template #title>
+          <span id="hymn-discard-title">編集内容があります</span>
+        </template>
+        <v-card-text>
           {{
             isEdit
               ? "変更を破棄して閉じますか?"
               : "入力した内容を破棄して閉じますか?"
           }}
-        </p>
-        <div class="d-flex justify-end flex-wrap ga-2 mt-4">
-          <v-btn variant="outlined" @click="discardOpen = false"
-            >編集を続ける</v-btn
-          >
-          <v-btn :color="color" variant="flat" @click="discard"
-            >破棄して閉じる</v-btn
-          >
-        </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn variant="plain" @click="discardOpen = false">
+            編集を続ける
+          </v-btn>
+          <v-btn :color="color" variant="tonal" @click="discard">
+            破棄して閉じる
+          </v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
   </v-dialog>
 </template>
-
-<style scoped>
-.hymn-form {
-  background: #fff !important;
-}
-.hymn-form__header {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  color: #fff;
-}
-.hymn-form__set {
-  border: 0;
-  margin: 0;
-  padding: 0;
-  min-width: 0;
-}
-.hymn-form__legend {
-  margin-bottom: 12px;
-  font-size: 1rem;
-  font-weight: 700;
-}
-.hymn-form__switch-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 8px 16px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 8px;
-  background: #fff;
-}
-.hymn-form__footer {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 16px 24px;
-  border-top: 1px solid rgba(0, 0, 0, 0.12);
-  background: rgba(255, 255, 255, 0.6);
-}
-</style>

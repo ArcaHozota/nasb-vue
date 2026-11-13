@@ -32,19 +32,24 @@ const LINE_CLASS: Record<string, string> = {
     >
       {{ item.nameJp }} / {{ item.nameKr }}
     </a>
+    <!-- 歌詞・楽譜(𝄞)ボタンは Vuetify の v-btn(押すと波紋・ホバーで薄い背景) -->
     <div class="hymn-card__actions">
-      <button
-        type="button"
+      <v-btn
+        icon
+        variant="text"
+        size="large"
         class="hymn-card__btn"
         aria-label="歌詞"
         @click="emit('lyric', item)"
       >
         <v-icon icon="mdi-script-text-outline" aria-hidden="true" />
         <v-tooltip activator="parent" location="bottom" text="歌詞" />
-      </button>
-      <button
-        type="button"
-        class="hymn-card__btn"
+      </v-btn>
+      <v-btn
+        icon
+        variant="text"
+        size="large"
+        class="hymn-card__btn hymn-card__btn--clef"
         aria-label="楽譜ダウンロード"
         @click="emit('score', item.id)"
       >
@@ -54,7 +59,7 @@ const LINE_CLASS: Record<string, string> = {
           location="bottom"
           text="楽譜ダウンロード"
         />
-      </button>
+      </v-btn>
     </div>
   </article>
 
@@ -134,28 +139,17 @@ const LINE_CLASS: Record<string, string> = {
   gap: 14px;
   margin-top: 12px;
 }
-/* 歌詞・楽譜ボタン(𝄞 と歌詞アイコンを同じ大きさ・白・影に揃える) */
+/* 歌詞・楽譜ボタン(白・影。𝄞 は文字なので大きさをアイコンに揃える) */
 .hymn-card__btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 0;
-  border: 0;
-  background: none;
-  font-size: 2.2rem;
-  line-height: 1;
   color: #fff;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.66);
-  transition:
-    scale 0.15s,
-    opacity 0.15s;
 }
 .hymn-card__btn .v-icon {
-  font-size: 0.85em;
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.66));
 }
-.hymn-card__btn:hover {
-  scale: 1.2;
-  opacity: 0.85;
+.hymn-card__btn--clef {
+  font-size: 2.4rem;
+  line-height: 1;
 }
 .hymn-card__skeleton {
   background: transparent;

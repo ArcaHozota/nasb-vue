@@ -236,7 +236,7 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
         </div>
 
         <div class="hymn-list__table-wrap">
-          <v-table class="hymn-list__table" density="comfortable">
+          <v-table class="hymn-list__table" density="comfortable" hover>
             <colgroup>
               <col style="width: 12%" />
               <col style="width: 34%" />
@@ -272,10 +272,11 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
                   データがありません
                 </td>
               </tr>
-              <!-- 行をクリック(またはEnter)すると YouTube を新しいタブで開く -->
+              <!-- 行をクリック(またはEnter)すると YouTube を新しいタブで開く。押すと Vuetify の波紋(v-ripple)が出る -->
               <tr
                 v-for="(row, i) in records"
                 :key="row.id"
+                v-ripple="!!row.link"
                 :tabindex="row.link ? 0 : undefined"
                 :aria-label="
                   row.link ? `${row.nameJp}をYouTubeで開く` : undefined
@@ -309,8 +310,14 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
                     :class="hymnNameSizeClass(row.nameKr)"
                   />
                 </td>
-                <!-- 操作列のクリックは行(YouTube)へ伝えない -->
-                <td @click.stop @keydown.stop>
+                <!-- 操作列のクリックは行(YouTube)へ伝えない。押下も伝えず、行の波紋を出さない(ボタン自身の波紋だけ) -->
+                <td
+                  @click.stop
+                  @keydown.stop
+                  @mousedown.stop
+                  @pointerdown.stop
+                  @touchstart.stop
+                >
                   <div class="d-flex justify-center ga-1">
                     <Hint v-slot="{ props }" label="楽譜アップロード">
                       <v-btn
@@ -475,8 +482,10 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
   padding: 8px 12px !important;
   font-weight: 500;
 }
-.hymn-list__row:hover {
-  filter: brightness(0.97);
+/* v-ripple の波紋を行の中に収める */
+.hymn-list__row {
+  position: relative;
+  overflow: hidden;
 }
 .hymn-list__row.is-link {
   cursor: pointer;
