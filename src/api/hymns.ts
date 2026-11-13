@@ -9,7 +9,12 @@ import api from "@/api/axios";
  * 一致度。CADMIUM=よく一致 / BURGUNDY=一致 / NAPLES=やや一致 / SNOWY=関連(一致なし)。
  * サーバーが将来ほかの値を返しても壊れないよう string も受ける。
  */
-export type LineNumber = "CADMIUM" | "BURGUNDY" | "NAPLES" | "SNOWY" | (string & {});
+export type LineNumber =
+  | "CADMIUM"
+  | "BURGUNDY"
+  | "NAPLES"
+  | "SNOWY"
+  | (string & {});
 
 /** 一覧・検索・ランダム選択で返る1曲分 */
 export type HymnSummary = {

@@ -17,8 +17,7 @@ export const chordLabel = (chord: string) => chord.replace(/b$/, "♭");
 /** 調の一覧を新鮮とみなす時間。他の端末でのアップロードもこの時間内には反映される */
 const SCORE_KEYS_STALE_MS = 60 * 1000;
 
-const scoreKeysQueryKey = (id: string) =>
-  ["score-keys", String(id)] as const;
+const scoreKeysQueryKey = (id: string) => ["score-keys", String(id)] as const;
 
 /** 調の一覧のクエリ設定(useQuery・fetchQuery の両方で使う) */
 export const scoreKeysQueryOptions = (id: string) => ({
@@ -41,10 +40,8 @@ export const fetchScoreKeysCached = (
   id: string,
 ): Promise<ScoreKey[]> => queryClient.fetchQuery(scoreKeysQueryOptions(id));
 
-export const invalidateScoreKeys = (
-  queryClient: QueryClient,
-  id: string,
-) => queryClient.invalidateQueries({ queryKey: scoreKeysQueryKey(id) });
+export const invalidateScoreKeys = (queryClient: QueryClient, id: string) =>
+  queryClient.invalidateQueries({ queryKey: scoreKeysQueryKey(id) });
 
 /** 調の一覧を取得する。失敗したときはトーストを出して null を返す */
 export async function fetchScoreKeysOrToast(
@@ -54,7 +51,9 @@ export async function fetchScoreKeysOrToast(
   try {
     return await fetchScoreKeysCached(queryClient, id);
   } catch (e: unknown) {
-    useFeedbackStore().toast(extractErrorMessage(e, "楽譜の取得に失敗しました"));
+    useFeedbackStore().toast(
+      extractErrorMessage(e, "楽譜の取得に失敗しました"),
+    );
     return null;
   }
 }

@@ -28,7 +28,10 @@ const sig = computed(() => keySignature(props.chord));
 const isSharp = computed(() => sig.value?.accidental === "sharp");
 // 記号の中心を、その音の線(または間)の高さにぴったり合わせる
 const marks = computed(() =>
-  accidentalSteps(sig.value).map((s, i) => ({ cx: 48 + i * 11, cy: TOP_LINE_Y + s * STEP })),
+  accidentalSteps(sig.value).map((s, i) => ({
+    cx: 48 + i * 11,
+    cy: TOP_LINE_Y + s * STEP,
+  })),
 );
 const disabled = computed(() => props.state !== "ready");
 
@@ -38,7 +41,9 @@ const title = computed(() => {
   return `${sig.value.nameJa}（${sig.value.label}）${props.isOriginal ? "・オリジナルキー" : ""}`;
 });
 const ariaLabel = computed(() =>
-  sig.value && props.state === "ready" ? `${sig.value.nameJa}の楽譜をダウンロード` : title.value,
+  sig.value && props.state === "ready"
+    ? `${sig.value.nameJa}の楽譜をダウンロード`
+    : title.value,
 );
 
 /** ♭: 縦棒の下端の丸み(ふくらみ)の中心が cy に来る */
@@ -62,17 +67,51 @@ const flatPath = (cx: number, cy: number) => {
         <line v-for="y in LINES" :key="y" x1="0" :y1="y" x2="300" :y2="y" />
         <line x1="299" :y1="LINES[0]" x2="299" :y2="LINES[4]" />
       </g>
-      <path :d="TREBLE_CLEF_PATH" :transform="CLEF_TRANSFORM" fill="currentColor" />
+      <path
+        :d="TREBLE_CLEF_PATH"
+        :transform="CLEF_TRANSFORM"
+        fill="currentColor"
+      />
       <!-- ♯・♭はフォントの字形ではなく線で描く(OS・フォントによって位置がずれないように) -->
       <template v-for="(m, i) in marks" :key="i">
         <g v-if="isSharp" stroke="currentColor" stroke-linecap="butt">
-          <line :x1="m.cx - 2" :y1="m.cy - 7" :x2="m.cx - 2" :y2="m.cy + 9" stroke-width="1.2" />
-          <line :x1="m.cx + 2" :y1="m.cy - 9" :x2="m.cx + 2" :y2="m.cy + 7" stroke-width="1.2" />
-          <line :x1="m.cx - 4.5" :y1="m.cy - 1.5" :x2="m.cx + 4.5" :y2="m.cy - 4" stroke-width="2.2" />
-          <line :x1="m.cx - 4.5" :y1="m.cy + 4" :x2="m.cx + 4.5" :y2="m.cy + 1.5" stroke-width="2.2" />
+          <line
+            :x1="m.cx - 2"
+            :y1="m.cy - 7"
+            :x2="m.cx - 2"
+            :y2="m.cy + 9"
+            stroke-width="1.2"
+          />
+          <line
+            :x1="m.cx + 2"
+            :y1="m.cy - 9"
+            :x2="m.cx + 2"
+            :y2="m.cy + 7"
+            stroke-width="1.2"
+          />
+          <line
+            :x1="m.cx - 4.5"
+            :y1="m.cy - 1.5"
+            :x2="m.cx + 4.5"
+            :y2="m.cy - 4"
+            stroke-width="2.2"
+          />
+          <line
+            :x1="m.cx - 4.5"
+            :y1="m.cy + 4"
+            :x2="m.cx + 4.5"
+            :y2="m.cy + 1.5"
+            stroke-width="2.2"
+          />
         </g>
         <g v-else stroke="currentColor" fill="none">
-          <line :x1="m.cx - 3" :y1="m.cy - 12" :x2="m.cx - 3" :y2="m.cy + 4" stroke-width="1.3" />
+          <line
+            :x1="m.cx - 3"
+            :y1="m.cy - 12"
+            :x2="m.cx - 3"
+            :y2="m.cy + 4"
+            stroke-width="1.3"
+          />
           <path :d="flatPath(m.cx, m.cy)" stroke-width="1.8" />
         </g>
       </template>
@@ -83,8 +122,12 @@ const flatPath = (cx: number, cy: number) => {
         楽譜をダウンロード
         <v-icon icon="mdi-download" size="14" aria-hidden="true" />
       </span>
-      <span v-else-if="state === 'downloading'" class="key-staff__hint book-sans">
-        <v-progress-circular indeterminate size="14" width="2" /> ダウンロードしています…
+      <span
+        v-else-if="state === 'downloading'"
+        class="key-staff__hint book-sans"
+      >
+        <v-progress-circular indeterminate size="14" width="2" />
+        ダウンロードしています…
       </span>
     </span>
   </button>
@@ -104,7 +147,9 @@ const flatPath = (cx: number, cy: number) => {
   font-size: 1rem;
   line-height: 1.5;
   text-align: left;
-  transition: background-color 0.15s, border-color 0.15s;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
 }
 .key-staff:not(:disabled):hover {
   border-color: #c9b48d;

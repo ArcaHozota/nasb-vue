@@ -27,7 +27,10 @@ onMounted(() => {
 });
 onBeforeUnmount(() => observer?.disconnect());
 // 文字が変わったら(ページ送りで行が使い回された時など)測り直す
-watch(() => props.text, () => requestAnimationFrame(measure));
+watch(
+  () => props.text,
+  () => requestAnimationFrame(measure),
+);
 </script>
 
 <template>

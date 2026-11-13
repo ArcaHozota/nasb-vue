@@ -47,8 +47,7 @@ export function splitByTerms(text: string, terms: string[]): TextPart[] {
 export const countHits = (text: string, terms: string[]) =>
   splitByTerms(text, terms).filter((p) => p.hit).length;
 
-const lyricQueryKey = (id: string) =>
-  ["lyric", String(id)] as const;
+const lyricQueryKey = (id: string) => ["lyric", String(id)] as const;
 
 /** 歌詞(GET /hymns/{id}/lyric、未ログインでも可)。歌詞はめったに変わらないので5分キャッシュする */
 export const lyricQueryOptions = (id: string) => ({
@@ -62,7 +61,5 @@ export const lyricQueryOptions = (id: string) => ({
   staleTime: 5 * 60 * 1000,
 });
 
-export const invalidateLyric = (
-  queryClient: QueryClient,
-  id: string,
-) => queryClient.invalidateQueries({ queryKey: lyricQueryKey(id) });
+export const invalidateLyric = (queryClient: QueryClient, id: string) =>
+  queryClient.invalidateQueries({ queryKey: lyricQueryKey(id) });

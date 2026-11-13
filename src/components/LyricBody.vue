@@ -8,9 +8,13 @@ import { extractErrorMessage } from "@/lib/constants";
 
 const props = defineProps<{ id: string; terms: string[] }>();
 
-const { data, isPending, error } = useQuery(computed(() => lyricQueryOptions(props.id)));
+const { data, isPending, error } = useQuery(
+  computed(() => lyricQueryOptions(props.id)),
+);
 
-const hits = computed(() => (data.value ? countHits(data.value, props.terms) : 0));
+const hits = computed(() =>
+  data.value ? countHits(data.value, props.terms) : 0,
+);
 const termsLabel = computed(() => props.terms.join("・"));
 </script>
 
@@ -21,9 +25,15 @@ const termsLabel = computed(() => props.terms.join("・"));
   <p v-else-if="error" class="py-6 text-center">
     {{ extractErrorMessage(error, "歌詞の取得に失敗しました") }}
   </p>
-  <p v-else-if="!data" class="py-6 text-center lyric-body__muted">歌詞が登録されていません。</p>
+  <p v-else-if="!data" class="py-6 text-center lyric-body__muted">
+    歌詞が登録されていません。
+  </p>
   <template v-else>
-    <p v-if="terms.length > 0" class="text-body-small lyric-body__muted" aria-live="polite">
+    <p
+      v-if="terms.length > 0"
+      class="text-body-small lyric-body__muted"
+      aria-live="polite"
+    >
       {{
         hits > 0
           ? `「${termsLabel}」に一致: ${hits}箇所`

@@ -33,7 +33,9 @@ export const keyLabel = (chord: string) =>
   chord.length > 1 && chord.endsWith("b") ? `${chord.slice(0, -1)}♭` : chord;
 
 /** 調の情報。未知の調は null */
-export function keySignature(chord: string | null | undefined): KeySignature | null {
+export function keySignature(
+  chord: string | null | undefined,
+): KeySignature | null {
   if (!chord) return null;
   const sig = SIGNATURES[chord];
   return sig ? { ...sig, label: keyLabel(chord) } : null;

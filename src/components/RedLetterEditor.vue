@@ -39,7 +39,8 @@ watch(model, (value) => {
   if (container.value) renderSegments(container.value, parseToSegments(value));
 });
 onMounted(() => {
-  if (container.value) renderSegments(container.value, parseToSegments(model.value));
+  if (container.value)
+    renderSegments(container.value, parseToSegments(model.value));
 });
 
 const reconcile = () => {
@@ -82,7 +83,9 @@ const wrapSelection = () => {
   const startSpan = findRedLetterAncestor(range.startContainer, el);
   const endSpan = findRedLetterAncestor(range.endContainer, el);
   if (startSpan && startSpan === endSpan) {
-    const textNode = document.createTextNode(startSpan.textContent ?? EMPTY_STRING);
+    const textNode = document.createTextNode(
+      startSpan.textContent ?? EMPTY_STRING,
+    );
     startSpan.parentNode?.replaceChild(textNode, startSpan);
     const newRange = document.createRange();
     newRange.setStart(textNode, textNode.length);
@@ -122,7 +125,10 @@ defineExpose({ wrapSelection });
     />
     <p
       v-if="helperText"
-      :class="['text-body-small mt-1', error ? 'text-error' : 'text-medium-emphasis']"
+      :class="[
+        'text-body-small mt-1',
+        error ? 'text-error' : 'text-medium-emphasis',
+      ]"
     >
       {{ helperText }}
     </p>

@@ -22,11 +22,13 @@ const model = defineModel<number | string>({ required: true });
 // (旧 Command は空の検索欄から始まっていた。後ろに足されると「該当なし」になるため)
 const selectAllOnFocus = (e: FocusEvent) => {
   const input = e.target;
-  if (input instanceof HTMLInputElement) requestAnimationFrame(() => input.select());
+  if (input instanceof HTMLInputElement)
+    requestAnimationFrame(() => input.select());
 };
 
 const stopWhileComposing = (e: KeyboardEvent) => {
-  if (e.key === "Enter" && (e.isComposing || e.keyCode === 229)) e.stopPropagation();
+  if (e.key === "Enter" && (e.isComposing || e.keyCode === 229))
+    e.stopPropagation();
 };
 </script>
 

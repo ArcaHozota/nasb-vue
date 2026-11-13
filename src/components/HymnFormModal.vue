@@ -127,13 +127,19 @@ const checkDuplicate = async (
   errors[key] = EMPTY_STRING;
   if (!name) return;
   try {
-    await api.get(url, { params: { id: form.value.id ?? EMPTY_STRING, [key]: name } });
+    await api.get(url, {
+      params: { id: form.value.id ?? EMPTY_STRING, [key]: name },
+    });
   } catch (e) {
     errors[key] = extractErrorMessage(e, "この名称は既に使われています。");
   }
 };
 const checkNameJp = () =>
-  checkDuplicate("nameJp", "/hymns/duplicate-check-jp", form.value.nameJp.trim());
+  checkDuplicate(
+    "nameJp",
+    "/hymns/duplicate-check-jp",
+    form.value.nameJp.trim(),
+  );
 const checkNameKr = () =>
   checkDuplicate(
     "nameKr",
@@ -163,7 +169,10 @@ const saveMutation = useMutation({
       params: { pageSize: props.pageSize || 5 },
     });
     // axios はヘッダー名を小文字化して格納する
-    return { mode: "add" as const, pageNum: Number(headers["x-page-num"]) || 1 };
+    return {
+      mode: "add" as const,
+      pageNum: Number(headers["x-page-num"]) || 1,
+    };
   },
   onSuccess: (result, f) => {
     // 一覧・ホーム・画面検索の索引・この曲の編集用データのキャッシュを捨てる
@@ -171,7 +180,9 @@ const saveMutation = useMutation({
     if (result.mode === "edit") {
       // ホーム画面の歌詞キャッシュ(5分)に古い歌詞が残らないよう、この曲の分を捨てる
       if (f.id) void invalidateLyric(queryClient, f.id);
-      feedback.toast(typeof result.message === "string" ? result.message : "更新しました");
+      feedback.toast(
+        typeof result.message === "string" ? result.message : "更新しました",
+      );
       emit("saved", { mode: "edit" });
     } else {
       feedback.toast("追加済み");
@@ -195,7 +206,9 @@ const onSubmit = () => {
     return;
   }
   if (!userId.value) {
-    feedback.toast("ログイン情報の取得に失敗しました。再度ログインしてください。");
+    feedback.toast(
+      "ログイン情報の取得に失敗しました。再度ログインしてください。",
+    );
     return;
   }
   saveMutation.mutate(f);
@@ -364,7 +377,9 @@ const discard = () => {
           :color="color"
           variant="flat"
           :loading="saving"
-          :prepend-icon="isEdit ? 'mdi-lightning-bolt' : 'mdi-archive-arrow-down-outline'"
+          :prepend-icon="
+            isEdit ? 'mdi-lightning-bolt' : 'mdi-archive-arrow-down-outline'
+          "
           @click="onSubmit"
         >
           {{ isEdit ? "更新" : "追加" }}
@@ -382,17 +397,32 @@ const discard = () => {
     </v-card>
 
     <!-- 編集内容の破棄確認 -->
-    <v-dialog v-model="discardOpen" max-width="384" aria-labelledby="hymn-discard-title">
+    <v-dialog
+      v-model="discardOpen"
+      max-width="384"
+      aria-labelledby="hymn-discard-title"
+    >
       <v-card class="noto-sans pa-6" rounded="xl">
-        <h2 id="hymn-discard-title" :class="['text-title-large font-weight-bold', `text-${color}`]">
+        <h2
+          id="hymn-discard-title"
+          :class="['text-title-large font-weight-bold', `text-${color}`]"
+        >
           編集内容があります
         </h2>
         <p class="text-body-medium text-medium-emphasis mt-2">
-          {{ isEdit ? "変更を破棄して閉じますか?" : "入力した内容を破棄して閉じますか?" }}
+          {{
+            isEdit
+              ? "変更を破棄して閉じますか?"
+              : "入力した内容を破棄して閉じますか?"
+          }}
         </p>
         <div class="d-flex justify-end flex-wrap ga-2 mt-4">
-          <v-btn variant="outlined" @click="discardOpen = false">編集を続ける</v-btn>
-          <v-btn :color="color" variant="flat" @click="discard">破棄して閉じる</v-btn>
+          <v-btn variant="outlined" @click="discardOpen = false"
+            >編集を続ける</v-btn
+          >
+          <v-btn :color="color" variant="flat" @click="discard"
+            >破棄して閉じる</v-btn
+          >
         </div>
       </v-card>
     </v-dialog>

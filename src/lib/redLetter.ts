@@ -114,4 +114,3 @@ export function findRedLetterAncestor(
   }
   return null;
 }
-

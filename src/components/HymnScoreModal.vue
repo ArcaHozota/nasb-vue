@@ -134,7 +134,8 @@ const onDownloadExisting = async () => {
   }
 };
 
-const chordText = () => MAJOR_KEYS.find((k) => k.value === chord.value)?.label ?? chord.value;
+const chordText = () =>
+  MAJOR_KEYS.find((k) => k.value === chord.value)?.label ?? chord.value;
 </script>
 
 <template>
@@ -149,7 +150,10 @@ const chordText = () => MAJOR_KEYS.find((k) => k.value === chord.value)?.label ?
       <div class="pt-3">
         <div class="score-modal__head">
           <div aria-hidden="true" />
-          <h2 id="score-modal-title" class="text-center text-title-medium font-weight-bold text-secondary">
+          <h2
+            id="score-modal-title"
+            class="text-center text-title-medium font-weight-bold text-secondary"
+          >
             楽譜-{{ hymnNameKr }}
           </h2>
           <v-btn
@@ -209,7 +213,9 @@ const chordText = () => MAJOR_KEYS.find((k) => k.value === chord.value)?.label ?
             ファイルを選択
           </v-btn>
           <div class="d-flex flex-column align-center mx-3">
-            <label for="score-original" class="text-body-small text-secondary">オリジナル</label>
+            <label for="score-original" class="text-body-small text-secondary"
+              >オリジナル</label
+            >
             <v-switch
               id="score-original"
               v-model="isOriginal"
@@ -228,7 +234,12 @@ const chordText = () => MAJOR_KEYS.find((k) => k.value === chord.value)?.label ?
       </div>
 
       <div class="d-flex justify-end px-6 pb-4">
-        <v-btn color="secondary" variant="flat" :loading="uploading" @click="onUpload">
+        <v-btn
+          color="secondary"
+          variant="flat"
+          :loading="uploading"
+          @click="onUpload"
+        >
           アップロード
         </v-btn>
       </div>
@@ -242,10 +253,15 @@ const chordText = () => MAJOR_KEYS.find((k) => k.value === chord.value)?.label ?
       aria-labelledby="score-overwrite-title"
     >
       <v-card class="noto-sans pa-6" rounded="xl">
-        <h2 id="score-overwrite-title" class="text-title-large font-weight-bold text-secondary">
+        <h2
+          id="score-overwrite-title"
+          class="text-title-large font-weight-bold text-secondary"
+        >
           {{ chordText() }}の楽譜は登録済みです
         </h2>
-        <p class="text-body-medium text-medium-emphasis mt-2">上書きしますか?</p>
+        <p class="text-body-medium text-medium-emphasis mt-2">
+          上書きしますか?
+        </p>
         <div class="d-flex justify-end flex-wrap ga-2 mt-4">
           <v-btn
             variant="outlined"
@@ -255,7 +271,9 @@ const chordText = () => MAJOR_KEYS.find((k) => k.value === chord.value)?.label ?
           >
             既存をダウンロード
           </v-btn>
-          <v-btn color="secondary" variant="flat" @click="onOverwrite">上書きする</v-btn>
+          <v-btn color="secondary" variant="flat" @click="onOverwrite"
+            >上書きする</v-btn
+          >
         </div>
       </v-card>
     </v-dialog>

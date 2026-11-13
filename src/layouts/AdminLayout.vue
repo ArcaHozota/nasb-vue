@@ -136,9 +136,7 @@ const hasActive = computed(() => navItems.value.some((i) => i.isActive));
 
 /** 区切り線は「非アクティブ同士が隣り合う境界」だけに出す(アクティブなタブとは接しない) */
 const showDivider = (idx: number) =>
-  idx > 0 &&
-  !navItems.value[idx].isActive &&
-  !navItems.value[idx - 1].isActive;
+  idx > 0 && !navItems.value[idx].isActive && !navItems.value[idx - 1].isActive;
 
 const onNav = (item: NavItem) => {
   item.action();
@@ -192,10 +190,19 @@ const onSearch = () => {
         class="admin-brand"
         :class="{ 'admin-brand--rail': isRail }"
         aria-label="メインメニューへ"
-        @click="go('/mainmenu'); closeOnMobile()"
+        @click="
+          go('/mainmenu');
+          closeOnMobile();
+        "
       >
-        <img src="/assets/jerusalem-cross2.svg" alt="" class="admin-brand__logo" />
-        <span v-if="!isRail" class="effect-shine admin-brand__title">NASB1995</span>
+        <img
+          src="/assets/jerusalem-cross2.svg"
+          alt=""
+          class="admin-brand__logo"
+        />
+        <span v-if="!isRail" class="effect-shine admin-brand__title"
+          >NASB1995</span
+        >
       </button>
     </template>
 
@@ -220,7 +227,9 @@ const onSearch = () => {
             @click="onNav(item)"
           >
             <v-icon :icon="item.icon" :size="isRail ? 16 : 20" />
-            <span v-if="!isRail" class="admin-nav__label">{{ item.title }}</span>
+            <span v-if="!isRail" class="admin-nav__label">{{
+              item.title
+            }}</span>
             <v-tooltip
               activator="parent"
               location="end"
@@ -244,7 +253,11 @@ const onSearch = () => {
               class="admin-user__btn"
               :class="{ 'admin-user__btn--rail': isRail }"
             >
-              <v-avatar :size="isRail ? 32 : 30" color="rgba(255,255,255,0.2)" class="text-body-small">
+              <v-avatar
+                :size="isRail ? 32 : 30"
+                color="rgba(255,255,255,0.2)"
+                class="text-body-small"
+              >
                 {{ username.slice(0, 1) }}
               </v-avatar>
               <template v-if="!isRail">
@@ -261,7 +274,10 @@ const onSearch = () => {
             <v-list-item
               prepend-icon="mdi-account-cog"
               title="個人スペース"
-              @click="go('/personal'); closeOnMobile()"
+              @click="
+                go('/personal');
+                closeOnMobile();
+              "
             />
             <v-list-item
               prepend-icon="mdi-message-outline"

@@ -33,14 +33,23 @@ const open = computed({
 </script>
 
 <template>
-  <v-bottom-sheet v-if="variant === 'sheet'" v-model="open" aria-labelledby="lyric-viewer-title">
+  <v-bottom-sheet
+    v-if="variant === 'sheet'"
+    v-model="open"
+    aria-labelledby="lyric-viewer-title"
+  >
     <div :class="['lyric-viewer lyric-viewer--sheet', contentClass]">
       <template v-if="target">
         <div class="px-4 pt-4">
-          <h2 id="lyric-viewer-title" class="noto-serif text-title-medium font-weight-bold">
+          <h2
+            id="lyric-viewer-title"
+            class="noto-serif text-title-medium font-weight-bold"
+          >
             {{ target.nameJp }}
           </h2>
-          <p class="noto-serif text-body-medium lyric-viewer__sub">{{ target.nameKr }}</p>
+          <p class="noto-serif text-body-medium lyric-viewer__sub">
+            {{ target.nameKr }}
+          </p>
         </div>
         <div class="lyric-viewer__scroll d-flex flex-column ga-2 px-4">
           <LyricBody :id="target.id" :terms="terms" />
@@ -49,14 +58,24 @@ const open = computed({
     </div>
   </v-bottom-sheet>
 
-  <v-dialog v-else v-model="open" max-width="576" aria-labelledby="lyric-viewer-title">
+  <v-dialog
+    v-else
+    v-model="open"
+    max-width="576"
+    aria-labelledby="lyric-viewer-title"
+  >
     <div :class="['lyric-viewer lyric-viewer--dialog', contentClass]">
       <template v-if="target">
         <div>
-          <h2 id="lyric-viewer-title" class="noto-serif text-title-large font-weight-bold">
+          <h2
+            id="lyric-viewer-title"
+            class="noto-serif text-title-large font-weight-bold"
+          >
             {{ target.nameJp }}
           </h2>
-          <p class="noto-serif text-body-medium lyric-viewer__sub">{{ target.nameKr }}</p>
+          <p class="noto-serif text-body-medium lyric-viewer__sub">
+            {{ target.nameKr }}
+          </p>
         </div>
         <div class="lyric-viewer__scroll d-flex flex-column ga-2 pr-3">
           <LyricBody :id="target.id" :terms="terms" />

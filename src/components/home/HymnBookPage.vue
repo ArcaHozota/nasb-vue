@@ -29,7 +29,8 @@ const keys = computed(() => keysQuery.data.value ?? []);
 const picked = ref<string | null>(null);
 const chord = computed(() => {
   const list = keys.value;
-  if (picked.value && list.some((k) => k.chord === picked.value)) return picked.value;
+  if (picked.value && list.some((k) => k.chord === picked.value))
+    return picked.value;
   return list.find((k) => k.isOriginal)?.chord ?? list[0]?.chord ?? null;
 });
 const isOriginal = computed(
@@ -57,7 +58,9 @@ const staffState = computed(() =>
         : "ready",
 );
 
-const match = computed(() => (props.terms.length > 0 ? matchOf(props.hymn.lineNumber) : null));
+const match = computed(() =>
+  props.terms.length > 0 ? matchOf(props.hymn.lineNumber) : null,
+);
 const lyric = computed(() => lyricQuery.data.value ?? "");
 const hits = computed(() => countHits(lyric.value, props.terms));
 const termsLabel = computed(() => props.terms.join("・"));
@@ -69,31 +72,52 @@ const onPick = (v: unknown) => {
 </script>
 
 <template>
-  <article class="book-page book-page--right" :aria-label="`${hymn.nameJp}の詳細`">
+  <article
+    class="book-page book-page--right"
+    :aria-label="`${hymn.nameJp}の詳細`"
+  >
     <div class="d-flex align-start justify-space-between ga-4">
       <div style="min-width: 0">
         <span v-if="match" :class="['hymn-page__match', match.tone]">
           {{ match.mark }} {{ match.label }}
         </span>
         <h1 class="hymn-page__title">
-          <span class="hymn-page__no">{{ no }}</span>　{{ hymn.nameJp }}
+          <span class="hymn-page__no">{{ no }}</span
+          >　{{ hymn.nameJp }}
         </h1>
         <p class="noto-serif-kr hymn-page__kr">{{ hymn.nameKr }}</p>
       </div>
-      <a :href="hymn.link" target="_blank" rel="noopener noreferrer" class="book-sans hymn-page__yt">
+      <a
+        :href="hymn.link"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="book-sans hymn-page__yt"
+      >
         <v-icon icon="mdi-youtube" size="16" aria-hidden="true" />
         YouTubeで聴く
       </a>
     </div>
 
     <!-- 五線譜: 選んだ調の調号を描き、押すとその調の楽譜をダウンロードする -->
-    <KeyStaff :chord="chord" :is-original="isOriginal" :state="staffState" @download="onDownload" />
+    <KeyStaff
+      :chord="chord"
+      :is-original="isOriginal"
+      :state="staffState"
+      @download="onDownload"
+    />
 
     <!-- 調を選ぶと上の五線譜の調号が変わる -->
     <div class="book-sans hymn-page__keys">
       <span>調を選ぶ</span>
       <template v-if="keysQuery.isPending.value">
-        <v-skeleton-loader v-for="i in 3" :key="i" type="chip" width="44" height="30" class="bg-transparent" />
+        <v-skeleton-loader
+          v-for="i in 3"
+          :key="i"
+          type="chip"
+          width="44"
+          height="30"
+          class="bg-transparent"
+        />
       </template>
       <v-btn-toggle
         v-if="keys.length > 0"
@@ -102,18 +126,31 @@ const onPick = (v: unknown) => {
         class="hymn-page__toggle"
         @update:model-value="onPick"
       >
-        <v-btn v-for="k in keys" :key="k.chord" :value="k.chord" class="hymn-page__key">
+        <v-btn
+          v-for="k in keys"
+          :key="k.chord"
+          :value="k.chord"
+          class="hymn-page__key"
+        >
           {{ keyLabel(k.chord) }}{{ k.isOriginal ? "＊" : "" }}
         </v-btn>
       </v-btn-toggle>
-      <span v-if="keys.some((k) => k.isOriginal)" class="text-body-small">＊オリジナルキー</span>
+      <span v-if="keys.some((k) => k.isOriginal)" class="text-body-small"
+        >＊オリジナルキー</span
+      >
       <span v-if="keysQuery.error.value" class="text-body-small hymn-page__err">
-        {{ extractErrorMessage(keysQuery.error.value, "楽譜の確認に失敗しました") }}
+        {{
+          extractErrorMessage(keysQuery.error.value, "楽譜の確認に失敗しました")
+        }}
       </span>
     </div>
 
     <div class="hymn-page__lyric-wrap">
-      <p v-if="terms.length > 0 && lyricQuery.isSuccess.value" class="book-sans hymn-page__hits" aria-live="polite">
+      <p
+        v-if="terms.length > 0 && lyricQuery.isSuccess.value"
+        class="book-sans hymn-page__hits"
+        aria-live="polite"
+      >
         {{
           hits > 0
             ? `「${termsLabel}」に一致: ${hits}箇所`
@@ -122,15 +159,38 @@ const onPick = (v: unknown) => {
       </p>
       <div class="hymn-page__lyric-scroll">
         <div class="book-lyric pr-2">
-          <div v-if="lyricQuery.isPending.value" class="d-flex justify-center py-10">
-            <v-progress-circular indeterminate size="24" width="2" color="primary" />
+          <div
+            v-if="lyricQuery.isPending.value"
+            class="d-flex justify-center py-10"
+          >
+            <v-progress-circular
+              indeterminate
+              size="24"
+              width="2"
+              color="primary"
+            />
           </div>
-          <p v-if="lyricQuery.error.value" class="book-sans py-6 text-body-medium">
-            {{ extractErrorMessage(lyricQuery.error.value, "歌詞の取得に失敗しました") }}
+          <p
+            v-if="lyricQuery.error.value"
+            class="book-sans py-6 text-body-medium"
+          >
+            {{
+              extractErrorMessage(
+                lyricQuery.error.value,
+                "歌詞の取得に失敗しました",
+              )
+            }}
           </p>
           <template v-if="lyricQuery.isSuccess.value">
-            <Highlighted v-if="lyric" :text="lyric" :terms="terms" mark-class="book-mark" />
-            <p v-else class="book-sans py-6 text-body-medium hymn-page__muted">歌詞が登録されていません。</p>
+            <Highlighted
+              v-if="lyric"
+              :text="lyric"
+              :terms="terms"
+              mark-class="book-mark"
+            />
+            <p v-else class="book-sans py-6 text-body-medium hymn-page__muted">
+              歌詞が登録されていません。
+            </p>
           </template>
         </div>
       </div>
@@ -169,7 +229,9 @@ const onPick = (v: unknown) => {
   font-size: 13px;
   color: #800020;
   text-decoration: none;
-  transition: background-color 0.15s, color 0.15s;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
 }
 .hymn-page__yt:hover {
   background: #800020;

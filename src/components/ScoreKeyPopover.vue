@@ -46,12 +46,15 @@ const loading = ref(false);
 const anchorEl = ref<Element | null>(null);
 
 const anchorRef = (el: Element | ComponentPublicInstance | null) => {
-  anchorEl.value = el && "$el" in el ? (el.$el as Element) : (el as Element | null);
+  anchorEl.value =
+    el && "$el" in el ? (el.$el as Element) : (el as Element | null);
 };
 
 const location = computed(
   () =>
-    ({ right: "end", left: "start", top: "top", bottom: "bottom" } as const)[props.side],
+    (({ right: "end", left: "start", top: "top", bottom: "bottom" }) as const)[
+      props.side
+    ],
 );
 
 const onClick = async (e: MouseEvent) => {
@@ -79,7 +82,12 @@ const onSelect = (chord: string) => {
 </script>
 
 <template>
-  <slot :on-click="onClick" :loading="loading" :open="open" :anchor-ref="anchorRef" />
+  <slot
+    :on-click="onClick"
+    :loading="loading"
+    :open="open"
+    :anchor-ref="anchorRef"
+  />
   <v-menu
     v-model="open"
     :activator="anchorEl ?? undefined"

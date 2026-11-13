@@ -14,7 +14,9 @@ const parts = computed(() => splitByTerms(props.text, props.terms));
 
 <template>
   <template v-for="(part, i) in parts" :key="i">
-    <mark v-if="part.hit" :class="['lyric-mark', markClass]">{{ part.text }}</mark>
+    <mark v-if="part.hit" :class="['lyric-mark', markClass]">{{
+      part.text
+    }}</mark>
     <span v-else>{{ part.text }}</span>
   </template>
 </template>

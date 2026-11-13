@@ -32,7 +32,20 @@ describe("keySignature", () => {
   });
 
   it("12長調すべてに調号がある", () => {
-    for (const k of ["A", "Ab", "B", "Bb", "C", "D", "Db", "E", "Eb", "F", "G", "Gb"]) {
+    for (const k of [
+      "A",
+      "Ab",
+      "B",
+      "Bb",
+      "C",
+      "D",
+      "Db",
+      "E",
+      "Eb",
+      "F",
+      "G",
+      "Gb",
+    ]) {
       expect(keySignature(k), k).not.toBeNull();
     }
   });

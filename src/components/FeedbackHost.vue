@@ -34,18 +34,28 @@ const color = computed(() =>
     aria-labelledby="feedback-dialog-title"
     aria-describedby="feedback-dialog-text"
   >
-    <v-card class="noto-sans" rounded="lg" @keydown.esc.stop="feedback.answer(false)">
+    <v-card
+      class="noto-sans"
+      rounded="lg"
+      @keydown.esc.stop="feedback.answer(false)"
+    >
       <div class="pt-3">
         <div
           id="feedback-dialog-title"
-          :class="['text-center text-title-large font-weight-bold', `text-${color}`]"
+          :class="[
+            'text-center text-title-large font-weight-bold',
+            `text-${color}`,
+          ]"
         >
           {{ dialog.title }}
         </div>
         <div :class="['feedback-dialog-bar mx-2 mt-2', `bg-${color}`]" />
       </div>
       <div class="pa-6">
-        <p id="feedback-dialog-text" class="text-body-medium text-medium-emphasis">
+        <p
+          id="feedback-dialog-text"
+          class="text-body-medium text-medium-emphasis"
+        >
           {{ dialog.text }}
         </p>
         <div class="d-flex justify-end ga-2 mt-6">

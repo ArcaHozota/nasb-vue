@@ -61,7 +61,9 @@ describe("usePlaylistCreation", () => {
 
   it("409(未連携)なら、確認のうえ個人設定へ移動する", async () => {
     answerConfirm(true);
-    createPlaylistAndWait.mockRejectedValue({ response: { status: 409, data: {} } });
+    createPlaylistAndWait.mockRejectedValue({
+      response: { status: 409, data: {} },
+    });
 
     await usePlaylistCreation().create(async () => ({ keyword: "愛" }));
 
@@ -69,8 +71,12 @@ describe("usePlaylistCreation", () => {
   });
 
   it("その他のエラーはトーストに出す", async () => {
-    createPlaylistAndWait.mockRejectedValue(new PlaylistError("上限を超えました"));
+    createPlaylistAndWait.mockRejectedValue(
+      new PlaylistError("上限を超えました"),
+    );
     await usePlaylistCreation().create(async () => ({ keyword: "愛" }));
-    expect(useFeedbackStore().toasts.map((t) => t.text)).toEqual(["上限を超えました"]);
+    expect(useFeedbackStore().toasts.map((t) => t.text)).toEqual([
+      "上限を超えました",
+    ]);
   });
 });

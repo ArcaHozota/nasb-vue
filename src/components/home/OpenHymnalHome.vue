@@ -41,7 +41,10 @@ watch(
   },
 );
 const selectedIndex = computed(() =>
-  Math.max(0, props.records.findIndex((r) => r.id === selectedId.value)),
+  Math.max(
+    0,
+    props.records.findIndex((r) => r.id === selectedId.value),
+  ),
 );
 const selected = computed(() => props.records[selectedIndex.value]);
 
@@ -55,25 +58,36 @@ const onListKeyDown = (e: KeyboardEvent) => {
     Math.max(0, selectedIndex.value + (e.key === "ArrowDown" ? 1 : -1)),
   );
   selectedId.value = props.records[next]?.id ?? null;
-  list.value?.querySelectorAll<HTMLButtonElement>("button[data-hymn-row]")[next]?.focus();
+  list.value
+    ?.querySelectorAll<HTMLButtonElement>("button[data-hymn-row]")
+    [next]?.focus();
 };
 
-const firstLoad = computed(() => props.isFetching && props.records.length === 0);
+const firstLoad = computed(
+  () => props.isFetching && props.records.length === 0,
+);
 const caption = computed(() => {
   const kw = props.submittedKeyword.trim();
   if (!kw) return `賛美歌 ・ ${props.totalRecords}曲`;
-  if (props.hitCount === undefined) return `「${kw}」を含む賛美歌 ・ ${props.totalRecords}曲`;
+  if (props.hitCount === undefined)
+    return `「${kw}」を含む賛美歌 ・ ${props.totalRecords}曲`;
   return props.hitCount > 0
     ? `「${kw}」に近い賛美歌 ・ ${props.hitCount}曲(全${props.totalRecords}曲)`
     : `賛美歌 ・ ${props.totalRecords}曲`;
 });
-const rowMatch = (line: string) => (props.terms.length > 0 ? matchOf(line) : null);
+const rowMatch = (line: string) =>
+  props.terms.length > 0 ? matchOf(line) : null;
 </script>
 
 <template>
   <div class="open-hymnal">
     <header class="open-hymnal-header">
-      <button type="button" class="open-hymnal__brand" aria-label="ホーム(検索をリセット)" @click="emit('reload')">
+      <button
+        type="button"
+        class="open-hymnal__brand"
+        aria-label="ホーム(検索をリセット)"
+        @click="emit('reload')"
+      >
         <svg viewBox="0 0 66 66" class="open-hymnal__cross" aria-hidden="true">
           <g fill="currentColor">
             <rect x="27" y="4" width="12" height="58" />
@@ -92,7 +106,11 @@ const rowMatch = (line: string) => (props.terms.length > 0 ? matchOf(line) : nul
       </button>
 
       <!-- 下線だけの検索欄(暗いヘッダー用)。<form> にして Enter での送信をブラウザに任せる -->
-      <form role="search" class="open-hymnal__search" @submit.prevent="emit('search')">
+      <form
+        role="search"
+        class="open-hymnal__search"
+        @submit.prevent="emit('search')"
+      >
         <span class="open-hymnal__search-label">索引</span>
         <input
           v-model="keyword"
@@ -109,7 +127,12 @@ const rowMatch = (line: string) => (props.terms.length > 0 ? matchOf(line) : nul
           aria-label="検索"
           class="open-hymnal__search-btn"
         >
-          <v-progress-circular v-if="isFetching" indeterminate size="14" width="2" />
+          <v-progress-circular
+            v-if="isFetching"
+            indeterminate
+            size="14"
+            width="2"
+          />
           <v-icon v-else icon="mdi-magnify" size="16" />
         </v-btn>
       </form>
@@ -129,24 +152,52 @@ const rowMatch = (line: string) => (props.terms.length > 0 ? matchOf(line) : nul
         <!-- ===== 左ページ: 目次 ===== -->
         <section class="book-page book-page--left" aria-label="目次">
           <p class="book-caption">{{ caption }}</p>
-          <p v-if="notice" role="status" class="book-sans open-hymnal__notice">{{ notice }}</p>
+          <p v-if="notice" role="status" class="book-sans open-hymnal__notice">
+            {{ notice }}
+          </p>
           <ol
             ref="list"
-            :class="['open-hymnal__toc', { 'is-stale': isFetching && records.length > 0 }]"
+            :class="[
+              'open-hymnal__toc',
+              { 'is-stale': isFetching && records.length > 0 },
+            ]"
             @keydown="onListKeyDown"
           >
             <template v-if="firstLoad">
-              <li v-for="i in pageSize" :key="i" class="toc-row toc-row--skeleton">
-                <v-skeleton-loader type="text" width="28" class="bg-transparent" />
+              <li
+                v-for="i in pageSize"
+                :key="i"
+                class="toc-row toc-row--skeleton"
+              >
+                <v-skeleton-loader
+                  type="text"
+                  width="28"
+                  class="bg-transparent"
+                />
                 <span class="d-flex flex-column flex-grow-1">
-                  <v-skeleton-loader type="text" width="75%" class="bg-transparent" />
+                  <v-skeleton-loader
+                    type="text"
+                    width="75%"
+                    class="bg-transparent"
+                  />
                 </span>
               </li>
             </template>
-            <li v-if="!isFetching && records.length === 0" class="book-sans open-hymnal__empty">
-              <v-icon icon="mdi-book-open-variant" size="32" aria-hidden="true" />
-              <span class="text-title-medium font-weight-bold">該当データなし</span>
-              <span class="text-body-medium">別のキーワードで検索してください。</span>
+            <li
+              v-if="!isFetching && records.length === 0"
+              class="book-sans open-hymnal__empty"
+            >
+              <v-icon
+                icon="mdi-book-open-variant"
+                size="32"
+                aria-hidden="true"
+              />
+              <span class="text-title-medium font-weight-bold"
+                >該当データなし</span
+              >
+              <span class="text-body-medium"
+                >別のキーワードで検索してください。</span
+              >
             </li>
             <li v-for="(r, i) in records" :key="r.id">
               <button
@@ -205,9 +256,20 @@ const rowMatch = (line: string) => (props.terms.length > 0 ? matchOf(line) : nul
           :terms="terms"
           :download="download"
         />
-        <article v-else class="book-page book-page--right open-hymnal__placeholder">
-          <v-progress-circular v-if="firstLoad" indeterminate size="24" width="2" color="primary" />
-          <span v-else class="book-sans text-body-medium">左の目次から曲を選んでください。</span>
+        <article
+          v-else
+          class="book-page book-page--right open-hymnal__placeholder"
+        >
+          <v-progress-circular
+            v-if="firstLoad"
+            indeterminate
+            size="24"
+            width="2"
+            color="primary"
+          />
+          <span v-else class="book-sans text-body-medium"
+            >左の目次から曲を選んでください。</span
+          >
         </article>
       </div>
     </main>

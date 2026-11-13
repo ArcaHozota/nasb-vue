@@ -29,7 +29,9 @@ describe("getYoutubeReauthConfirmText", () => {
   });
 
   it("未連携(本文なしの409)やほかの状態は null", () => {
-    expect(getYoutubeReauthConfirmText({ response: { status: 409 } })).toBeNull();
+    expect(
+      getYoutubeReauthConfirmText({ response: { status: 409 } }),
+    ).toBeNull();
     expect(
       getYoutubeReauthConfirmText({
         response: { status: 500, data: "YouTube連携の再認証が必要です。" },
