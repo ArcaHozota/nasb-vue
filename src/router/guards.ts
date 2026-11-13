@@ -11,8 +11,6 @@ declare module "vue-router" {
   interface RouteMeta {
     /** ログインが必要な画面(AdminLayout 配下) */
     requiresAuth?: boolean;
-    /** 画面名(未移植の画面の PendingView に出す) */
-    title?: string;
   }
 }
 

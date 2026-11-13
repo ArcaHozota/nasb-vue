@@ -244,7 +244,7 @@ const onSearch = () => {
               class="admin-user__btn"
               :class="{ 'admin-user__btn--rail': isRail }"
             >
-              <v-avatar :size="isRail ? 32 : 30" color="rgba(255,255,255,0.2)" class="text-caption">
+              <v-avatar :size="isRail ? 32 : 30" color="rgba(255,255,255,0.2)" class="text-body-small">
                 {{ username.slice(0, 1) }}
               </v-avatar>
               <template v-if="!isRail">

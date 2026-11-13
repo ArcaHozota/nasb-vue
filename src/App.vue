@@ -31,8 +31,8 @@ const reload = () => window.location.reload();
 <template>
   <v-app>
     <main v-if="renderError" class="app-error pa-8 text-center">
-      <h1 class="text-h6 font-weight-bold">エラーが発生しました</h1>
-      <p class="text-body-2 text-medium-emphasis">
+      <h1 class="text-title-large font-weight-bold">エラーが発生しました</h1>
+      <p class="text-body-medium text-medium-emphasis">
         時間をおいてもう一度お試しください。解消しない場合はホームへ戻ってください。
       </p>
       <div class="d-flex justify-center ga-2">

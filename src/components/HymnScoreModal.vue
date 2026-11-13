@@ -149,7 +149,7 @@ const chordText = () => MAJOR_KEYS.find((k) => k.value === chord.value)?.label ?
       <div class="pt-3">
         <div class="score-modal__head">
           <div aria-hidden="true" />
-          <h2 id="score-modal-title" class="text-center text-subtitle-1 font-weight-bold text-secondary">
+          <h2 id="score-modal-title" class="text-center text-title-medium font-weight-bold text-secondary">
             楽譜-{{ hymnNameKr }}
           </h2>
           <v-btn
@@ -209,7 +209,7 @@ const chordText = () => MAJOR_KEYS.find((k) => k.value === chord.value)?.label ?
             ファイルを選択
           </v-btn>
           <div class="d-flex flex-column align-center mx-3">
-            <label for="score-original" class="text-caption text-secondary">オリジナル</label>
+            <label for="score-original" class="text-body-small text-secondary">オリジナル</label>
             <v-switch
               id="score-original"
               v-model="isOriginal"
@@ -221,10 +221,10 @@ const chordText = () => MAJOR_KEYS.find((k) => k.value === chord.value)?.label ?
             />
           </div>
         </div>
-        <p v-if="file" class="mt-2 text-body-2 text-medium-emphasis">
+        <p v-if="file" class="mt-2 text-body-medium text-medium-emphasis">
           {{ file.name }}({{ Math.round(file.size / 1024) }} KB)
         </p>
-        <p v-if="error" class="mt-1 text-body-2 text-error">{{ error }}</p>
+        <p v-if="error" class="mt-1 text-body-medium text-error">{{ error }}</p>
       </div>
 
       <div class="d-flex justify-end px-6 pb-4">
@@ -242,10 +242,10 @@ const chordText = () => MAJOR_KEYS.find((k) => k.value === chord.value)?.label ?
       aria-labelledby="score-overwrite-title"
     >
       <v-card class="noto-sans pa-6" rounded="xl">
-        <h2 id="score-overwrite-title" class="text-h6 font-weight-bold text-secondary">
+        <h2 id="score-overwrite-title" class="text-title-large font-weight-bold text-secondary">
           {{ chordText() }}の楽譜は登録済みです
         </h2>
-        <p class="text-body-2 text-medium-emphasis mt-2">上書きしますか?</p>
+        <p class="text-body-medium text-medium-emphasis mt-2">上書きしますか?</p>
         <div class="d-flex justify-end flex-wrap ga-2 mt-4">
           <v-btn
             variant="outlined"

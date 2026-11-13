@@ -9,7 +9,7 @@
     text="URLが間違っているか、ページが移動または削除された可能性があります。"
   >
     <template #headline>
-      <div class="text-h2 font-weight-bold text-primary">404</div>
+      <div class="text-display-medium font-weight-bold text-primary">404</div>
     </template>
     <template #actions>
       <v-btn color="primary" variant="flat" to="/home">ホームへ戻る</v-btn>

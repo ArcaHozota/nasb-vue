@@ -38,14 +38,14 @@ const color = computed(() =>
       <div class="pt-3">
         <div
           id="feedback-dialog-title"
-          :class="['text-center text-h6 font-weight-bold', `text-${color}`]"
+          :class="['text-center text-title-large font-weight-bold', `text-${color}`]"
         >
           {{ dialog.title }}
         </div>
         <div :class="['feedback-dialog-bar mx-2 mt-2', `bg-${color}`]" />
       </div>
       <div class="pa-6">
-        <p id="feedback-dialog-text" class="text-body-2 text-medium-emphasis">
+        <p id="feedback-dialog-text" class="text-body-medium text-medium-emphasis">
           {{ dialog.text }}
         </p>
         <div class="d-flex justify-end ga-2 mt-6">

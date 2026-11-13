@@ -23,8 +23,8 @@ const onSelect = (chord: string) => {
 <template>
   <v-dialog v-model="open" max-width="320" aria-labelledby="score-key-dialog-title">
     <v-card :class="['noto-serif pa-6', contentClass]" rounded="lg">
-      <h2 id="score-key-dialog-title" class="text-h6 font-weight-bold">調を選択</h2>
-      <p :class="['text-body-2 mt-1', contentClass ? 'score-key-dialog__desc' : 'text-medium-emphasis']">
+      <h2 id="score-key-dialog-title" class="text-title-large font-weight-bold">調を選択</h2>
+      <p :class="['text-body-medium mt-1', contentClass ? 'score-key-dialog__desc' : 'text-medium-emphasis']">
         {{ title ?? "ダウンロードする調を選んでください。" }}
       </p>
       <div class="score-key-dialog__grid mt-4">
@@ -39,7 +39,7 @@ const onSelect = (chord: string) => {
           {{ chordLabel(k.chord) }}{{ k.isOriginal ? "*" : "" }}
         </v-btn>
       </div>
-      <p class="text-caption mt-4 score-key-dialog__desc">* はオリジナルキー</p>
+      <p class="text-body-small mt-4 score-key-dialog__desc">* はオリジナルキー</p>
     </v-card>
   </v-dialog>
 </template>

@@ -248,7 +248,7 @@ const discard = () => {
     <v-card class="form-card glass-panel hymn-form noto-sans" rounded="xl">
       <div :class="['hymn-form__header', `bg-${color}`]">
         <v-icon icon="mdi-view-grid-outline" size="20" class="mr-2" />
-        <h2 id="hymn-form-title" class="text-h6">
+        <h2 id="hymn-form-title" class="text-title-large">
           {{ isEdit ? "賛美歌情報更新" : "賛美歌情報追加" }}
         </h2>
         <v-btn
@@ -357,7 +357,7 @@ const discard = () => {
       </v-card-text>
 
       <div class="hymn-form__footer">
-        <p v-if="isEdit" class="mr-auto text-caption text-medium-emphasis">
+        <p v-if="isEdit" class="mr-auto text-body-small text-medium-emphasis">
           最終更新者：{{ form.updatedUser }}＠{{ form.updatedTime }}日本標準時間
         </p>
         <v-btn
@@ -384,10 +384,10 @@ const discard = () => {
     <!-- 編集内容の破棄確認 -->
     <v-dialog v-model="discardOpen" max-width="384" aria-labelledby="hymn-discard-title">
       <v-card class="noto-sans pa-6" rounded="xl">
-        <h2 id="hymn-discard-title" :class="['text-h6 font-weight-bold', `text-${color}`]">
+        <h2 id="hymn-discard-title" :class="['text-title-large font-weight-bold', `text-${color}`]">
           編集内容があります
         </h2>
-        <p class="text-body-2 text-medium-emphasis mt-2">
+        <p class="text-body-medium text-medium-emphasis mt-2">
           {{ isEdit ? "変更を破棄して閉じますか?" : "入力した内容を破棄して閉じますか?" }}
         </p>
         <div class="d-flex justify-end flex-wrap ga-2 mt-4">
@@ -439,11 +439,5 @@ const discard = () => {
   padding: 16px 24px;
   border-top: 1px solid rgba(0, 0, 0, 0.12);
   background: rgba(255, 255, 255, 0.6);
-}
-.form-label {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 0.875rem;
-  font-weight: 500;
 }
 </style>

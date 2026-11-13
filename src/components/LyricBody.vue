@@ -23,7 +23,7 @@ const termsLabel = computed(() => props.terms.join("・"));
   </p>
   <p v-else-if="!data" class="py-6 text-center lyric-body__muted">歌詞が登録されていません。</p>
   <template v-else>
-    <p v-if="terms.length > 0" class="text-caption lyric-body__muted" aria-live="polite">
+    <p v-if="terms.length > 0" class="text-body-small lyric-body__muted" aria-live="polite">
       {{
         hits > 0
           ? `「${termsLabel}」に一致: ${hits}箇所`

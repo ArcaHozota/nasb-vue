@@ -122,7 +122,7 @@ defineExpose({ wrapSelection });
     />
     <p
       v-if="helperText"
-      :class="['text-caption mt-1', error ? 'text-error' : 'text-medium-emphasis']"
+      :class="['text-body-small mt-1', error ? 'text-error' : 'text-medium-emphasis']"
     >
       {{ helperText }}
     </p>
