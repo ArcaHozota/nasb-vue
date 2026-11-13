@@ -180,7 +180,7 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
               @click="formModal = { mode: 'add' }">
               賛美歌情報追加
             </v-btn>
-            <Hint label="プレイリスト作成" v-slot="{ props }">
+            <Hint v-slot="{ props }" label="プレイリスト作成">
               <v-btn
                 v-bind="props"
                 icon="mdi-playlist-music"
@@ -251,27 +251,27 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
                 <!-- 操作列のクリックは行(YouTube)へ伝えない -->
                 <td @click.stop @keydown.stop>
                   <div class="d-flex justify-center ga-1">
-                    <Hint label="楽譜アップロード" v-slot="{ props }">
+                    <Hint v-slot="{ props }" label="楽譜アップロード">
                       <v-btn v-bind="props" icon="mdi-music" class="action-btn" aria-label="楽譜アップロード"
                         @click="scoreModalHymn = { id: row.id, nameKr: row.nameKr }" />
                     </Hint>
-                    <Hint label="編集" v-slot="{ props }">
+                    <Hint v-slot="{ props }" label="編集">
                       <v-btn v-bind="props" icon="mdi-notebook-edit-outline" class="action-btn" aria-label="編集"
                         @click="formModal = { mode: 'edit', id: row.id }" />
                     </Hint>
-                    <Hint label="削除" v-slot="{ props }">
+                    <Hint v-slot="{ props }" label="削除">
                       <v-btn v-bind="props" icon="mdi-trash-can-outline" class="action-btn text-red-darken-1"
                         aria-label="削除" @click="onDelete(row)" />
                     </Hint>
                     <!-- 楽譜が複数あるときは、アイコンの右にふきだしで調を選ばせる -->
                     <ScoreKeyPopover
                       :id="row.id"
+                      v-slot="{ onClick, loading, open, anchorRef }"
                       :fetch-keys="fetchKeys"
                       :download="downloadScoreOrToast"
                       side="right"
-                      v-slot="{ onClick, loading, open, anchorRef }"
                     >
-                      <Hint label="楽譜をダウンロード" v-slot="{ props }">
+                      <Hint v-slot="{ props }" label="楽譜をダウンロード">
                         <v-btn
                           v-bind="props"
                           :ref="anchorRef"

@@ -1,6 +1,7 @@
-import "@mdi/font/css/materialdesignicons.css";
 import "vuetify/styles";
 import { createVuetify, type ThemeDefinition } from "vuetify";
+import { aliases } from "vuetify/iconsets/mdi-svg";
+import { mdiByName } from "./icons";
 import { MOBILE_BREAKPOINT } from "@/composables/useIsMobile";
 
 // 旧 theme.ts(MUI createTheme) / globals.css の配色を踏襲
@@ -20,6 +21,8 @@ const nasbLight: ThemeDefinition = {
 };
 
 export default createVuetify({
+  // アイコン: "mdi-xxx" は plugins/icons.ts の SVG、Vuetify 内部のアイコン($close 等)は mdi-svg の別名
+  icons: { defaultSet: "mdi", aliases, sets: { mdi: mdiByName } },
   // useDisplay().mobile を「768px 未満」にする(旧 Tailwind の md と同じ境目)
   display: { mobileBreakpoint: MOBILE_BREAKPOINT },
   theme: {

@@ -71,6 +71,7 @@ export async function downloadScore(id: string, chord?: string) {
   } catch (e: unknown) {
     throw new Error(
       await extractBlobErrorMessage(e, "楽譜の取得に失敗しました"),
+      { cause: e },
     );
   }
 }

@@ -273,7 +273,7 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
         </div>
 
         <div class="mb-2 book-addition__wrap">
-          <Hint label="選択範囲を赤文字にする(再押下で解除)" v-slot="{ props }">
+          <Hint v-slot="{ props }" label="選択範囲を赤文字にする(再押下で解除)">
             <!-- mousedown で選択範囲が外れないようにする -->
             <v-btn
               v-bind="props"

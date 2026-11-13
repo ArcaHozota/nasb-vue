@@ -140,7 +140,7 @@ const onCreatePlaylist = () =>
               hide-details
             >
               <template #append-inner>
-                <Hint label="ランダム選択" v-slot="{ props }">
+                <Hint v-slot="{ props }" label="ランダム選択">
                   <v-btn
                     v-bind="props"
                     icon="mdi-magnify"

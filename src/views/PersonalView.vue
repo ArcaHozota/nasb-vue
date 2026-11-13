@@ -368,7 +368,7 @@ const inputProps = {
 
             <!-- 右: トグル + 連携ボタン(連携処理中はスイッチに読み込み表示を出す) -->
             <div class="d-flex align-center ga-3 flex-shrink-0">
-              <Hint label="ONで連携ボタンが押せるようになります" v-slot="{ props }">
+              <Hint v-slot="{ props }" label="ONで連携ボタンが押せるようになります">
                 <span v-bind="props" class="d-inline-flex">
                   <v-switch
                     id="personal-youtube"
@@ -384,7 +384,7 @@ const inputProps = {
                 </span>
               </Hint>
 
-              <Hint :label="youtubeHint" wrap-disabled v-slot="{ props }">
+              <Hint v-slot="{ props }" :label="youtubeHint" wrap-disabled>
                 <v-btn
                   v-bind="props"
                   variant="outlined"
