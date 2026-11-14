@@ -83,8 +83,10 @@ const rowMatch = (line: string) =>
 <template>
   <div class="open-hymnal">
     <header class="open-hymnal-header">
-      <button
-        type="button"
+      <!-- ロゴは Vuetify の v-btn(ホバーで薄い背景、押すと波紋) -->
+      <v-btn
+        variant="text"
+        rounded="lg"
         class="open-hymnal__brand"
         aria-label="ホーム(検索をリセット)"
         @click="emit('reload')"
@@ -104,7 +106,7 @@ const rowMatch = (line: string) =>
           </g>
         </svg>
         <span class="open-hymnal-logo">NASB1995</span>
-      </button>
+      </v-btn>
 
       <!-- 下線だけの検索欄(暗いヘッダー用)。<form> にして Enter での送信をブラウザに任せる -->
       <form
@@ -201,7 +203,9 @@ const rowMatch = (line: string) =>
               >
             </li>
             <li v-for="(r, i) in records" :key="r.id">
+              <!-- 押すと Vuetify の波紋(v-ripple)が出る -->
               <button
+                v-ripple
                 type="button"
                 data-hymn-row
                 :data-active="i === selectedIndex"
@@ -234,6 +238,7 @@ const rowMatch = (line: string) =>
               color="primary"
               size="small"
               density="comfortable"
+              rounded="pill"
               class="open-hymnal__pager-btn"
               :disabled="page <= 1"
               @click="emit('update:page', page - 1)"
@@ -246,6 +251,7 @@ const rowMatch = (line: string) =>
               color="primary"
               size="small"
               density="comfortable"
+              rounded="pill"
               class="open-hymnal__pager-btn"
               :disabled="page >= totalPages"
               @click="emit('update:page', page + 1)"
@@ -285,14 +291,16 @@ const rowMatch = (line: string) =>
 </template>
 
 <style scoped>
+/* ホバーの背景のための余白を取り、そのぶん左へずらしてロゴの位置は今まで通りにする */
 .open-hymnal__brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0;
-  border: 0;
-  background: none;
+  height: auto !important;
+  margin-left: -10px;
+  padding: 6px 10px !important;
   color: #f3e3c3;
+  letter-spacing: normal;
+}
+.open-hymnal__brand :deep(.v-btn__content) {
+  gap: 10px;
 }
 .open-hymnal__cross {
   width: 36px;
@@ -374,6 +382,8 @@ const rowMatch = (line: string) =>
 }
 /* 目次の1行(点線の下罫線・押せる行のホバーと選択中の背景は本のデザインに合わせる) */
 .toc-row {
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: baseline;
   gap: 12px;
