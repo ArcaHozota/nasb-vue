@@ -232,13 +232,14 @@ const rowMatch = (line: string) =>
             </li>
           </ol>
           <nav class="book-pager" aria-label="ページ送り">
-            <!-- Vuetify の v-btn(ホバーで薄い背景、押すと波紋)。本のデザインに合わせて文字だけのボタンにする -->
+            <!-- Vuetify の v-btn(ホバーで薄い背景、押すと波紋)。矢印と「前」「次」を 40px の円に収める
+                 (40px までなら11曲とページ送りが本のページに収まる) -->
             <v-btn
               variant="text"
               color="primary"
-              size="small"
-              density="comfortable"
-              rounded="pill"
+              width="40"
+              height="40"
+              rounded="circle"
               class="open-hymnal__pager-btn"
               :disabled="page <= 1"
               @click="emit('update:page', page - 1)"
@@ -249,9 +250,9 @@ const rowMatch = (line: string) =>
             <v-btn
               variant="text"
               color="primary"
-              size="small"
-              density="comfortable"
-              rounded="pill"
+              width="40"
+              height="40"
+              rounded="circle"
               class="open-hymnal__pager-btn"
               :disabled="page >= totalPages"
               @click="emit('update:page', page + 1)"
@@ -388,7 +389,8 @@ const rowMatch = (line: string) =>
   align-items: baseline;
   gap: 12px;
   width: 100%;
-  padding: 8.7px 8px;
+  /* 1行 58px(上下 7.5px + 曲名・韓国語名 42.6px + 点線 1px) */
+  padding: 7.5px 8px;
   border: 0;
   border-bottom: 1px dotted #c9b48d;
   background: transparent;
@@ -454,8 +456,11 @@ const rowMatch = (line: string) =>
   color: #5a4630;
 }
 .open-hymnal__pager-btn {
-  font-size: 13px;
+  min-width: 0 !important;
+  padding: 0 !important;
+  font-size: 12px;
   letter-spacing: normal;
+  white-space: nowrap;
 }
 .open-hymnal__placeholder {
   align-items: center;

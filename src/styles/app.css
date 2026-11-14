@@ -234,7 +234,8 @@ a.glass-item:hover {
   justify-content: center;
   align-items: center;
   gap: 16px;
-  padding-top: 4px;
+  /* ページ送りは 40px の丸ボタンなので、上の余白は取らない(11曲と一緒に本のページへ収めるため) */
+  padding-top: 0;
   color: #6b5338;
   font-size: 13px;
 }
