@@ -412,9 +412,9 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
               :total-visible="5"
               density="compact"
               active-color="primary"
-              variant="flat"
-              size="small"
-              rounded="md"
+              variant="tonal"
+              size="default"
+              rounded="circle"
               class="hymn-list__pagination"
             />
           </div>
