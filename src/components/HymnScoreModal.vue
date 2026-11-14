@@ -18,22 +18,23 @@ const emit = defineEmits<{ close: []; uploaded: [] }>();
 const MAX_FILE_BYTES = 30 * 1024 * 1024;
 
 /**
- * 12長調。value は DB(HYMNS_WORK.CHORD)に保存する値(ASCII)、label は画面表示。
- * バックエンド(HymnsHandler)の許可リストと同じ並び・同じ値にすること。
+ * 12長調(半音ずつ上がる順。上の段 A〜E♭、下の段 E〜A♭)。
+ * value は DB(HYMNS_WORK.CHORD)に保存する値(ASCII)、label は画面表示。
+ * value はバックエンド(HymnsHandler)の許可リストと同じ値にすること。
  */
 const MAJOR_KEYS = [
   { value: "A", label: "A" },
-  { value: "Ab", label: "A♭" },
-  { value: "B", label: "B" },
   { value: "Bb", label: "B♭" },
+  { value: "B", label: "B" },
   { value: "C", label: "C" },
-  { value: "D", label: "D" },
   { value: "Db", label: "D♭" },
-  { value: "E", label: "E" },
+  { value: "D", label: "D" },
   { value: "Eb", label: "E♭" },
+  { value: "E", label: "E" },
   { value: "F", label: "F" },
-  { value: "G", label: "G" },
   { value: "Gb", label: "G♭" },
+  { value: "G", label: "G" },
+  { value: "Ab", label: "A♭" },
 ] as const;
 
 /** 調チップの1段目の個数(7個＋5個の2段にする) */
