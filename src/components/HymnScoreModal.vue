@@ -36,6 +36,9 @@ const MAJOR_KEYS = [
   { value: "Gb", label: "G♭" },
 ] as const;
 
+/** 調チップの1段目の個数(7個＋5個の2段にする) */
+const KEYS_PER_ROW = 7;
+
 const feedback = useFeedbackStore();
 const fileInput = ref<HTMLInputElement | null>(null);
 
@@ -185,26 +188,29 @@ const chordText = () =>
           hidden
           @change="onFilePick"
         />
-        <v-btn-toggle
+        <!-- 調の選択: Vuetify の filter chip(選んだ調にチェックが付く) -->
+        <v-chip-group
           :model-value="chord || undefined"
           :disabled="uploading"
           color="secondary"
-          variant="outlined"
-          divided
-          class="score-modal__keys mb-5"
+          column
+          class="score-modal__keys justify-center mb-5"
           aria-label="調(長調)"
           @update:model-value="onChord"
         >
-          <v-btn
-            v-for="k in MAJOR_KEYS"
-            :key="k.value"
-            :value="k.value"
-            :aria-label="k.label"
-            class="score-modal__key"
-          >
-            {{ k.label }}
-          </v-btn>
-        </v-btn-toggle>
+          <template v-for="(k, i) in MAJOR_KEYS" :key="k.value">
+            <v-chip
+              :value="k.value"
+              :aria-label="k.label"
+              variant="outlined"
+              filter
+            >
+              {{ k.label }}
+            </v-chip>
+            <!-- 7個目のあとで必ず改行する(選ぶとチェックの分だけ幅が広がり、1段に入る数が変わるため) -->
+            <div v-if="i === KEYS_PER_ROW - 1" class="score-modal__break" />
+          </template>
+        </v-chip-group>
         <div class="d-flex align-end justify-center ga-5">
           <v-btn
             variant="outlined"
@@ -272,31 +278,12 @@ const chordText = () =>
   height: 3px;
   border-radius: 9999px;
 }
-/* 12の調を 6列×2段で並べる(v-btn-toggle の既定の横一列・枠をやめる) */
-.score-modal__keys {
-  display: grid !important;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 6px;
-  width: 100%;
-  height: auto !important;
-  border: 0 !important;
-  overflow: visible;
+/* チップを中央に寄せて折り返す */
+.score-modal__keys :deep(.v-slide-group__content) {
+  justify-content: center;
 }
-.score-modal__keys .score-modal__key {
-  height: 40px !important;
-  min-width: 0;
-  padding: 0;
-  border: 1px solid rgb(var(--v-theme-secondary)) !important;
-  border-radius: 6px !important;
-  font-size: 1rem;
-  letter-spacing: normal;
-}
-/* 選んだ調は塗りつぶす(旧 data-[state=on]:bg-secondary) */
-.score-modal__keys .score-modal__key.v-btn--active {
-  background: rgb(var(--v-theme-secondary));
-  color: #fff !important;
-}
-.score-modal__keys .score-modal__key.v-btn--active :deep(.v-btn__overlay) {
-  opacity: 0;
+.score-modal__break {
+  flex-basis: 100%;
+  height: 0;
 }
 </style>

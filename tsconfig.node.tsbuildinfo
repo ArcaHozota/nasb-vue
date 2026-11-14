@@ -1,0 +1,1 @@
+{"root":["./vite.config.ts","./vitest.config.ts","./playwright.config.ts","./e2e/features.spec.ts","./e2e/hymns.spec.ts","./e2e/login.spec.ts","./e2e/mock-api.ts"],"version":"6.0.3"}
