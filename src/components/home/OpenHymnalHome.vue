@@ -228,23 +228,30 @@ const rowMatch = (line: string) =>
             </li>
           </ol>
           <nav class="book-pager" aria-label="ページ送り">
-            <button
-              type="button"
+            <!-- Vuetify の v-btn(ホバーで薄い背景、押すと波紋)。本のデザインに合わせて文字だけのボタンにする -->
+            <v-btn
+              variant="text"
+              color="primary"
+              size="small"
+              density="comfortable"
               class="open-hymnal__pager-btn"
               :disabled="page <= 1"
               @click="emit('update:page', page - 1)"
             >
               ← 前
-            </button>
+            </v-btn>
             <span aria-live="polite">{{ page }} / {{ totalPages }}</span>
-            <button
-              type="button"
+            <v-btn
+              variant="text"
+              color="primary"
+              size="small"
+              density="comfortable"
               class="open-hymnal__pager-btn"
               :disabled="page >= totalPages"
               @click="emit('update:page', page + 1)"
             >
               次 →
-            </button>
+            </v-btn>
           </nav>
         </section>
 
@@ -339,10 +346,14 @@ const rowMatch = (line: string) =>
   font-size: 0.75rem;
   color: #8a6400;
 }
+/* 画面が低くて11曲が収まらない時は、ページ送りをページの外へ押し出さず、目次の中でスクロールする */
 .open-hymnal__toc {
   display: flex;
   flex: 1;
   flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -386,12 +397,14 @@ const rowMatch = (line: string) =>
   outline: 2px solid #800020;
   outline-offset: -2px;
 }
+/* 番号は曲名とベースラインでそろえる。行の高さを曲名(22.5px)と同じにして、行が無駄に高くならないようにする
+   (27px だと番号の上に余白ができ、11曲が本のページに収まらなかった) */
 .toc-row__no {
   width: 30px;
   flex-shrink: 0;
   font-size: 1.125rem;
   font-weight: 700;
-  line-height: 27px;
+  line-height: 22.5px;
   color: #800020;
 }
 .toc-row__body {
@@ -431,15 +444,8 @@ const rowMatch = (line: string) =>
   color: #5a4630;
 }
 .open-hymnal__pager-btn {
-  padding: 0;
-  border: 0;
-  background: none;
   font-size: 13px;
-  color: #800020;
-}
-.open-hymnal__pager-btn:disabled {
-  color: #b8a888;
-  cursor: default;
+  letter-spacing: normal;
 }
 .open-hymnal__placeholder {
   align-items: center;

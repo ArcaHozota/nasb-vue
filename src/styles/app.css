@@ -234,7 +234,7 @@ a.glass-item:hover {
   justify-content: center;
   align-items: center;
   gap: 16px;
-  padding-top: 10px;
+  padding-top: 4px;
   color: #6b5338;
   font-size: 13px;
 }
