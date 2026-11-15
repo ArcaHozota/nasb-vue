@@ -1,12 +1,12 @@
 <script setup lang="ts">
-// PC版ホーム「開いた讃美歌集」の右ページ: 選んだ曲(旧 OpenHymnalHome.tsx の HymnPage)。
-// 調を選ぶと五線譜の調号が変わり、五線譜を押すとその調の楽譜をダウンロードする。
-// 歌詞は検索した語を下線で強調して表示する(歌詞の照合)。
-// 親が :key="hymn.id" で曲ごとに作り直すので、選んだ調などの状態は曲を変えると初期化される。
+// PC版ホームの右カード: 選んだ曲の詳細。
+//   一致度・曲名・韓国語名・YouTubeで聴く
+//   楽譜: 登録済みの調をチップで並べ、押すとその調の楽譜をダウンロードする(オリジナルキーは塗りつぶし)
+//   歌詞: 検索した語を黄色で強調して表示する
+// 親が :key="hymn.id" で曲ごとに作り直す。
 import { computed, ref } from "vue";
 import { useQuery } from "@tanstack/vue-query";
 import Highlighted from "@/components/Highlighted.vue";
-import KeyStaff from "@/components/home/KeyStaff.vue";
 import { extractErrorMessage } from "@/lib/constants";
 import { keyLabel } from "@/lib/keySignature";
 import { countHits, lyricQueryOptions } from "@/lib/lyrics";
@@ -16,7 +16,6 @@ import { matchOf } from "./match";
 
 const props = defineProps<{
   hymn: HymnSummary;
-  no: string;
   terms: string[];
   download: (id: string, chord?: string) => Promise<void>;
 }>();
@@ -25,38 +24,17 @@ const keysQuery = useQuery(scoreKeysQueryOptions(props.hymn.id));
 const lyricQuery = useQuery(lyricQueryOptions(props.hymn.id));
 const keys = computed(() => keysQuery.data.value ?? []);
 
-// 最初はオリジナルキー、無ければ並びの最初の調
-const picked = ref<string | null>(null);
-const chord = computed(() => {
-  const list = keys.value;
-  if (picked.value && list.some((k) => k.chord === picked.value))
-    return picked.value;
-  return list.find((k) => k.isOriginal)?.chord ?? list[0]?.chord ?? null;
-});
-const isOriginal = computed(
-  () => keys.value.find((k) => k.chord === chord.value)?.isOriginal ?? false,
-);
-
-const downloading = ref(false);
-const onDownload = async () => {
-  if (!chord.value) return;
-  downloading.value = true;
+// ダウンロード中の調(二重押しを防ぎ、そのチップに読み込み中を出す)
+const downloading = ref<string | null>(null);
+const onDownload = async (chord: string) => {
+  if (downloading.value) return;
+  downloading.value = chord;
   try {
-    await props.download(props.hymn.id, chord.value);
+    await props.download(props.hymn.id, chord);
   } finally {
-    downloading.value = false;
+    downloading.value = null;
   }
 };
-
-const staffState = computed(() =>
-  keysQuery.isPending.value
-    ? "loading"
-    : keys.value.length === 0
-      ? "empty"
-      : downloading.value
-        ? "downloading"
-        : "ready",
-);
 
 const match = computed(() =>
   props.terms.length > 0 ? matchOf(props.hymn.lineNumber) : null,
@@ -64,254 +42,210 @@ const match = computed(() =>
 const lyric = computed(() => lyricQuery.data.value ?? "");
 const hits = computed(() => countHits(lyric.value, props.terms));
 const termsLabel = computed(() => props.terms.join("・"));
-
-const onPick = (v: unknown) => {
-  // 選択済みを再クリックすると空になるので、選択を維持する
-  if (typeof v === "string" && v) picked.value = v;
-};
 </script>
 
 <template>
-  <article
-    class="book-page book-page--right"
+  <v-card
+    flat
+    rounded="xl"
+    tag="article"
+    class="hymn-detail"
     :aria-label="`${hymn.nameJp}の詳細`"
   >
-    <div class="d-flex align-start justify-space-between ga-4">
-      <div style="min-width: 0">
-        <span v-if="match" :class="['hymn-page__match', match.tone]">
-          {{ match.mark }} {{ match.label }}
-        </span>
-        <h1 class="hymn-page__title">
-          <span class="hymn-page__no">{{ no }}</span
-          >　{{ hymn.nameJp }}
-        </h1>
-        <p class="noto-serif-kr hymn-page__kr">{{ hymn.nameKr }}</p>
+    <div class="d-flex align-start justify-space-between ga-6">
+      <div class="hymn-detail__heading">
+        <v-chip
+          v-if="match"
+          :color="match.chip"
+          variant="tonal"
+          size="small"
+          class="hymn-detail__match"
+        >
+          {{ match.label }}
+        </v-chip>
+        <h1 class="hymn-detail__title">{{ hymn.nameJp }}</h1>
+        <p class="hymn-detail__kr">{{ hymn.nameKr }}</p>
       </div>
-      <a
+      <v-btn
         :href="hymn.link"
         target="_blank"
         rel="noopener noreferrer"
-        class="book-sans hymn-page__yt"
+        color="#c62828"
+        variant="flat"
+        size="large"
+        rounded="lg"
+        prepend-icon="mdi-youtube"
+        class="hymn-detail__yt"
       >
-        <v-icon icon="mdi-youtube" size="16" aria-hidden="true" />
         YouTubeで聴く
-      </a>
+      </v-btn>
     </div>
 
-    <!-- 五線譜: 選んだ調の調号を描き、押すとその調の楽譜をダウンロードする -->
-    <KeyStaff
-      :chord="chord"
-      :is-original="isOriginal"
-      :state="staffState"
-      @download="onDownload"
-    />
-
-    <!-- 調を選ぶと上の五線譜の調号が変わる -->
-    <div class="book-sans hymn-page__keys">
-      <span>調を選ぶ</span>
+    <!-- 楽譜: 調のチップを押すと、その調の楽譜をダウンロードする -->
+    <div class="hymn-detail__keys">
+      <span class="hymn-detail__keys-label">𝄞 楽譜</span>
       <template v-if="keysQuery.isPending.value">
         <v-skeleton-loader
           v-for="i in 3"
           :key="i"
           type="chip"
-          width="44"
-          height="30"
+          width="56"
           class="bg-transparent"
         />
       </template>
-      <v-btn-toggle
-        v-if="keys.length > 0"
-        :model-value="chord"
-        aria-label="調を選ぶ"
-        class="hymn-page__toggle"
-        @update:model-value="onPick"
-      >
-        <v-btn
+      <template v-else-if="keys.length > 0">
+        <v-chip
           v-for="k in keys"
           :key="k.chord"
-          :value="k.chord"
-          class="hymn-page__key"
+          :color="k.isOriginal ? 'primary' : undefined"
+          :variant="k.isOriginal ? 'flat' : 'outlined'"
+          :disabled="downloading !== null && downloading !== k.chord"
+          :aria-label="`${keyLabel(k.chord)}${k.isOriginal ? '(オリジナルキー)' : ''}の楽譜をダウンロード`"
+          class="hymn-detail__key"
+          @click="onDownload(k.chord)"
         >
+          <v-progress-circular
+            v-if="downloading === k.chord"
+            indeterminate
+            size="14"
+            width="2"
+            class="mr-1"
+          />
           {{ keyLabel(k.chord) }}{{ k.isOriginal ? "＊" : "" }}
-        </v-btn>
-      </v-btn-toggle>
-      <span v-if="keys.some((k) => k.isOriginal)" class="text-body-small"
-        >＊オリジナルキー</span
+        </v-chip>
+        <span
+          v-if="keys.some((k) => k.isOriginal)"
+          class="hymn-detail__keys-note"
+          >＊はオリジナルキー</span
+        >
+      </template>
+      <span v-else-if="!keysQuery.error.value" class="hymn-detail__keys-note"
+        >楽譜は登録されていません</span
       >
-      <span v-if="keysQuery.error.value" class="text-body-small hymn-page__err">
+      <span v-if="keysQuery.error.value" class="hymn-detail__err">
         {{
           extractErrorMessage(keysQuery.error.value, "楽譜の確認に失敗しました")
         }}
       </span>
     </div>
 
-    <div class="hymn-page__lyric-wrap">
-      <p
-        v-if="terms.length > 0 && lyricQuery.isSuccess.value"
-        class="book-sans hymn-page__hits"
-        aria-live="polite"
-      >
-        {{
-          hits > 0
-            ? `「${termsLabel}」に一致: ${hits}箇所`
-            : `「${termsLabel}」は歌詞に含まれていません（歌詞が似ている曲）`
-        }}
-      </p>
-      <div class="hymn-page__lyric-scroll">
-        <div class="book-lyric pr-2">
-          <div
-            v-if="lyricQuery.isPending.value"
-            class="d-flex justify-center py-10"
-          >
-            <v-progress-circular
-              indeterminate
-              size="24"
-              width="2"
-              color="primary"
-            />
-          </div>
-          <p
-            v-if="lyricQuery.error.value"
-            class="book-sans py-6 text-body-medium"
-          >
-            {{
-              extractErrorMessage(
-                lyricQuery.error.value,
-                "歌詞の取得に失敗しました",
-              )
-            }}
-          </p>
-          <template v-if="lyricQuery.isSuccess.value">
-            <Highlighted
-              v-if="lyric"
-              :text="lyric"
-              :terms="terms"
-              mark-class="book-mark"
-            />
-            <p v-else class="book-sans py-6 text-body-medium hymn-page__muted">
-              歌詞が登録されていません。
-            </p>
-          </template>
-        </div>
+    <p
+      v-if="terms.length > 0 && lyricQuery.isSuccess.value"
+      class="hymn-detail__hits"
+      aria-live="polite"
+    >
+      {{
+        hits > 0
+          ? `「${termsLabel}」に一致: ${hits}箇所`
+          : `「${termsLabel}」は歌詞に含まれていません（歌詞が似ている曲）`
+      }}
+    </p>
+    <v-divider class="hymn-detail__divider" />
+
+    <div class="hymn-detail__lyric-scroll">
+      <div v-if="lyricQuery.isPending.value" class="d-flex justify-center py-10">
+        <v-progress-circular indeterminate size="24" width="2" color="primary" />
       </div>
+      <p v-if="lyricQuery.error.value" class="py-6 text-body-medium">
+        {{ extractErrorMessage(lyricQuery.error.value, "歌詞の取得に失敗しました") }}
+      </p>
+      <template v-if="lyricQuery.isSuccess.value">
+        <div v-if="lyric" class="hymn-detail__lyric">
+          <Highlighted :text="lyric" :terms="terms" />
+        </div>
+        <p v-else class="py-6 text-body-medium hymn-detail__muted">
+          歌詞が登録されていません。
+        </p>
+      </template>
     </div>
-  </article>
+  </v-card>
 </template>
 
 <style scoped>
-.hymn-page__match {
-  font-size: 0.75rem;
-  letter-spacing: 0.05em;
-}
-.hymn-page__title {
-  margin-top: 4px;
-  font-size: 30px;
-  font-weight: 700;
-  line-height: 1.25;
-}
-.hymn-page__no {
-  color: #800020;
-}
-.hymn-page__kr {
-  margin-top: 2px;
-  font-size: 17px;
-  color: #5a4630;
-}
-.hymn-page__yt {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 6px;
-  height: 36px;
-  padding: 0 14px;
-  border: 1px solid #800020;
-  border-radius: 8px;
-  font-size: 13px;
-  color: #800020;
-  text-decoration: none;
-  transition:
-    background-color 0.15s,
-    color 0.15s;
-}
-.hymn-page__yt:hover {
-  background: #800020;
-  color: #fff;
-}
-.hymn-page__keys {
+.hymn-detail {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #6b5338;
-}
-.hymn-page__toggle {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  height: auto !important;
-  border: 0 !important;
-  background: transparent;
-  overflow: visible;
-}
-.hymn-page__toggle .hymn-page__key {
-  height: 30px !important;
-  min-width: 44px;
-  padding: 0 12px;
-  border: 1px solid #c9b48d !important;
-  border-radius: 8px !important;
-  background: transparent;
-  font-size: 13px;
-  letter-spacing: normal;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  padding: 28px 40px 0;
+  border: 1px solid #e8e0cf;
   color: #2b1d14;
 }
-.hymn-page__toggle .hymn-page__key:hover {
-  background: #f3e8cf;
+.hymn-detail__heading {
+  min-width: 0;
 }
-.hymn-page__toggle .hymn-page__key.v-btn--active {
-  border-color: #800020 !important;
-  background: #800020;
-  color: #fff;
+.hymn-detail__match {
+  margin-bottom: 8px;
+  font-weight: 700;
 }
-.hymn-page__toggle .hymn-page__key.v-btn--active :deep(.v-btn__overlay) {
-  opacity: 0;
+.hymn-detail__title {
+  font-family: "Noto Serif JP", serif;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.3;
 }
-.hymn-page__err {
-  color: #800020;
-}
-.hymn-page__lyric-wrap {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-height: 0;
+.hymn-detail__kr {
   margin-top: 4px;
-  padding-top: 10px;
-  border-top: 1px solid #e3d5b8;
+  font-family: "Noto Serif KR", serif;
+  font-size: 1.25rem;
+  color: #6b5d4a;
 }
-.hymn-page__hits {
-  margin-bottom: 4px;
-  font-size: 0.75rem;
-  color: #6b5338;
+.hymn-detail__yt {
+  flex-shrink: 0;
+  font-weight: 700;
+  letter-spacing: normal;
 }
-.hymn-page__lyric-scroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
+.hymn-detail__keys {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
 }
-.hymn-page__muted {
-  color: #6b5338;
+.hymn-detail__keys-label,
+.hymn-detail__keys-note {
+  font-size: 0.875rem;
+  color: #6b5d4a;
 }
-/* 一致度の色(◆の表示) */
-.tone-cadmium {
-  color: #0d5c33;
+.hymn-detail__key {
+  min-width: 48px;
+  justify-content: center;
+  font-weight: 600;
 }
-.tone-burgundy {
+/* オリジナル以外の調は、薄い枠(文字は本文と同じ色) */
+.hymn-detail__key.v-chip--variant-outlined {
+  border-color: #d9cfbc;
+}
+.hymn-detail__err {
+  font-size: 0.875rem;
   color: #800020;
 }
-.tone-naples {
-  color: #8a6400;
+.hymn-detail__hits {
+  margin-top: 16px;
+  font-size: 0.8125rem;
+  color: #6b5d4a;
 }
-.tone-related {
-  color: #8a7a64;
+.hymn-detail__divider {
+  flex-shrink: 0;
+  margin-top: 12px;
+  border-color: #e8e0cf;
+  opacity: 1;
+}
+.hymn-detail__lyric-scroll {
+  flex: 1;
+  min-height: 0;
+  padding: 16px 0 24px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.hymn-detail__lyric {
+  font-size: 1.25rem;
+  line-height: 2.1;
+  white-space: pre-wrap;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.hymn-detail__muted {
+  color: #6b5d4a;
 }
 </style>

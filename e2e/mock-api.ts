@@ -8,6 +8,8 @@ export type Hymn = {
   nameKr: string;
   link: string;
   lineNumber: string;
+  /** 歌詞(省略時は「曲名の歌詞」) */
+  lyric?: string;
 };
 
 export const makeHymns = (n: number): Hymn[] =>
@@ -116,6 +118,24 @@ export async function mockApi(page: Page, opts: Options = {}): Promise<MockApi> 
         total: 1,
         added: 1,
       });
+    }
+
+    // ホームの右カード: 歌詞と、楽譜が登録済みの調(G がオリジナル)
+    const lyric = path.match(/^\/hymns\/(\d+)\/lyric$/);
+    if (lyric && method === "GET") {
+      const h = state.hymns.find((x) => x.id === lyric[1]);
+      return json(route, 200, {
+        id: lyric[1],
+        lyric: h?.lyric ?? `${h?.nameJp ?? ""}の歌詞`,
+      });
+    }
+    const score = path.match(/^\/hymns\/(\d+)\/score$/);
+    if (score && method === "GET" && url.searchParams.get("keysOnly")) {
+      return json(route, 200, [
+        { chord: "G", isOriginal: true },
+        { chord: "F", isOriginal: false },
+        { chord: "Eb", isOriginal: false },
+      ]);
     }
 
     const detail = path.match(/^\/hymns\/(\d+)$/);

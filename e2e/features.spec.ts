@@ -99,6 +99,6 @@ test("追加モーダル: 入力の案内を出し、空のまま追加すると
     dialog.getByText("入力してください。", { exact: true }),
   ).toHaveCount(4);
   await page.screenshot({
-    path: process.env.SHOT_PATH ?? "test-results/add-modal.png",
+    path: process.env.ADD_MODAL_SHOT ?? "test-results/add-modal.png",
   });
 });

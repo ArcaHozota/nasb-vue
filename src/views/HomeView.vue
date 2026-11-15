@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // ホーム画面(旧 app/home/page.tsx)。
-//   PC   : 開いた讃美歌集(OpenHymnalHome)。左に目次、右に選んだ曲。
+//   PC   : 左右2つのカード(DesktopHome)。左に曲の一覧、右に選んだ曲の詳細。
 //   モバイル: 1枚+次の端がのぞくカルーセル(横スワイプ、終わりに近づくと自動で追加読み込み)。
 // カルーセルは CSS の scroll-snap で作る(旧 Embla 相当。Vuetify の v-carousel は1枚ずつの表示で、
 // 次のカードの端をのぞかせられないため)。
@@ -35,11 +35,11 @@ import { useIsMobile } from "@/composables/useIsMobile";
 import ScoreKeyDialog from "@/components/ScoreKeyDialog.vue";
 import LyricViewer, { type LyricTarget } from "@/components/LyricViewer.vue";
 import PageBackground from "@/components/PageBackground.vue";
-import OpenHymnalHome from "@/components/home/OpenHymnalHome.vue";
+import DesktopHome from "@/components/home/DesktopHome.vue";
 import HymnCard from "@/components/home/HymnCard.vue";
 
-// デスクトップ(開いた讃美歌集): 左ページの目次に並べる曲数(ページ送りで切替)
-const PAGE_SIZE = 11;
+// デスクトップ: 左の一覧に並べる曲数(ページ送りで切替)
+const PAGE_SIZE = 8;
 // モバイル: カルーセルに一度に追加読み込みする件数
 const MOBILE_BATCH_SIZE = 10;
 // カルーセルの残りがこの枚数以下になったら次の分を先読みする
@@ -257,7 +257,7 @@ const onMobileScore = async (id: string) => {
 };
 
 // ===== 歌詞の表示(照合) =====
-// モバイルは画面の下から出るシートで表示する(PC版は開いた讃美歌集の右ページに常に表示する)
+// モバイルは画面の下から出るシートで表示する(PC版は右のカードに常に表示する)
 const lyricTarget = ref<LyricTarget | null>(null);
 const openLyric = (item: HymnSummary) => {
   lyricTarget.value = {
@@ -284,8 +284,8 @@ const reload = () => {
 </script>
 
 <template>
-  <!-- ===== PC版: 開いた讃美歌集 ===== -->
-  <OpenHymnalHome
+  <!-- ===== PC版: 左に一覧、右に詳細 ===== -->
+  <DesktopHome
     v-if="!isMobile"
     v-model:keyword="keyword"
     :records="records"

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-// PC版ホーム画面「開いた讃美歌集」(旧 components/home/OpenHymnalHome.tsx)。
-//   左ページ: 讃美歌集の目次(番号・点線・◆の数で一致度)。1ページ11曲。
-//   右ページ: 左で選んだ曲(HymnBookPage)。
+// PC版ホーム画面。上にヘッダー(ロゴ・検索・ログイン)、下に左右2つのカード。
+//   左: 曲の一覧(一致度の丸・曲名・韓国語名・一致度)。1ページ8曲。
+//   右: 左で選んだ曲の詳細(HymnDetail)。
 // データ取得・検索・ページ送りの状態は HomeView.vue が持つ。
 import { computed, ref, watch } from "vue";
 import type { HymnSummary } from "@/api/hymns";
-import HymnBookPage from "@/components/home/HymnBookPage.vue";
+import HymnDetail from "@/components/home/HymnDetail.vue";
 import { hymnNo, matchOf } from "./match";
 
 const props = defineProps<{
@@ -33,7 +33,6 @@ const emit = defineEmits<{
 
 // 選んだ曲。ページや検索が変わってその曲が一覧に無くなったら、先頭の曲を表示する
 const selectedId = ref<string | null>(null);
-// ページや検索が変わったら目次の先頭へ
 watch(
   () => `${props.page}|${props.submittedKeyword}`,
   () => {
@@ -48,8 +47,8 @@ const selectedIndex = computed(() =>
 );
 const selected = computed(() => props.records[selectedIndex.value]);
 
-// ↑↓キーで目次の曲を移動する
-const list = ref<HTMLOListElement | null>(null);
+// ↑↓キーで一覧の曲を移動する
+const list = ref<{ $el: HTMLElement } | null>(null);
 const onListKeyDown = (e: KeyboardEvent) => {
   if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
   e.preventDefault();
@@ -58,40 +57,35 @@ const onListKeyDown = (e: KeyboardEvent) => {
     Math.max(0, selectedIndex.value + (e.key === "ArrowDown" ? 1 : -1)),
   );
   selectedId.value = props.records[next]?.id ?? null;
-  const rows = list.value?.querySelectorAll<HTMLButtonElement>(
-    "button[data-hymn-row]",
-  );
+  const rows = list.value?.$el.querySelectorAll<HTMLElement>("[data-hymn-row]");
   rows?.[next]?.focus();
 };
 
+const searching = computed(() => props.terms.length > 0);
 const firstLoad = computed(
   () => props.isFetching && props.records.length === 0,
 );
 const caption = computed(() => {
-  const kw = props.submittedKeyword.trim();
-  if (!kw) return `賛美歌 ・ ${props.totalRecords}曲`;
-  if (props.hitCount === undefined)
-    return `「${kw}」を含む賛美歌 ・ ${props.totalRecords}曲`;
-  return props.hitCount > 0
-    ? `「${kw}」に近い賛美歌 ・ ${props.hitCount}曲(全${props.totalRecords}曲)`
-    : `賛美歌 ・ ${props.totalRecords}曲`;
+  if (!props.submittedKeyword.trim()) return `${props.totalRecords}件`;
+  if (props.hitCount === 0) return `${props.totalRecords}件`;
+  if (props.hitCount !== undefined)
+    return `${props.hitCount}件(全${props.totalRecords}件) ・ 一致度の高い順`;
+  return `${props.totalRecords}件 ・ 一致度の高い順`;
 });
-const rowMatch = (line: string) =>
-  props.terms.length > 0 ? matchOf(line) : null;
 </script>
 
 <template>
-  <div class="open-hymnal">
-    <header class="open-hymnal-header">
-      <!-- ロゴは Vuetify の v-btn(ホバーで薄い背景、押すと波紋) -->
+  <div class="desktop-home">
+    <header class="desktop-home__bar">
+      <!-- ロゴは Vuetify の v-btn(ホバーで薄い背景、押すと波紋)。押すと検索をリセットする -->
       <v-btn
         variant="text"
         rounded="lg"
-        class="open-hymnal__brand"
+        class="desktop-home__brand"
         aria-label="ホーム(検索をリセット)"
         @click="emit('reload')"
       >
-        <svg viewBox="0 0 66 66" class="open-hymnal__cross" aria-hidden="true">
+        <svg viewBox="0 0 66 66" class="desktop-home__cross" aria-hidden="true">
           <g fill="currentColor">
             <rect x="27" y="4" width="12" height="58" />
             <rect x="4" y="27" width="58" height="12" />
@@ -105,370 +99,355 @@ const rowMatch = (line: string) =>
             <rect x="43" y="49" width="13" height="3" />
           </g>
         </svg>
-        <span class="open-hymnal-logo">NASB1995</span>
+        <span class="desktop-home__logo">NASB1995</span>
       </v-btn>
 
-      <!-- 下線だけの検索欄(暗いヘッダー用)。<form> にして Enter での送信をブラウザに任せる -->
+      <!-- 検索欄。<form> にして Enter での送信(日本語変換中の Enter は除く)をブラウザに任せる -->
       <form
         role="search"
-        class="open-hymnal__search"
+        class="desktop-home__search"
         @submit.prevent="emit('search')"
       >
-        <span class="open-hymnal__search-label">索引</span>
-        <input
+        <v-text-field
           v-model="keyword"
-          type="text"
+          variant="outlined"
+          rounded="pill"
+          density="comfortable"
+          hide-details
+          single-line
+          bg-color="white"
+          base-color="#d9cfbc"
+          color="primary"
           placeholder="曲名・歌詞のキーワードで検索してください"
           aria-label="キーワード"
-          class="noto-serif-kr open-hymnal__search-input"
-        />
-        <v-btn
-          type="submit"
-          icon
-          size="x-small"
-          variant="text"
-          aria-label="検索"
-          class="open-hymnal__search-btn"
+          class="noto-serif-kr"
         >
-          <v-progress-circular
-            v-if="isFetching"
-            indeterminate
-            size="14"
-            width="2"
-          />
-          <v-icon v-else icon="mdi-magnify" size="16" />
-        </v-btn>
+          <template #prepend-inner>
+            <v-progress-circular
+              v-if="isFetching"
+              indeterminate
+              size="18"
+              width="2"
+              color="primary"
+            />
+            <v-icon
+              v-else
+              icon="mdi-magnify"
+              size="20"
+              class="desktop-home__search-icon"
+            />
+          </template>
+        </v-text-field>
       </form>
 
       <v-btn
-        variant="outlined"
-        prepend-icon="mdi-login"
-        class="open-hymnal__login"
+        color="warning"
+        variant="flat"
+        size="large"
+        rounded="lg"
+        class="desktop-home__login"
         @click="emit('login')"
       >
         ログイン
       </v-btn>
     </header>
 
-    <main class="open-hymnal-main">
-      <div class="book">
-        <!-- ===== 左ページ: 目次 ===== -->
-        <section class="book-page book-page--left" aria-label="目次">
-          <p class="book-caption">{{ caption }}</p>
-          <p v-if="notice" role="status" class="book-sans open-hymnal__notice">
-            {{ notice }}
-          </p>
-          <ol
-            ref="list"
-            :class="[
-              'open-hymnal__toc',
-              { 'is-stale': isFetching && records.length > 0 },
-            ]"
-            @keydown="onListKeyDown"
+    <main class="desktop-home__main">
+      <!-- ===== 左: 曲の一覧 ===== -->
+      <v-card
+        flat
+        rounded="xl"
+        class="desktop-home__card desktop-home__list-card"
+        aria-label="曲の一覧"
+        tag="section"
+      >
+        <div class="desktop-home__caption">{{ caption }}</div>
+        <p v-if="notice" role="status" class="desktop-home__notice">
+          {{ notice }}
+        </p>
+
+        <div v-if="firstLoad" class="desktop-home__scroll">
+          <v-skeleton-loader
+            v-for="i in pageSize"
+            :key="i"
+            type="list-item-two-line"
+            class="desktop-home__skeleton"
+          />
+        </div>
+        <v-empty-state
+          v-else-if="!isFetching && records.length === 0"
+          icon="mdi-magnify-close"
+          title="該当データなし"
+          text="別のキーワードで検索してください。"
+          class="desktop-home__empty"
+        />
+        <v-list
+          v-else
+          ref="list"
+          :class="[
+            'desktop-home__scroll py-0',
+            { 'is-stale': isFetching && records.length > 0 },
+          ]"
+          bg-color="transparent"
+          @keydown="onListKeyDown"
+        >
+          <!-- 押すと Vuetify の波紋が出る行(v-list-item) -->
+          <v-list-item
+            v-for="(r, i) in records"
+            :key="r.id"
+            data-hymn-row
+            :active="i === selectedIndex"
+            :aria-current="i === selectedIndex ? 'true' : undefined"
+            class="hymn-row"
+            @click="selectedId = r.id"
           >
-            <template v-if="firstLoad">
-              <li
-                v-for="i in pageSize"
-                :key="i"
-                class="toc-row toc-row--skeleton"
-              >
-                <v-skeleton-loader
-                  type="text"
-                  width="28"
-                  class="bg-transparent"
-                />
-                <span class="d-flex flex-column flex-grow-1">
-                  <v-skeleton-loader
-                    type="text"
-                    width="75%"
-                    class="bg-transparent"
-                  />
-                </span>
-              </li>
-            </template>
-            <li
-              v-if="!isFetching && records.length === 0"
-              class="book-sans open-hymnal__empty"
-            >
-              <v-icon
-                icon="mdi-book-open-variant"
-                size="32"
+            <template #prepend>
+              <span
+                v-if="searching"
+                class="hymn-row__dot"
+                :style="{ background: matchOf(r.lineNumber).dot }"
                 aria-hidden="true"
               />
-              <span class="text-title-medium font-weight-bold"
-                >該当データなし</span
+              <span v-else class="hymn-row__no">{{
+                hymnNo(page, pageSize, i)
+              }}</span>
+            </template>
+            <v-list-item-title class="hymn-row__jp">{{
+              r.nameJp
+            }}</v-list-item-title>
+            <v-list-item-subtitle class="hymn-row__kr">{{
+              r.nameKr
+            }}</v-list-item-subtitle>
+            <template v-if="searching" #append>
+              <span
+                :class="['hymn-row__match', matchOf(r.lineNumber).tone]"
+                >{{ matchOf(r.lineNumber).label }}</span
               >
-              <span class="text-body-medium"
-                >別のキーワードで検索してください。</span
-              >
-            </li>
-            <li v-for="(r, i) in records" :key="r.id">
-              <!-- 押すと Vuetify の波紋(v-ripple)が出る -->
-              <button
-                v-ripple
-                type="button"
-                data-hymn-row
-                :data-active="i === selectedIndex"
-                :aria-current="i === selectedIndex ? 'true' : undefined"
-                class="toc-row toc-row--btn"
-                @click="selectedId = r.id"
-              >
-                <span class="toc-row__no">{{ hymnNo(page, pageSize, i) }}</span>
-                <span class="toc-row__body">
-                  <span class="toc-row__line">
-                    <span class="toc-row__jp">{{ r.nameJp }}</span>
-                    <span class="toc-row__dots" aria-hidden="true" />
-                    <span
-                      v-if="rowMatch(r.lineNumber)"
-                      :class="['toc-row__match', rowMatch(r.lineNumber)!.tone]"
-                      :aria-label="rowMatch(r.lineNumber)!.label"
-                    >
-                      {{ rowMatch(r.lineNumber)!.mark }}
-                    </span>
-                  </span>
-                  <span class="noto-serif-kr toc-row__kr">{{ r.nameKr }}</span>
-                </span>
-              </button>
-            </li>
-          </ol>
-          <nav class="book-pager" aria-label="ページ送り">
-            <!-- Vuetify の v-btn(ホバーで薄い背景、押すと波紋)。矢印と「前」「次」を 40px の円に収める
-                 (40px までなら11曲とページ送りが本のページに収まる) -->
-            <v-btn
-              variant="text"
-              color="primary"
-              width="40"
-              height="40"
-              rounded="circle"
-              class="open-hymnal__pager-btn"
-              :disabled="page <= 1"
-              @click="emit('update:page', page - 1)"
-            >
-              ← 前
-            </v-btn>
-            <span aria-live="polite">{{ page }} / {{ totalPages }}</span>
-            <v-btn
-              variant="text"
-              color="primary"
-              width="40"
-              height="40"
-              rounded="circle"
-              class="open-hymnal__pager-btn"
-              :disabled="page >= totalPages"
-              @click="emit('update:page', page + 1)"
-            >
-              次 →
-            </v-btn>
-          </nav>
-        </section>
+            </template>
+          </v-list-item>
+        </v-list>
 
-        <!-- ===== 右ページ: 選んだ曲 ===== -->
-        <HymnBookPage
-          v-if="selected"
-          :key="selected.id"
-          :hymn="selected"
-          :no="hymnNo(page, pageSize, selectedIndex)"
-          :terms="terms"
-          :download="download"
-        />
-        <article
-          v-else
-          class="book-page book-page--right open-hymnal__placeholder"
-        >
-          <v-progress-circular
-            v-if="firstLoad"
-            indeterminate
-            size="24"
-            width="2"
-            color="primary"
-          />
-          <span v-else class="book-sans text-body-medium"
-            >左の目次から曲を選んでください。</span
+        <nav class="desktop-home__pager" aria-label="ページ送り">
+          <v-btn
+            variant="text"
+            prepend-icon="mdi-chevron-left"
+            class="desktop-home__pager-btn"
+            :disabled="page <= 1"
+            @click="emit('update:page', page - 1)"
           >
-        </article>
-      </div>
+            前
+          </v-btn>
+          <span aria-live="polite">{{ page }} / {{ totalPages }}</span>
+          <v-btn
+            variant="text"
+            color="primary"
+            append-icon="mdi-chevron-right"
+            class="desktop-home__pager-btn"
+            :disabled="page >= totalPages"
+            @click="emit('update:page', page + 1)"
+          >
+            次
+          </v-btn>
+        </nav>
+      </v-card>
+
+      <!-- ===== 右: 選んだ曲 ===== -->
+      <HymnDetail
+        v-if="selected"
+        :key="selected.id"
+        :hymn="selected"
+        :terms="terms"
+        :download="download"
+      />
+      <v-card
+        v-else
+        flat
+        rounded="xl"
+        class="desktop-home__card desktop-home__placeholder"
+      >
+        <v-progress-circular
+          v-if="firstLoad"
+          indeterminate
+          size="24"
+          width="2"
+          color="primary"
+        />
+        <span v-else class="text-body-medium"
+          >左の一覧から曲を選んでください。</span
+        >
+      </v-card>
     </main>
   </div>
 </template>
 
 <style scoped>
-/* ホバーの背景のための余白を取り、そのぶん左へずらしてロゴの位置は今まで通りにする */
-.open-hymnal__brand {
+.desktop-home {
+  display: flex;
+  flex-direction: column;
+  height: 100svh;
+  min-height: 640px;
+  background: #f4f0e7;
+  color: #2b1d14;
+  font-family: "Noto Sans JP", sans-serif;
+}
+
+/* ===== ヘッダー ===== */
+.desktop-home__bar {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 24px;
+  height: 64px;
+  padding: 0 32px 0 24px;
+  border-bottom: 1px solid #e8e0cf;
+  background: #fdfaf2;
+}
+.desktop-home__brand {
   height: auto !important;
-  margin-left: -10px;
   padding: 6px 10px !important;
-  color: #f3e3c3;
+  color: #800020;
   letter-spacing: normal;
 }
-.open-hymnal__brand :deep(.v-btn__content) {
+.desktop-home__brand :deep(.v-btn__content) {
   gap: 10px;
 }
-.open-hymnal__cross {
-  width: 36px;
-  height: 36px;
+.desktop-home__cross {
+  width: 30px;
+  height: 30px;
 }
-.open-hymnal__search {
-  display: flex;
-  align-items: center;
-  width: min(420px, 40vw);
-  padding: 6px 2px;
-  border-bottom: 1px solid rgba(243, 227, 195, 0.6);
-  color: #f3e3c3;
+.desktop-home__logo {
+  font-family: "Niconne", cursive;
+  font-size: 26px;
+  line-height: 1;
+  text-transform: none;
 }
-.open-hymnal__search:focus-within {
-  border-bottom-color: #f3e3c3;
+.desktop-home__search {
+  width: min(400px, 36vw);
 }
-.open-hymnal__search-label {
-  flex-shrink: 0;
-  font-size: 13px;
-  color: rgba(243, 227, 195, 0.85);
+.desktop-home__search-icon {
+  color: #6b5d4a;
 }
-.open-hymnal__search-input {
+.desktop-home__login {
+  margin-left: auto;
+  padding: 0 20px !important;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #2b1d14 !important;
+}
+
+/* ===== 左右のカード ===== */
+.desktop-home__main {
+  display: grid;
   flex: 1;
-  min-width: 0;
-  padding: 0 8px;
-  border: 0;
-  outline: none;
-  background: transparent;
-  font-size: 1rem;
-  color: #fff;
+  grid-template-columns: minmax(320px, 36fr) 64fr;
+  gap: 16px;
+  min-height: 0;
+  padding: 16px 24px;
 }
-.open-hymnal__search-input::placeholder {
-  font-family: "Noto Sans JP", sans-serif;
-  font-size: 13px;
-  color: rgba(243, 227, 195, 0.55);
+.desktop-home__card {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border: 1px solid #e8e0cf;
 }
-.open-hymnal__search-btn {
-  color: #f3e3c3;
+.desktop-home__caption {
+  flex-shrink: 0;
+  padding: 14px 24px;
+  border-bottom: 1px solid #efe8da;
+  font-size: 0.8125rem;
+  color: #6b5d4a;
 }
-.open-hymnal__login {
-  height: 34px !important;
-  border-color: #f3e3c3;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  letter-spacing: normal;
-  color: #f3e3c3;
-}
-.open-hymnal__notice {
-  padding: 0 4px 4px;
+.desktop-home__notice {
+  padding: 8px 24px 0;
   font-size: 0.75rem;
   color: #8a6400;
 }
-/* 画面が低くて11曲が収まらない時は、ページ送りをページの外へ押し出さず、目次の中でスクロールする */
-.open-hymnal__toc {
-  display: flex;
+/* 画面が低くて8曲が収まらない時は、ページ送りを押し出さず一覧の中でスクロールする */
+.desktop-home__scroll {
   flex: 1;
-  flex-direction: column;
   min-height: 0;
   overflow-y: auto;
   scrollbar-width: thin;
-  margin: 0;
-  padding: 0;
-  list-style: none;
   transition: opacity 0.15s;
 }
-.open-hymnal__toc.is-stale {
+.desktop-home__scroll.is-stale {
   opacity: 0.5;
 }
-.open-hymnal__empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  margin: auto;
-  padding: 40px 0;
-  text-align: center;
-  color: #6b5338;
+.desktop-home__skeleton {
+  border-bottom: 1px solid #efe8da;
 }
-/* 目次の1行(点線の下罫線・押せる行のホバーと選択中の背景は本のデザインに合わせる) */
-.toc-row {
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  width: 100%;
-  /* 1行 58px(上下 7.5px + 曲名・韓国語名 42.6px + 点線 1px) */
-  padding: 7.5px 8px;
-  border: 0;
-  border-bottom: 1px dotted #c9b48d;
-  background: transparent;
-  font-size: 1rem;
-  line-height: 1.5;
-  text-align: left;
-  color: inherit;
+.desktop-home__empty {
+  flex: 1;
+  color: #6b5d4a;
 }
-.toc-row--btn:hover {
-  background: #f3e8cf;
+
+/* 一覧の1行 */
+.hymn-row {
+  min-height: 76px;
+  padding-inline: 24px !important;
+  border-bottom: 1px solid #efe8da;
 }
-.toc-row--btn[data-active="true"] {
-  background: #efe2c4;
+.hymn-row :deep(.v-list-item__prepend) {
+  width: 32px;
 }
-.toc-row--btn:focus-visible {
-  outline: 2px solid #800020;
-  outline-offset: -2px;
+/* 選んだ行は薄いクリーム色(Vuetify の選択色の重ねは消す) */
+.hymn-row.v-list-item--active {
+  background: #fbf0d6;
 }
-/* 番号は曲名とベースラインでそろえる。行の高さを曲名(22.5px)と同じにして、行が無駄に高くならないようにする
-   (27px だと番号の上に余白ができ、11曲が本のページに収まらなかった) */
-.toc-row__no {
-  width: 30px;
-  flex-shrink: 0;
-  font-size: 1.125rem;
+.hymn-row.v-list-item--active :deep(.v-list-item__overlay) {
+  opacity: 0;
+}
+.hymn-row__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.hymn-row__no {
+  font-size: 0.875rem;
   font-weight: 700;
-  line-height: 22.5px;
   color: #800020;
 }
-.toc-row__body {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-width: 0;
-}
-.toc-row__line {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-}
-.toc-row__jp {
-  overflow: hidden;
-  font-size: 15px;
+.hymn-row__jp {
+  font-family: "Noto Serif JP", serif;
+  font-size: 1.0625rem;
   font-weight: 700;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  line-height: 1.5;
 }
-.toc-row__dots {
-  flex: 1;
-  min-width: 12px;
-  translate: 0 -4px;
-  border-bottom: 2px dotted #c9b48d;
+.hymn-row__kr {
+  font-family: "Noto Serif KR", serif;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: #6b5d4a;
+  opacity: 1;
 }
-.toc-row__match {
+.hymn-row__match {
+  padding-left: 12px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+/* ページ送り */
+.desktop-home__pager {
+  display: flex;
   flex-shrink: 0;
-  font-size: 11px;
-  letter-spacing: 1px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  border-top: 1px solid #efe8da;
+  font-size: 0.875rem;
+  color: #6b5d4a;
 }
-.toc-row__kr {
-  overflow: hidden;
-  font-size: 0.75rem;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  color: #5a4630;
-}
-.open-hymnal__pager-btn {
-  min-width: 0 !important;
-  padding: 0 !important;
-  font-size: 12px;
+.desktop-home__pager-btn {
   letter-spacing: normal;
-  white-space: nowrap;
 }
-.open-hymnal__placeholder {
+.desktop-home__placeholder {
   align-items: center;
   justify-content: center;
   color: #8a7a64;
 }
+
 .tone-cadmium {
-  color: #0d5c33;
+  color: #14653a;
 }
 .tone-burgundy {
   color: #800020;
@@ -477,6 +456,6 @@ const rowMatch = (line: string) =>
   color: #8a6400;
 }
 .tone-related {
-  color: #8a7a64;
+  color: #6b6b73;
 }
 </style>
