@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// PC版ホームの右カード: 選んだ曲の詳細。
+// ホームの曲の詳細(PC版は右のカード、モバイル版は下から出るシートの中。compact で幅の狭い表示にする)。
 //   一致度・曲名・韓国語名・YouTubeで聴く
 //   楽譜: 調のチップで調を選ぶと、下の五線譜の調号が変わる。五線譜を押すとその調の楽譜をダウンロードする
 //   歌詞: 検索した語を黄色で強調して表示する
@@ -19,6 +19,8 @@ const props = defineProps<{
   hymn: HymnSummary;
   terms: string[];
   download: (id: string, chord?: string) => Promise<void>;
+  /** モバイル用: 余白・文字を小さくし、YouTube ボタンを曲名の下に置く */
+  compact?: boolean;
 }>();
 
 const keysQuery = useQuery(scoreKeysQueryOptions(props.hymn.id));
@@ -75,10 +77,10 @@ const termsLabel = computed(() => props.terms.join("・"));
     flat
     rounded="xl"
     tag="article"
-    class="hymn-detail"
+    :class="['hymn-detail', { 'hymn-detail--compact': compact }]"
     :aria-label="`${hymn.nameJp}の詳細`"
   >
-    <div class="d-flex align-start justify-space-between ga-6">
+    <div class="hymn-detail__head">
       <div class="hymn-detail__heading">
         <v-chip
           v-if="match"
@@ -98,7 +100,7 @@ const termsLabel = computed(() => props.terms.join("・"));
         rel="noopener noreferrer"
         color="primary"
         variant="flat"
-        size="large"
+        :size="compact ? 'default' : 'large'"
         rounded="lg"
         prepend-icon="mdi-youtube"
         class="hymn-detail__yt"
@@ -213,6 +215,12 @@ const termsLabel = computed(() => props.terms.join("・"));
   border: 1px solid #e8e0cf;
   color: #2b1d14;
 }
+.hymn-detail__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
 .hymn-detail__heading {
   min-width: 0;
 }
@@ -298,5 +306,39 @@ const termsLabel = computed(() => props.terms.join("・"));
 }
 .hymn-detail__muted {
   color: #6b5d4a;
+}
+
+/* ===== モバイル(compact) ===== */
+.hymn-detail--compact {
+  padding: 4px 16px 0;
+  border: 0;
+  border-radius: 0 !important;
+}
+.hymn-detail--compact .hymn-detail__head {
+  flex-direction: column;
+  gap: 12px;
+}
+.hymn-detail--compact .hymn-detail__title {
+  font-size: 1.5rem;
+}
+.hymn-detail--compact .hymn-detail__kr {
+  font-size: 1.0625rem;
+}
+.hymn-detail--compact .hymn-detail__keys {
+  gap: 6px 10px;
+}
+/* 五線譜は幅に合わせて縮め、調の名前は五線譜の下へ回す */
+.hymn-detail--compact .hymn-detail__staff {
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  max-width: 100%;
+}
+.hymn-detail--compact .hymn-detail__staff :deep(svg) {
+  width: min(300px, 100%);
+  height: auto;
+}
+.hymn-detail--compact .hymn-detail__lyric {
+  font-size: 1.0625rem;
+  line-height: 2;
 }
 </style>

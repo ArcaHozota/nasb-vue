@@ -7,7 +7,8 @@ import { computed, ref, watch } from "vue";
 import type { HymnSummary } from "@/api/hymns";
 import HymnDetail from "@/components/home/HymnDetail.vue";
 import JerusalemCross from "@/components/JerusalemCross.vue";
-import { hymnNo, matchOf } from "./match";
+import HymnListRow from "@/components/home/HymnListRow.vue";
+import { hymnNo } from "./match";
 
 const props = defineProps<{
   records: HymnSummary[];
@@ -179,39 +180,15 @@ const caption = computed(() => {
           bg-color="transparent"
           @keydown="onListKeyDown"
         >
-          <!-- 押すと Vuetify の波紋が出る行(v-list-item) -->
-          <v-list-item
+          <HymnListRow
             v-for="(r, i) in records"
             :key="r.id"
-            data-hymn-row
+            :hymn="r"
+            :no="hymnNo(page, pageSize, i)"
+            :searching="searching"
             :active="i === selectedIndex"
-            :aria-current="i === selectedIndex ? 'true' : undefined"
-            class="hymn-row"
             @click="selectedId = r.id"
-          >
-            <template #prepend>
-              <span
-                v-if="searching"
-                class="hymn-row__dot"
-                :style="{ background: matchOf(r.lineNumber).dot }"
-                aria-hidden="true"
-              />
-              <span v-else class="hymn-row__no">{{
-                hymnNo(page, pageSize, i)
-              }}</span>
-            </template>
-            <v-list-item-title class="hymn-row__jp">{{
-              r.nameJp
-            }}</v-list-item-title>
-            <v-list-item-subtitle class="hymn-row__kr">{{
-              r.nameKr
-            }}</v-list-item-subtitle>
-            <template v-if="searching" #append>
-              <span :class="['hymn-row__match', matchOf(r.lineNumber).tone]">{{
-                matchOf(r.lineNumber).label
-              }}</span>
-            </template>
-          </v-list-item>
+          />
         </v-list>
 
         <nav class="desktop-home__pager" aria-label="ページ送り">
@@ -368,54 +345,6 @@ const caption = computed(() => {
   color: #6b5d4a;
 }
 
-/* 一覧の1行: 64px(10行で一覧の高さ 640px にぴったり収まる) */
-.hymn-row {
-  height: 64px;
-  min-height: 0 !important;
-  padding-block: 0 !important;
-  box-sizing: border-box;
-  padding-inline: 24px !important;
-  border-bottom: 1px solid #efe8da;
-}
-.hymn-row :deep(.v-list-item__prepend) {
-  width: 32px;
-}
-/* 選んだ行は薄いクリーム色(Vuetify の選択色の重ねは消す) */
-.hymn-row.v-list-item--active {
-  background: #fbf0d6;
-}
-.hymn-row.v-list-item--active :deep(.v-list-item__overlay) {
-  opacity: 0;
-}
-.hymn-row__dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-}
-.hymn-row__no {
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: #800020;
-}
-.hymn-row__jp {
-  font-family: "Noto Serif JP", serif;
-  font-size: 1.0625rem;
-  font-weight: 700;
-  line-height: 1.5;
-}
-.hymn-row__kr {
-  font-family: "Noto Serif KR", serif;
-  font-size: 0.9375rem;
-  line-height: 1.5;
-  color: #6b5d4a;
-  opacity: 1;
-}
-.hymn-row__match {
-  padding-left: 12px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-}
-
 /* ページ送り */
 .desktop-home__pager {
   display: flex;
@@ -434,18 +363,5 @@ const caption = computed(() => {
   align-items: center;
   justify-content: center;
   color: #8a7a64;
-}
-
-.tone-cadmium {
-  color: #14653a;
-}
-.tone-burgundy {
-  color: #800020;
-}
-.tone-naples {
-  color: #8a6400;
-}
-.tone-related {
-  color: #6b6b73;
 }
 </style>

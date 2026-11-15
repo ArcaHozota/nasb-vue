@@ -1,7 +1,12 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import type { RouteLocationNormalized } from "vue-router";
-import { confirmUnsaved, requireAuth } from "./guards";
+import {
+  blockOnMobile,
+  confirmUnsaved,
+  PC_ONLY_MESSAGE,
+  requireAuth,
+} from "./guards";
 import { useAuthStore } from "@/stores/auth";
 import { useFeedbackStore } from "@/stores/feedback";
 import { useUnsavedGuard } from "@/stores/unsavedGuard";
@@ -101,5 +106,36 @@ describe("confirmUnsaved", () => {
     guard.setBypass();
     expect(await runUnsaved(loc("/hymns"), loc("/books/add"))).toBe(true);
     expect(feedback.confirm).not.toHaveBeenCalled();
+  });
+});
+
+describe("blockOnMobile", () => {
+  const pcOnly = (path: string) =>
+    ({
+      path,
+      matched: [{ meta: { pcOnly: true } }],
+    }) as unknown as RouteLocationNormalized;
+  const run = (to: RouteLocationNormalized) =>
+    (blockOnMobile as (to: RouteLocationNormalized) => unknown)(to);
+  // テストは Node で動くので、画面の幅だけを持つ window を差し込む
+  const setWidth = (w: number) => vi.stubGlobal("window", { innerWidth: w });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("モバイルの幅では PC 専用の画面を開かせず、理由を知らせてホームへ戻す", () => {
+    setWidth(390);
+    const feedback = useFeedbackStore();
+    const toast = vi.spyOn(feedback, "toast");
+    expect(run(pcOnly("/login"))).toEqual({ path: "/home", replace: true });
+    expect(toast).toHaveBeenCalledWith(PC_ONLY_MESSAGE);
+  });
+
+  it("PC の幅(768px 以上)なら通す", () => {
+    setWidth(768);
+    expect(run(pcOnly("/login"))).toBe(true);
+  });
+
+  it("PC 専用でない画面(ホーム)はモバイルでも通す", () => {
+    setWidth(390);
+    expect(run(loc("/home"))).toBe(true);
   });
 });

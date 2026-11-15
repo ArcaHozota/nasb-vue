@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { confirmUnsaved, requireAuth } from "./guards";
+import { blockOnMobile, confirmUnsaved, requireAuth } from "./guards";
 
 // 旧 Next の app/ 配下に対応。(admin) グループは meta.requiresAuth の子ルートにする。
 const router = createRouter({
@@ -7,11 +7,16 @@ const router = createRouter({
   routes: [
     { path: "/", redirect: "/home" },
     { path: "/home", component: () => import("@/views/HomeView.vue") },
-    { path: "/login", component: () => import("@/views/LoginView.vue") },
+    // ログイン・管理画面は PC 専用(pcOnly)。モバイルの幅で開くとホームへ戻す
+    {
+      path: "/login",
+      component: () => import("@/views/LoginView.vue"),
+      meta: { pcOnly: true },
+    },
     {
       path: "/",
       component: () => import("@/layouts/AdminLayout.vue"),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, pcOnly: true },
       children: [
         {
           path: "mainmenu",
@@ -40,7 +45,9 @@ const router = createRouter({
   ],
 });
 
-// 先に未保存の確認(断られたらログイン確認の通信もしない)、次にログイン確認
+// 先にモバイルの確認(PC 専用の画面は開かせない)、次に未保存の確認
+// (断られたらログイン確認の通信もしない)、最後にログイン確認
+router.beforeEach(blockOnMobile);
 router.beforeEach(confirmUnsaved);
 router.beforeEach(requireAuth);
 

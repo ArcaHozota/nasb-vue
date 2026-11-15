@@ -1,16 +1,14 @@
 <script setup lang="ts">
-// ホーム画面(旧 app/home/page.tsx)。
-//   PC   : 左右2つのカード(DesktopHome)。左に曲の一覧、右に選んだ曲の詳細。
-//   モバイル: 1枚+次の端がのぞくカルーセル(横スワイプ、終わりに近づくと自動で追加読み込み)。
-// カルーセルは CSS の scroll-snap で作る(旧 Embla 相当。Vuetify の v-carousel は1枚ずつの表示で、
-// 次のカードの端をのぞかせられないため)。
-import { computed, nextTick, onMounted, ref, watch } from "vue";
+// ホーム画面(旧 app/home/page.tsx)。PC版・モバイル版とも、クリーム地・白いカード・臙脂の同じ見た目。
+//   PC     : 左右2つのカード(DesktopHome)。左に曲の一覧(ページ送り)、右に選んだ曲の詳細。
+//   モバイル: 曲の一覧(MobileHome)。下までフリックすると読み足し、曲を押すと詳細が下からシートで出る。
+// ここはデータ取得・検索・ページ送りの状態だけを持つ。
+import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import {
   keepPreviousData,
   useInfiniteQuery,
   useQuery,
-  useQueryClient,
 } from "@tanstack/vue-query";
 import type { AxiosError } from "axios";
 import {
@@ -19,8 +17,6 @@ import {
   type HymnPage,
   type HymnSummary,
 } from "@/api/hymns";
-import type { ScoreKey } from "@/lib/scoreKeys";
-import { fetchScoreKeysOrToast } from "@/lib/scoreKeys";
 import { extractTerms } from "@/lib/lyrics";
 import {
   searchIndexQueryOptions,
@@ -32,26 +28,16 @@ import { consumeRedirectMessage } from "@/lib/session";
 import { EMPTY_STRING } from "@/lib/constants";
 import { useFeedbackStore } from "@/stores/feedback";
 import { useIsMobile } from "@/composables/useIsMobile";
-import ScoreKeyDialog from "@/components/ScoreKeyDialog.vue";
-import LyricViewer, { type LyricTarget } from "@/components/LyricViewer.vue";
-import PageBackground from "@/components/PageBackground.vue";
 import DesktopHome from "@/components/home/DesktopHome.vue";
-import HymnCard from "@/components/home/HymnCard.vue";
-import JerusalemCross from "@/components/JerusalemCross.vue";
+import MobileHome from "@/components/home/MobileHome.vue";
 
 // デスクトップ: 左の一覧に並べる曲数(ページ送りで切替)
 const PAGE_SIZE = 10;
-// モバイル: カルーセルに一度に追加読み込みする件数
+// モバイル: 一覧に一度に読み足す件数
 const MOBILE_BATCH_SIZE = 10;
-// カルーセルの残りがこの枚数以下になったら次の分を先読みする
-const MOBILE_PREFETCH_REMAINING = 4;
-// 未取得のスライドのうち、現在位置からこの枚数以内だけスケルトンカードを描く。
-// それより遠いスライドは同じ大きさの空の箱にする(画面に入らないので見た目は変わらない)
-const MOBILE_SKELETON_WINDOW = 4;
 
 const router = useRouter();
 const feedback = useFeedbackStore();
-const queryClient = useQueryClient();
 const isMobile = useIsMobile();
 
 // 別端末ログインによる強制ログアウト等で localStorage に残したメッセージをトースト表示する
@@ -94,6 +80,9 @@ const localNotice = computed(() =>
     ? "一致する曲が見つからなかったため、通常の順序で表示しています"
     : null,
 );
+const hitCount = computed(() =>
+  isLocal.value && local.value ? local.value.hitCount : undefined,
+);
 
 // モバイル/デスクトップが切り替わったらデスクトップ側は1ページ目に戻す
 watch(isMobile, () => {
@@ -115,7 +104,7 @@ const desktopQuery = useQuery(
   })),
 );
 
-// ===== モバイル: カルーセル用の無限読み込み =====
+// ===== モバイル: 一覧の読み足し =====
 const mobileQuery = useInfiniteQuery(
   computed(() => ({
     queryKey: hymnKeys.infinite(MOBILE_BATCH_SIZE, submittedKeyword.value),
@@ -161,11 +150,11 @@ const desktopBusy = computed(() =>
   isLocal.value ? indexQuery.isPending.value : desktopQuery.isFetching.value,
 );
 
-// モバイル: カルーセルの現在位置(画面検索では、この位置から先読み分だけカードを描く)
-const currentSlide = ref(0);
+// 画面検索のときにモバイルの一覧に出している件数(下までフリックするたびに増やす)
+const localShown = ref(MOBILE_BATCH_SIZE);
 const mobileRecords = computed<HymnSummary[]>(() =>
   isLocal.value
-    ? localAll.value.slice(0, currentSlide.value + MOBILE_BATCH_SIZE)
+    ? localAll.value.slice(0, localShown.value)
     : (mobileQuery.data.value?.pages.flatMap((p) => p.records) ?? []),
 );
 const mobileTotal = computed(() =>
@@ -173,114 +162,44 @@ const mobileTotal = computed(() =>
     ? localAll.value.length
     : (mobileQuery.data.value?.pages[0]?.totalRecords ?? 0),
 );
+const mobileHasMore = computed(() =>
+  isLocal.value
+    ? localShown.value < localAll.value.length
+    : !!mobileQuery.hasNextPage.value,
+);
 const mobileBusy = computed(() =>
   isLocal.value ? indexQuery.isPending.value : mobileQuery.isFetching.value,
 );
-
-// スライドの枚数は最初から「全件数」で固定し、未取得の分はスケルトンで埋めておく
-// (追加読み込みでスライドの中身だけが入れ替わり、スクロール位置がずれない)
-type SlideKind = "card" | "skeleton" | "placeholder";
-const slideKind = (i: number): SlideKind =>
-  mobileRecords.value[i]
-    ? "card"
-    : Math.abs(i - currentSlide.value) <= MOBILE_SKELETON_WINDOW
-      ? "skeleton"
-      : "placeholder";
-
-// ===== モバイル: カルーセルの現在位置と先読み =====
-const track = ref<HTMLElement | null>(null);
-let scrollFrame = 0;
-const onTrackScroll = () => {
-  cancelAnimationFrame(scrollFrame);
-  scrollFrame = requestAnimationFrame(() => {
-    const el = track.value;
-    const first = el?.firstElementChild as HTMLElement | null;
-    if (!el || !first) return;
-    // 1枚分の送り幅(カード幅 + すき間)
-    const step =
-      first.offsetWidth + parseFloat(getComputedStyle(el).columnGap || "0");
-    currentSlide.value = Math.max(0, Math.round(el.scrollLeft / step));
-  });
+/** 次の曲を読み足す。読み足したあとも残りがあれば true */
+const loadMoreMobile = async (): Promise<boolean> => {
+  if (isLocal.value) {
+    localShown.value += MOBILE_BATCH_SIZE;
+    return localShown.value < localAll.value.length;
+  }
+  if (!mobileQuery.hasNextPage.value) return false;
+  if (mobileQuery.isFetchingNextPage.value) return true;
+  const result = await mobileQuery.fetchNextPage();
+  if (result.isError) throw result.error;
+  return !!result.hasNextPage;
 };
-
-watch(
-  () =>
-    [
-      currentSlide.value,
-      mobileRecords.value.length,
-      mobileQuery.hasNextPage.value,
-    ] as const,
-  () => {
-    if (
-      isMobile.value &&
-      !isLocal.value &&
-      mobileQuery.hasNextPage.value &&
-      !mobileQuery.isFetchingNextPage.value &&
-      currentSlide.value >=
-        mobileRecords.value.length - MOBILE_PREFETCH_REMAINING
-    ) {
-      void mobileQuery.fetchNextPage();
-    }
-  },
-);
-
-// 検索やロゴクリックでデータが入れ替わる時は、カルーセルを先頭へ戻す
-const resetCarousel = () => {
-  currentSlide.value = 0;
-  void nextTick(() => track.value?.scrollTo({ left: 0 }));
-};
-
-const currentBg = computed(() =>
-  isMobile.value ? "/assets/home-bg2.webp" : "/assets/home-bg3.webp",
-);
 
 // 検索欄は <form> にして、Enter での送信(日本語変換中の Enter は除く)をブラウザに任せる
 const onSearch = () => {
   page.value = 1;
+  localShown.value = MOBILE_BATCH_SIZE;
   submittedKeyword.value = keyword.value;
-  resetCarousel();
 };
 
-// モバイル: 調が複数ある曲は中央ダイアログで選ばせ、1件ならそのままダウンロード
-const keyDialog = ref<{ item: HymnSummary; keys: ScoreKey[] } | null>(null);
-const keyDialogOpen = computed({
-  get: () => keyDialog.value !== null,
-  set: (o) => {
-    if (!o) keyDialog.value = null;
-  },
-});
-const onMobileScore = async (id: string) => {
-  const keys = await fetchScoreKeysOrToast(queryClient, id);
-  if (keys === null) return;
-  const item = mobileRecords.value.find((r) => r?.id === id);
-  if (keys.length > 1 && item) keyDialog.value = { item, keys };
-  else await downloadScoreOrToast(id);
-};
-
-// ===== 歌詞の表示(照合) =====
-// モバイルは画面の下から出るシートで表示する(PC版は右のカードに常に表示する)
-const lyricTarget = ref<LyricTarget | null>(null);
-const openLyric = (item: HymnSummary) => {
-  lyricTarget.value = {
-    id: item.id,
-    nameJp: item.nameJp,
-    nameKr: item.nameKr,
-    lineNumber: item.lineNumber,
-  };
-};
 // ハイライトする語。確定した検索キーワードから作る(入力中の文字では変わらない)
 const lyricTerms = computed(() => extractTerms(submittedKeyword.value));
-
-/** ダイアログ・シートをカードと同じガラス風・同じ色にする(app.css の .bubble-glass) */
-const bubbleClass = (line: string | undefined) =>
-  `bubble-glass bubble-${line && ["BURGUNDY", "NAPLES", "CADMIUM"].includes(line) ? line : "DEFAULT"}`;
 
 const goLogin = () => router.push("/login");
 const reload = () => {
   page.value = 1;
+  localShown.value = MOBILE_BATCH_SIZE;
   keyword.value = EMPTY_STRING;
   submittedKeyword.value = EMPTY_STRING;
-  resetCarousel();
+  window.scrollTo({ top: 0 });
 };
 </script>
 
@@ -297,7 +216,7 @@ const reload = () => {
     :is-fetching="desktopBusy"
     :submitted-keyword="submittedKeyword"
     :terms="lyricTerms"
-    :hit-count="isLocal && local ? local.hitCount : undefined"
+    :hit-count="hitCount"
     :notice="localNotice"
     :download="downloadScoreOrToast"
     @search="onSearch"
@@ -306,246 +225,21 @@ const reload = () => {
     @update:page="(p) => (page = p)"
   />
 
-  <!-- ===== モバイル版 ===== -->
-  <div v-else class="home">
-    <PageBackground :src="currentBg" />
-
-    <header class="home-nav">
-      <button type="button" class="home-nav__brand" @click="reload">
-        <JerusalemCross :size="66" />
-        <span class="effect-shine home-nav__title">NASB1995</span>
-      </button>
-    </header>
-
-    <main class="home__main">
-      <form role="search" class="home__search" @submit.prevent="onSearch">
-        <!-- 読み込み中は、検索欄のまわりに細いリングを脈打たせる -->
-        <span
-          v-if="desktopBusy || mobileBusy"
-          aria-hidden="true"
-          class="home__search-ring"
-        />
-        <input
-          v-model="keyword"
-          type="text"
-          placeholder="曲名・歌詞のキーワードで検索してください"
-          aria-label="キーワード"
-          class="home__search-input"
-        />
-        <v-btn
-          type="submit"
-          icon="mdi-magnify"
-          size="small"
-          variant="text"
-          aria-label="検索"
-          class="home__search-btn"
-        />
-      </form>
-
-      <p v-if="localNotice" role="status" class="home__notice">
-        {{ localNotice }}
-      </p>
-
-      <!-- 1枚+次の端がのぞくカルーセル -->
-      <div
-        v-if="mobileBusy && mobileRecords.length === 0"
-        class="home__track home__track--loading"
-      >
-        <div class="home__slide"><HymnCard /></div>
-        <div class="home__slide"><HymnCard /></div>
-      </div>
-      <v-empty-state
-        v-else-if="mobileRecords.length === 0"
-        icon="mdi-magnify-close"
-        title="該当データなし"
-        text="別の韓国語単語で検索してください。"
-        class="home__empty"
-      />
-      <div
-        v-else
-        ref="track"
-        class="home__track"
-        role="region"
-        aria-roledescription="carousel"
-        aria-label="賛美歌カード"
-        @scroll.passive="onTrackScroll"
-      >
-        <!-- key は位置(i)で固定: 読み込み完了でスライド自体を差し替えず、中身だけ入れ替える -->
-        <div
-          v-for="i in mobileTotal"
-          :key="i"
-          class="home__slide"
-          role="group"
-          aria-roledescription="slide"
-        >
-          <HymnCard
-            v-if="slideKind(i - 1) !== 'placeholder'"
-            :item="mobileRecords[i - 1]"
-            @score="onMobileScore"
-            @lyric="openLyric"
-          />
-          <!-- .glass-card.is-slide と同じ高さを確保し、カルーセルの高さが変わらないようにする -->
-          <div v-else class="home__placeholder" aria-hidden="true" />
-        </div>
-      </div>
-      <p
-        v-if="mobileTotal > 0"
-        class="page-info home__page-info"
-        aria-live="polite"
-      >
-        {{ Math.min(currentSlide + 1, mobileTotal) }} / {{ mobileTotal }}件
-      </p>
-
-      <LyricViewer
-        :target="lyricTarget"
-        :terms="lyricTerms"
-        variant="sheet"
-        :content-class="bubbleClass(lyricTarget?.lineNumber)"
-        @close="lyricTarget = null"
-      />
-
-      <ScoreKeyDialog
-        v-model="keyDialogOpen"
-        :title="
-          keyDialog
-            ? `${keyDialog.item.nameJp} / ${keyDialog.item.nameKr}`
-            : undefined
-        "
-        :keys="keyDialog?.keys ?? []"
-        :content-class="bubbleClass(keyDialog?.item.lineNumber)"
-        item-class="bubble-item"
-        @select="
-          (chord) => keyDialog && downloadScoreOrToast(keyDialog.item.id, chord)
-        "
-      />
-
-      <p class="hint-verse home__verse">
-        "Heaven and Earth will pass away, but My words will not pass away." ---
-        Luke 21:33
-      </p>
-    </main>
-  </div>
+  <!-- ===== モバイル版: 一覧＋下から出る詳細 ===== -->
+  <MobileHome
+    v-else
+    v-model:keyword="keyword"
+    :records="mobileRecords"
+    :total-records="mobileTotal"
+    :is-fetching="mobileBusy"
+    :has-more="mobileHasMore"
+    :load-more="loadMoreMobile"
+    :submitted-keyword="submittedKeyword"
+    :terms="lyricTerms"
+    :hit-count="hitCount"
+    :notice="localNotice"
+    :download="downloadScoreOrToast"
+    @search="onSearch"
+    @reload="reload"
+  />
 </template>
-
-<style scoped>
-.home {
-  position: relative;
-  z-index: 0;
-  min-height: 100vh;
-}
-.home-nav {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 24px;
-  background: #fffef7;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-.home-nav__brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0;
-  border: 0;
-  background: none;
-}
-.home-nav__title {
-  font-size: 2.2rem;
-}
-.home__main {
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 32px 16px 64px;
-}
-.home__search {
-  position: relative;
-  max-width: 520px;
-  margin: 0 auto 28px;
-}
-.home__search-ring {
-  pointer-events: none;
-  position: absolute;
-  inset: -2px;
-  border-radius: 9999px;
-  box-shadow: 0 0 0 2px rgba(128, 0, 32, 0.6);
-  animation: home-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-@keyframes home-pulse {
-  50% {
-    opacity: 0.5;
-  }
-}
-.home__search-input {
-  width: 100%;
-  padding: 12px 44px 12px 20px;
-  border: 0;
-  border-radius: 9999px;
-  outline: none;
-  background: rgba(255, 255, 255, 0.67);
-  font-size: 1rem;
-}
-.home__search-input::placeholder {
-  color: rgba(0, 0, 0, 0.5);
-}
-.home__search-btn {
-  position: absolute;
-  top: 50%;
-  right: 6px;
-  translate: 0 -50%;
-}
-.home__notice,
-.home__page-info,
-.home__verse {
-  color: #fff;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-}
-.home__notice {
-  margin-bottom: 12px;
-  text-align: center;
-  font-size: 0.75rem;
-}
-/* カルーセル: 横スクロール + スナップ。上下に余白を足し(負のマージンで相殺)、浮き上がり・光が切れないようにする */
-.home__track {
-  display: flex;
-  column-gap: 12px;
-  margin: -28px 0;
-  padding: 28px 0;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-}
-.home__track::-webkit-scrollbar {
-  display: none;
-}
-.home__track--loading {
-  overflow: hidden;
-}
-.home__slide {
-  flex: 0 0 80%;
-  min-width: 0;
-  scroll-snap-align: start;
-}
-.home__placeholder {
-  height: 100%;
-  min-height: 44vh;
-}
-.home__empty {
-  color: #fff;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
-}
-.home__page-info {
-  margin-top: 12px;
-  text-align: center;
-  font-size: 0.75rem;
-}
-.home__verse {
-  margin-top: 20px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #fffff0;
-}
-</style>
