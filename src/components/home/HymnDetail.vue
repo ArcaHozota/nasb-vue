@@ -259,6 +259,11 @@ const termsLabel = computed(() => props.terms.join("・"));
 .hymn-detail__key.v-chip--selected :deep(.v-chip__overlay) {
   opacity: 0;
 }
+/* Vuetify の outlined は枠線 1px が外側に付き、flat には枠線が無いので、選んだ調だけ上下左右 1px 小さく見える。
+   選んだ調にも透明な枠線 1px を付けて、同じ大きさにそろえる(背景は枠線の下まで塗られる) */
+.hymn-detail__key.v-chip--variant-flat {
+  border: 1px solid transparent;
+}
 .hymn-detail__staff {
   margin-top: 8px;
 }
