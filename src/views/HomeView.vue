@@ -37,6 +37,7 @@ import LyricViewer, { type LyricTarget } from "@/components/LyricViewer.vue";
 import PageBackground from "@/components/PageBackground.vue";
 import DesktopHome from "@/components/home/DesktopHome.vue";
 import HymnCard from "@/components/home/HymnCard.vue";
+import JerusalemCross from "@/components/JerusalemCross.vue";
 
 // デスクトップ: 左の一覧に並べる曲数(ページ送りで切替)
 const PAGE_SIZE = 10;
@@ -311,12 +312,7 @@ const reload = () => {
 
     <header class="home-nav">
       <button type="button" class="home-nav__brand" @click="reload">
-        <img
-          src="/assets/jerusalem-cross2.svg"
-          alt="NASB1995"
-          width="66"
-          height="66"
-        />
+        <JerusalemCross :size="66" />
         <span class="effect-shine home-nav__title">NASB1995</span>
       </button>
     </header>

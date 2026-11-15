@@ -6,6 +6,7 @@
 import { computed, ref, watch } from "vue";
 import type { HymnSummary } from "@/api/hymns";
 import HymnDetail from "@/components/home/HymnDetail.vue";
+import JerusalemCross from "@/components/JerusalemCross.vue";
 import { hymnNo, matchOf } from "./match";
 
 const props = defineProps<{
@@ -85,20 +86,7 @@ const caption = computed(() => {
         aria-label="ホーム(検索をリセット)"
         @click="emit('reload')"
       >
-        <svg viewBox="0 0 66 66" class="desktop-home__cross" aria-hidden="true">
-          <g fill="currentColor">
-            <rect x="27" y="4" width="12" height="58" />
-            <rect x="4" y="27" width="58" height="12" />
-            <rect x="15" y="9" width="3" height="13" />
-            <rect x="10" y="14" width="13" height="3" />
-            <rect x="48" y="9" width="3" height="13" />
-            <rect x="43" y="14" width="13" height="3" />
-            <rect x="15" y="44" width="3" height="13" />
-            <rect x="10" y="49" width="13" height="3" />
-            <rect x="48" y="44" width="3" height="13" />
-            <rect x="43" y="49" width="13" height="3" />
-          </g>
-        </svg>
+        <JerusalemCross :size="34" />
         <span class="desktop-home__logo">NASB1995</span>
       </v-btn>
 
@@ -308,10 +296,6 @@ const caption = computed(() => {
 }
 .desktop-home__brand :deep(.v-btn__content) {
   gap: 10px;
-}
-.desktop-home__cross {
-  width: 30px;
-  height: 30px;
 }
 .desktop-home__logo {
   font-family: "Niconne", cursive;

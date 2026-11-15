@@ -16,6 +16,7 @@ import { hardRedirectHome } from "@/lib/session";
 import { DELAY_APOLOGY, EMPTY_STRING } from "@/lib/constants";
 import { useIsMobile } from "@/composables/useIsMobile";
 import { useSessionCheck } from "@/composables/useSessionCheck";
+import JerusalemCross from "@/components/JerusalemCross.vue";
 
 const RAIL_STORAGE_KEY = "sidebar_rail";
 
@@ -202,11 +203,7 @@ const onSearch = () => {
           closeOnMobile();
         "
       >
-        <img
-          src="/assets/jerusalem-cross2.svg"
-          alt=""
-          class="admin-brand__logo"
-        />
+        <JerusalemCross :size="isRail ? 32 : 44" />
         <span v-if="!isRail" class="effect-shine admin-brand__title"
           >NASB1995</span
         >
@@ -366,16 +363,6 @@ const onSearch = () => {
 .admin-brand--rail {
   justify-content: center;
   padding: 12px 0;
-}
-.admin-brand__logo {
-  width: 44px;
-  height: 44px;
-  flex-shrink: 0;
-  object-fit: cover;
-}
-.admin-brand--rail .admin-brand__logo {
-  width: 32px;
-  height: 32px;
 }
 .admin-brand__title {
   white-space: nowrap;

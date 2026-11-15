@@ -14,10 +14,8 @@ test("サイドバー: 見出しごとに項目を並べ、今の画面の項目
   const current = nav.locator('[aria-current="page"]');
   await expect(current).toHaveCount(1);
   await expect(current).toContainText("賛美歌一覧");
-  // ロゴの画像が読み込まれてから撮る
-  await expect
-    .poll(() => page.locator(".admin-brand__logo").evaluate((img: HTMLImageElement) => img.naturalWidth))
-    .toBeGreaterThan(0);
+  // ロゴはエルサレム十字(共通の部品。臙脂)
+  await expect(page.locator(".admin-brand .jerusalem-cross")).toBeVisible();
   await page.screenshot({ path: process.env.SIDEBAR_SHOT ?? "test-results/sidebar.png" });
 
   // 押すとその画面へ移り、選択中も移る
