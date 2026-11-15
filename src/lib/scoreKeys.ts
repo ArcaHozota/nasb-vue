@@ -6,6 +6,7 @@
 import type { QueryClient } from "@tanstack/vue-query";
 import api from "@/api/axios";
 import { extractErrorMessage } from "@/lib/constants";
+import { keyOrder } from "@/lib/keySignature";
 import { useFeedbackStore } from "@/stores/feedback";
 
 /** 楽譜が登録されている調(旧 components/ScoreKeyPopover.tsx から移動) */
@@ -27,10 +28,15 @@ export const scoreKeysQueryOptions = (id: string) => ({
       params: { keysOnly: true },
     });
     const list = Array.isArray(data) ? data : [];
-    return list.map((k: { chord: string; isOriginal?: boolean | string }) => ({
-      chord: k.chord,
-      isOriginal: k.isOriginal === true || k.isOriginal === "true",
-    }));
+    // サーバーの並びに関係なく、A → B♭ → B → … → A♭ の順にそろえる(どの画面でも同じ順に並ぶ)
+    return list
+      .map((k: { chord: string; isOriginal?: boolean | string }) => ({
+        chord: k.chord,
+        isOriginal: k.isOriginal === true || k.isOriginal === "true",
+      }))
+      .sort(
+        (a: ScoreKey, b: ScoreKey) => keyOrder(a.chord) - keyOrder(b.chord),
+      );
   },
   staleTime: SCORE_KEYS_STALE_MS,
 });

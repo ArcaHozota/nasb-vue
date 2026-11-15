@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { accidentalSteps, keyLabel, keySignature } from "./keySignature";
+import {
+  accidentalSteps,
+  keyColor,
+  keyOrder,
+  keyLabel,
+  keySignature,
+} from "./keySignature";
 
 describe("keyLabel", () => {
   it("末尾の b を ♭ にする", () => {
@@ -62,5 +68,48 @@ describe("accidentalSteps", () => {
   it("ハ長調・不明な調では空", () => {
     expect(accidentalSteps(keySignature("C"))).toEqual([]);
     expect(accidentalSteps(null)).toEqual([]);
+  });
+});
+
+describe("keyColor", () => {
+  it("調ごとの色を返し、未知の調は臙脂", () => {
+    expect(keyColor("Ab")).toBe("#6a2c7a");
+    expect(keyColor("G")).toBe("#fe5000");
+    expect(keyColor("X")).toBe("#800020");
+  });
+});
+
+describe("keyOrder", () => {
+  it("A → B♭ → B → C → D♭ → D → E♭ → E → F → G♭ → G → A♭ の順。未知の調は最後", () => {
+    const all = [
+      "Ab",
+      "G",
+      "Gb",
+      "F",
+      "E",
+      "Eb",
+      "D",
+      "Db",
+      "C",
+      "B",
+      "Bb",
+      "A",
+      "X",
+    ];
+    expect([...all].sort((a, b) => keyOrder(a) - keyOrder(b))).toEqual([
+      "A",
+      "Bb",
+      "B",
+      "C",
+      "Db",
+      "D",
+      "Eb",
+      "E",
+      "F",
+      "Gb",
+      "G",
+      "Ab",
+      "X",
+    ]);
   });
 });

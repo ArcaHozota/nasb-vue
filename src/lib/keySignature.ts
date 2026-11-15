@@ -28,6 +28,45 @@ const SIGNATURES: Record<string, Omit<KeySignature, "label">> = {
   Gb: { accidental: "flat", count: 6, nameJa: "変ト長調" },
 };
 
+/** 調の並び順: A から半音ずつ上がる(楽譜アップロードの調の並びと同じ) */
+const KEY_ORDER = [
+  "A",
+  "Bb",
+  "B",
+  "C",
+  "Db",
+  "D",
+  "Eb",
+  "E",
+  "F",
+  "Gb",
+  "G",
+  "Ab",
+];
+
+/** 調の並びでの位置。未知の調は最後 */
+export const keyOrder = (chord: string) => {
+  const i = KEY_ORDER.indexOf(chord);
+  return i === -1 ? KEY_ORDER.length : i;
+};
+
+/** 調ごとの色(PC版ホームの調のチップ)。未知の調は臙脂 */
+const KEY_COLORS: Record<string, string> = {
+  A: "#4f9a5a",
+  Ab: "#6a2c7a",
+  B: "#0d66cc",
+  Bb: "#a33a4a",
+  C: "#ec4569",
+  D: "#f2c230",
+  Db: "#7a3a6f",
+  E: "#25d8b9",
+  Eb: "#800020",
+  F: "#a5482c",
+  G: "#fe5000",
+  Gb: "#7b5cff",
+};
+export const keyColor = (chord: string) => KEY_COLORS[chord] ?? "#800020";
+
 /** "Bb" → "B♭" */
 export const keyLabel = (chord: string) =>
   chord.length > 1 && chord.endsWith("b") ? `${chord.slice(0, -1)}♭` : chord;

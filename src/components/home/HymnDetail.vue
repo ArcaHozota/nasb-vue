@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/vue-query";
 import Highlighted from "@/components/Highlighted.vue";
 import KeyStaff from "@/components/home/KeyStaff.vue";
 import { extractErrorMessage } from "@/lib/constants";
-import { keyLabel } from "@/lib/keySignature";
+import { keyColor, keyLabel } from "@/lib/keySignature";
 import { countHits, lyricQueryOptions } from "@/lib/lyrics";
 import { scoreKeysQueryOptions } from "@/lib/scoreKeys";
 import type { HymnSummary } from "@/api/hymns";
@@ -96,7 +96,7 @@ const termsLabel = computed(() => props.terms.join("・"));
         :href="hymn.link"
         target="_blank"
         rel="noopener noreferrer"
-        color="#c62828"
+        color="primary"
         variant="flat"
         size="large"
         rounded="lg"
@@ -107,7 +107,7 @@ const termsLabel = computed(() => props.terms.join("・"));
       </v-btn>
     </div>
 
-    <!-- 楽譜: 調のチップで調を選ぶと、下の五線譜の調号が変わる(選んだ調は塗りつぶし) -->
+    <!-- 楽譜: 調のチップで調を選ぶと、下の五線譜の調号が変わる(調ごとの色。選んだ調は塗りつぶし) -->
     <div class="hymn-detail__keys">
       <span class="hymn-detail__keys-label">𝄞 楽譜</span>
       <template v-if="keysQuery.isPending.value">
@@ -122,8 +122,8 @@ const termsLabel = computed(() => props.terms.join("・"));
       <v-chip-group
         v-else-if="keys.length > 0"
         :model-value="chord"
-        selected-class="hymn-detail__key--on"
         aria-label="調を選ぶ"
+        column
         class="py-0"
         @update:model-value="onPick"
       >
@@ -131,7 +131,9 @@ const termsLabel = computed(() => props.terms.join("・"));
           v-for="k in keys"
           :key="k.chord"
           :value="k.chord"
-          variant="outlined"
+          :color="keyColor(k.chord)"
+          :base-color="keyColor(k.chord)"
+          :variant="k.chord === chord ? 'flat' : 'outlined'"
           class="hymn-detail__key"
         >
           {{ keyLabel(k.chord) }}{{ k.isOriginal ? "＊" : "" }}
@@ -252,14 +254,10 @@ const termsLabel = computed(() => props.terms.join("・"));
   justify-content: center;
   font-weight: 600;
 }
-/* 選んでいない調は薄い枠、選んだ調は臙脂で塗りつぶす */
-.hymn-detail__key {
-  border-color: #d9cfbc;
-}
-.hymn-detail__key.hymn-detail__key--on {
-  border-color: #800020;
-  background: #800020;
-  color: #fff;
+/* 調ごとの色: 選んでいない調はその色の枠と文字、選んだ調はその色で塗りつぶす(文字色は Vuetify が見やすい方を選ぶ)。
+   選んだ調に Vuetify が重ねる白い膜(選択の表示)は消し、指定どおりの色にする */
+.hymn-detail__key.v-chip--selected :deep(.v-chip__overlay) {
+  opacity: 0;
 }
 .hymn-detail__staff {
   margin-top: 8px;
