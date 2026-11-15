@@ -1,12 +1,13 @@
 <script setup lang="ts">
 // PC版ホームの右カード: 選んだ曲の詳細。
 //   一致度・曲名・韓国語名・YouTubeで聴く
-//   楽譜: 登録済みの調をチップで並べ、押すとその調の楽譜をダウンロードする(オリジナルキーは塗りつぶし)
+//   楽譜: 調のチップで調を選ぶと、下の五線譜の調号が変わる。五線譜を押すとその調の楽譜をダウンロードする
 //   歌詞: 検索した語を黄色で強調して表示する
 // 親が :key="hymn.id" で曲ごとに作り直す。
 import { computed, ref } from "vue";
 import { useQuery } from "@tanstack/vue-query";
 import Highlighted from "@/components/Highlighted.vue";
+import KeyStaff from "@/components/home/KeyStaff.vue";
 import { extractErrorMessage } from "@/lib/constants";
 import { keyLabel } from "@/lib/keySignature";
 import { countHits, lyricQueryOptions } from "@/lib/lyrics";
@@ -24,17 +25,42 @@ const keysQuery = useQuery(scoreKeysQueryOptions(props.hymn.id));
 const lyricQuery = useQuery(lyricQueryOptions(props.hymn.id));
 const keys = computed(() => keysQuery.data.value ?? []);
 
-// ダウンロード中の調(二重押しを防ぎ、そのチップに読み込み中を出す)
-const downloading = ref<string | null>(null);
-const onDownload = async (chord: string) => {
-  if (downloading.value) return;
-  downloading.value = chord;
+// 最初はオリジナルキー、無ければ並びの最初の調
+const picked = ref<string | null>(null);
+const chord = computed(() => {
+  const list = keys.value;
+  if (picked.value && list.some((k) => k.chord === picked.value))
+    return picked.value;
+  return list.find((k) => k.isOriginal)?.chord ?? list[0]?.chord ?? null;
+});
+const isOriginal = computed(
+  () => keys.value.find((k) => k.chord === chord.value)?.isOriginal ?? false,
+);
+const onPick = (v: unknown) => {
+  // 選択済みを再クリックすると空になるので、選択を維持する
+  if (typeof v === "string" && v) picked.value = v;
+};
+
+const downloading = ref(false);
+const onDownload = async () => {
+  if (!chord.value) return;
+  downloading.value = true;
   try {
-    await props.download(props.hymn.id, chord);
+    await props.download(props.hymn.id, chord.value);
   } finally {
-    downloading.value = null;
+    downloading.value = false;
   }
 };
+
+const staffState = computed(() =>
+  keysQuery.isPending.value
+    ? "loading"
+    : keys.value.length === 0
+      ? "empty"
+      : downloading.value
+        ? "downloading"
+        : "ready",
+);
 
 const match = computed(() =>
   props.terms.length > 0 ? matchOf(props.hymn.lineNumber) : null,
@@ -81,7 +107,7 @@ const termsLabel = computed(() => props.terms.join("・"));
       </v-btn>
     </div>
 
-    <!-- 楽譜: 調のチップを押すと、その調の楽譜をダウンロードする -->
+    <!-- 楽譜: 調のチップで調を選ぶと、下の五線譜の調号が変わる(選んだ調は塗りつぶし) -->
     <div class="hymn-detail__keys">
       <span class="hymn-detail__keys-label">𝄞 楽譜</span>
       <template v-if="keysQuery.isPending.value">
@@ -93,34 +119,26 @@ const termsLabel = computed(() => props.terms.join("・"));
           class="bg-transparent"
         />
       </template>
-      <template v-else-if="keys.length > 0">
+      <v-chip-group
+        v-else-if="keys.length > 0"
+        :model-value="chord"
+        selected-class="hymn-detail__key--on"
+        aria-label="調を選ぶ"
+        class="py-0"
+        @update:model-value="onPick"
+      >
         <v-chip
           v-for="k in keys"
           :key="k.chord"
-          :color="k.isOriginal ? 'primary' : undefined"
-          :variant="k.isOriginal ? 'flat' : 'outlined'"
-          :disabled="downloading !== null && downloading !== k.chord"
-          :aria-label="`${keyLabel(k.chord)}${k.isOriginal ? '(オリジナルキー)' : ''}の楽譜をダウンロード`"
+          :value="k.chord"
+          variant="outlined"
           class="hymn-detail__key"
-          @click="onDownload(k.chord)"
         >
-          <v-progress-circular
-            v-if="downloading === k.chord"
-            indeterminate
-            size="14"
-            width="2"
-            class="mr-1"
-          />
           {{ keyLabel(k.chord) }}{{ k.isOriginal ? "＊" : "" }}
         </v-chip>
-        <span
-          v-if="keys.some((k) => k.isOriginal)"
-          class="hymn-detail__keys-note"
-          >＊はオリジナルキー</span
-        >
-      </template>
-      <span v-else-if="!keysQuery.error.value" class="hymn-detail__keys-note"
-        >楽譜は登録されていません</span
+      </v-chip-group>
+      <span v-if="keys.some((k) => k.isOriginal)" class="hymn-detail__keys-note"
+        >＊はオリジナルキー</span
       >
       <span v-if="keysQuery.error.value" class="hymn-detail__err">
         {{
@@ -128,6 +146,15 @@ const termsLabel = computed(() => props.terms.join("・"));
         }}
       </span>
     </div>
+
+    <!-- 五線譜: 選んだ調の調号を描き、押すとその調の楽譜をダウンロードする -->
+    <KeyStaff
+      :chord="chord"
+      :is-original="isOriginal"
+      :state="staffState"
+      class="hymn-detail__staff"
+      @download="onDownload"
+    />
 
     <p
       v-if="terms.length > 0 && lyricQuery.isSuccess.value"
@@ -143,11 +170,24 @@ const termsLabel = computed(() => props.terms.join("・"));
     <v-divider class="hymn-detail__divider" />
 
     <div class="hymn-detail__lyric-scroll">
-      <div v-if="lyricQuery.isPending.value" class="d-flex justify-center py-10">
-        <v-progress-circular indeterminate size="24" width="2" color="primary" />
+      <div
+        v-if="lyricQuery.isPending.value"
+        class="d-flex justify-center py-10"
+      >
+        <v-progress-circular
+          indeterminate
+          size="24"
+          width="2"
+          color="primary"
+        />
       </div>
       <p v-if="lyricQuery.error.value" class="py-6 text-body-medium">
-        {{ extractErrorMessage(lyricQuery.error.value, "歌詞の取得に失敗しました") }}
+        {{
+          extractErrorMessage(
+            lyricQuery.error.value,
+            "歌詞の取得に失敗しました",
+          )
+        }}
       </p>
       <template v-if="lyricQuery.isSuccess.value">
         <div v-if="lyric" class="hymn-detail__lyric">
@@ -212,9 +252,17 @@ const termsLabel = computed(() => props.terms.join("・"));
   justify-content: center;
   font-weight: 600;
 }
-/* オリジナル以外の調は、薄い枠(文字は本文と同じ色) */
-.hymn-detail__key.v-chip--variant-outlined {
+/* 選んでいない調は薄い枠、選んだ調は臙脂で塗りつぶす */
+.hymn-detail__key {
   border-color: #d9cfbc;
+}
+.hymn-detail__key.hymn-detail__key--on {
+  border-color: #800020;
+  background: #800020;
+  color: #fff;
+}
+.hymn-detail__staff {
+  margin-top: 8px;
 }
 .hymn-detail__err {
   font-size: 0.875rem;
