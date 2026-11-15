@@ -26,3 +26,6 @@ dist-ssr
 # Playwright
 test-results
 playwright-report
+
+# vue-tsc -b の作業ファイル
+*.tsbuildinfo
