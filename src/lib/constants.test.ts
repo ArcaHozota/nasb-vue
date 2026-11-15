@@ -45,4 +45,8 @@ describe("required", () => {
   it("入力があれば空文字", () => {
     expect(required("a")).toBe("");
   });
+
+  it("エラー文言は「入力してください。」", () => {
+    expect(required("")).toBe("入力してください。");
+  });
 });

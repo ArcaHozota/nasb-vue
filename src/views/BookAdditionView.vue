@@ -29,7 +29,7 @@ type VerseLookup = "idle" | "loading" | "found" | "none" | "error";
 
 /** 章・節を入力してから既存の節を問い合わせるまでの待ち時間(ms) */
 const LOOKUP_DELAY = 300;
-const REQUIRED_MESSAGE = "上記の入力ボックスを空になってはいけません。";
+const REQUIRED_MESSAGE = "入力してください。";
 
 /** 空・空白だけでないか */
 const isFilled = (v: string) => !!v && v.trim() !== EMPTY_STRING;

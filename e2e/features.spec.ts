@@ -81,3 +81,24 @@ test("編集モーダル: 読み込んだ内容を表示し、廃棄で元に戻
   await dialog.getByRole("button", { name: "廃棄" }).click();
   await expect(nameJp).toHaveValue("賛美歌1");
 });
+
+test("追加モーダル: 入力の案内を出し、空のまま追加すると各項目に「入力してください。」", async ({
+  page,
+}) => {
+  await mockApi(page, { loggedIn: true, hymns: makeHymns(2) });
+  await page.goto("/hymns");
+
+  await page.getByRole("button", { name: "賛美歌情報追加" }).click();
+  const dialog = page.getByRole("dialog", { name: "賛美歌情報追加" });
+  await expect(
+    dialog.getByText("すべての項目を入力してください"),
+  ).toBeVisible();
+
+  await dialog.getByRole("button", { name: "追加", exact: true }).click();
+  await expect(
+    dialog.getByText("入力してください。", { exact: true }),
+  ).toHaveCount(4);
+  await page.screenshot({
+    path: process.env.SHOT_PATH ?? "test-results/add-modal.png",
+  });
+});

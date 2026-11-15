@@ -265,13 +265,12 @@ const close = async () => {
           {{ isEdit ? "賛美歌情報更新" : "賛美歌情報追加" }}
         </span>
       </template>
-      <!-- 更新は最終更新者をサブタイトルに出す。追加はサブタイトルが無いので、
-           同じ高さの空行を置いてタイトル部分の高さを更新とそろえる -->
+      <!-- サブタイトル: 更新は最終更新者、追加は入力の案内(タイトル部分の高さも更新とそろう) -->
       <template #subtitle>
         <template v-if="isEdit">
           最終更新者：{{ form.updatedUser }}＠{{ form.updatedTime }}日本標準時間
         </template>
-        <span v-else aria-hidden="true">&nbsp;</span>
+        <template v-else>すべての項目を入力してください</template>
       </template>
 
       <v-divider />
