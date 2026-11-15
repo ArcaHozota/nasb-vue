@@ -39,7 +39,7 @@ import DesktopHome from "@/components/home/DesktopHome.vue";
 import HymnCard from "@/components/home/HymnCard.vue";
 
 // デスクトップ: 左の一覧に並べる曲数(ページ送りで切替)
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 10;
 // モバイル: カルーセルに一度に追加読み込みする件数
 const MOBILE_BATCH_SIZE = 10;
 // カルーセルの残りがこの枚数以下になったら次の分を先読みする

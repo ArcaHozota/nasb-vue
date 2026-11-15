@@ -3,7 +3,9 @@ import { makeHymns, mockApi } from "./mock-api";
 
 test.use({ viewport: { width: 1440, height: 900 } });
 
-test("PCホーム: 左に一覧(1ページ8曲)、右に選んだ曲の詳細", async ({ page }) => {
+test("PCホーム: 左に一覧(1ページ10曲)、右に選んだ曲の詳細", async ({
+  page,
+}) => {
   const lines = [
     "CADMIUM",
     "CADMIUM",
@@ -30,11 +32,11 @@ test("PCホーム: 左に一覧(1ページ8曲)、右に選んだ曲の詳細", 
   const list = page.getByRole("region", { name: "曲の一覧" });
   await expect(list.getByText("20件 ・ 一致度の高い順")).toBeVisible();
   const rows = list.locator("[data-hymn-row]");
-  await expect(rows).toHaveCount(8);
+  await expect(rows).toHaveCount(10);
   await expect(rows.first()).toContainText("よく一致");
   await expect(rows.nth(2)).toContainText("一致");
   await expect(rows.nth(6)).toContainText("関連");
-  await expect(list.getByText("1 / 3")).toBeVisible();
+  await expect(list.getByText("1 / 2")).toBeVisible();
 
   const detail = page.getByRole("article", { name: "賛美歌1の詳細" });
   await expect(detail.getByRole("heading", { name: "賛美歌1" })).toBeVisible();
@@ -50,6 +52,25 @@ test("PCホーム: 左に一覧(1ページ8曲)、右に選んだ曲の詳細", 
     detail.getByRole("button", { name: "ヘ長調の楽譜をダウンロード" }),
   ).toBeVisible();
   await detail.getByText("G＊").click();
+  // ブックは幅 1190px・高さ 740px、行は 64px で10行がスクロールなしで収まる
+  const size = await page.evaluate(() => {
+    const main = document
+      .querySelector(".desktop-home__main")!
+      .getBoundingClientRect();
+    const row = document
+      .querySelector("[data-hymn-row]")!
+      .getBoundingClientRect();
+    const scroll = document.querySelector(".desktop-home__scroll")!;
+    return {
+      w: main.width,
+      h: main.height - 32,
+      row: row.height,
+      overflow: scroll.scrollHeight - scroll.clientHeight,
+    };
+  });
+  console.log(JSON.stringify(size));
+  expect(size).toMatchObject({ w: 1190, h: 740, row: 64 });
+  expect(size.overflow).toBeLessThanOrEqual(0);
   await page.screenshot({
     path: process.env.HOME_SHOT ?? "test-results/home-pc.png",
   });

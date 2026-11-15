@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // PC版ホーム画面。上にヘッダー(ロゴ・検索・ログイン)、下に左右2つのカード。
-//   左: 曲の一覧(一致度の丸・曲名・韓国語名・一致度)。1ページ8曲。
+//   左: 曲の一覧(一致度の丸・曲名・韓国語名・一致度)。1ページ10曲。
 //   右: 左で選んだ曲の詳細(HymnDetail)。
 // データ取得・検索・ページ送りの状態は HomeView.vue が持つ。
 import { computed, ref, watch } from "vue";
@@ -219,10 +219,9 @@ const caption = computed(() => {
               r.nameKr
             }}</v-list-item-subtitle>
             <template v-if="searching" #append>
-              <span
-                :class="['hymn-row__match', matchOf(r.lineNumber).tone]"
-                >{{ matchOf(r.lineNumber).label }}</span
-              >
+              <span :class="['hymn-row__match', matchOf(r.lineNumber).tone]">{{
+                matchOf(r.lineNumber).label
+              }}</span>
             </template>
           </v-list-item>
         </v-list>
@@ -284,8 +283,7 @@ const caption = computed(() => {
 .desktop-home {
   display: flex;
   flex-direction: column;
-  height: 100svh;
-  min-height: 640px;
+  min-height: 100svh;
   background: #f4f0e7;
   color: #2b1d14;
   font-family: "Noto Sans JP", sans-serif;
@@ -336,13 +334,18 @@ const caption = computed(() => {
 }
 
 /* ===== 左右のカード ===== */
+/* 左右のカードを並べた面(ブック)。幅 1190px・高さ 740px で、ヘッダーの下の余白の中央に置く
+   (画面がそれより狭いときは幅を縮め、低いときはページ全体をスクロールする) */
 .desktop-home__main {
   display: grid;
-  flex: 1;
+  flex-shrink: 0;
   grid-template-columns: minmax(320px, 36fr) 64fr;
   gap: 16px;
-  min-height: 0;
-  padding: 16px 24px;
+  width: min(1190px, 100% - 48px);
+  height: 740px;
+  margin: auto;
+  padding-block: 16px;
+  box-sizing: content-box;
 }
 .desktop-home__card {
   display: flex;
@@ -362,7 +365,7 @@ const caption = computed(() => {
   font-size: 0.75rem;
   color: #8a6400;
 }
-/* 画面が低くて8曲が収まらない時は、ページ送りを押し出さず一覧の中でスクロールする */
+/* 念のため、10曲が収まらない時は、ページ送りを押し出さず一覧の中でスクロールする */
 .desktop-home__scroll {
   flex: 1;
   min-height: 0;
@@ -381,9 +384,12 @@ const caption = computed(() => {
   color: #6b5d4a;
 }
 
-/* 一覧の1行 */
+/* 一覧の1行: 64px(10行で一覧の高さ 640px にぴったり収まる) */
 .hymn-row {
-  min-height: 76px;
+  height: 64px;
+  min-height: 0 !important;
+  padding-block: 0 !important;
+  box-sizing: border-box;
   padding-inline: 24px !important;
   border-bottom: 1px solid #efe8da;
 }
