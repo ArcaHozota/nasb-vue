@@ -17,7 +17,7 @@ const nasbLight: ThemeDefinition = {
     warning: "#f6c91c",
     info: "#353542",
     error: "#d32f2f",
-    sidebar: "#111827", // サイドバー・上部バー(旧 --sidebar / bg-gray-900)
+    sidebar: "#fdfaf2", // サイドバー・上部バー(PC版ホームと同じクリーム色)
   },
 };
 

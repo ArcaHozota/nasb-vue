@@ -75,6 +75,8 @@ const closeOnMobile = () => {
 // ===== ナビ =====
 type NavItem = {
   key: string;
+  /** 見出し(聖書・賛美歌・その他)。同じ見出しの項目を続けて並べる */
+  group: string;
   icon: string;
   title: string;
   action: () => void;
@@ -91,6 +93,7 @@ const navItems = computed<NavItem[]>(() => {
   return [
     {
       key: "bookSearch",
+      group: "聖書",
       icon: "mdi-anchor",
       title: "聖書章節選択",
       action: () => feedback.toast(DELAY_APOLOGY),
@@ -99,6 +102,7 @@ const navItems = computed<NavItem[]>(() => {
     },
     {
       key: "bookAdd",
+      group: "聖書",
       icon: "mdi-package-variant-closed",
       title: "聖書章節入力",
       action: () => go("/books/add"),
@@ -106,6 +110,7 @@ const navItems = computed<NavItem[]>(() => {
     },
     {
       key: "hymns",
+      group: "賛美歌",
       icon: "mdi-music",
       title: "賛美歌一覧",
       action: () => go("/hymns"),
@@ -117,6 +122,7 @@ const navItems = computed<NavItem[]>(() => {
     },
     {
       key: "randomFive",
+      group: "賛美歌",
       icon: "mdi-shuffle-variant",
       title: "ランダム検索",
       action: () => go("/hymns/random-five"),
@@ -124,6 +130,7 @@ const navItems = computed<NavItem[]>(() => {
     },
     {
       key: "receipts",
+      group: "その他",
       icon: "mdi-receipt-text-outline",
       title: "レシート明細入力",
       // /receipts のページはまだ無いため「未実装」のトーストだけ出す。
@@ -132,11 +139,9 @@ const navItems = computed<NavItem[]>(() => {
     },
   ];
 });
-const hasActive = computed(() => navItems.value.some((i) => i.isActive));
-
-/** 区切り線は「非アクティブ同士が隣り合う境界」だけに出す(アクティブなタブとは接しない) */
-const showDivider = (idx: number) =>
-  idx > 0 && !navItems.value[idx].isActive && !navItems.value[idx - 1].isActive;
+/** 見出しは、グループの最初の項目の前にだけ出す */
+const startsGroup = (idx: number) =>
+  idx === 0 || navItems.value[idx].group !== navItems.value[idx - 1].group;
 
 const onNav = (item: NavItem) => {
   item.action();
@@ -174,18 +179,20 @@ const onSearch = () => {
 </script>
 
 <template>
+  <!-- サイドバー: クリーム地＋臙脂(PC版ホームと同じ色)。項目は Vuetify の v-list nav
+       (ホバーで薄い背景、押すと波紋、選択中は臙脂の薄い角丸) -->
   <v-navigation-drawer
     v-model="drawer"
     :rail="isRail"
-    rail-width="48"
+    rail-width="56"
     width="256"
     color="sidebar"
-    border="0"
     class="admin-sidebar"
   >
     <!-- ===== ブランド ===== -->
     <template #prepend>
       <button
+        v-ripple
         type="button"
         class="admin-brand"
         :class="{ 'admin-brand--rail': isRail }"
@@ -207,68 +214,61 @@ const onSearch = () => {
     </template>
 
     <!-- ===== メインナビ ===== -->
-    <div class="admin-nav">
-      <!-- 右端の縦ストライプ(折りたたみ時はタブ表現が成り立たないので出さない) -->
-      <span v-if="hasActive && !isRail" class="admin-nav__stripe" />
-      <ul class="admin-nav__list">
-        <li v-for="(item, idx) in navItems" :key="item.key">
-          <v-btn
-            block
-            variant="text"
-            :class="[
-              'admin-nav__item',
-              {
-                'admin-nav__item--active': item.isActive,
-                'admin-nav__item--divider': showDivider(idx),
-                'admin-nav__item--rail': isRail,
-              },
-            ]"
-            :aria-current="item.isActive ? 'page' : undefined"
-            @click="onNav(item)"
-          >
-            <v-icon :icon="item.icon" :size="isRail ? 16 : 20" />
-            <span v-if="!isRail" class="admin-nav__label">{{
-              item.title
-            }}</span>
-            <v-tooltip
-              activator="parent"
-              location="end"
-              :disabled="!isRail"
-              :text="item.title"
-            />
-          </v-btn>
-        </li>
-      </ul>
-    </div>
+    <v-list nav color="primary" class="admin-nav" aria-label="メニュー">
+      <template v-for="(item, idx) in navItems" :key="item.key">
+        <template v-if="startsGroup(idx)">
+          <v-list-subheader v-if="!isRail" class="admin-nav__group">{{
+            item.group
+          }}</v-list-subheader>
+          <v-divider v-else-if="idx > 0" class="my-2" />
+        </template>
+        <v-list-item
+          :prepend-icon="item.icon"
+          :title="item.title"
+          :active="item.isActive"
+          :aria-current="item.isActive ? 'page' : undefined"
+          rounded="lg"
+          class="admin-nav__item"
+          @click="onNav(item)"
+        >
+          <v-tooltip
+            activator="parent"
+            location="end"
+            :disabled="!isRail"
+            :text="item.title"
+          />
+        </v-list-item>
+      </template>
+    </v-list>
 
     <!-- ===== ユーザーメニュー ===== -->
     <template #append>
       <div class="admin-user">
         <v-menu location="top start" offset="4">
           <template #activator="{ props: menuProps, isActive }">
-            <v-btn
+            <v-list-item
               v-bind="menuProps"
-              block
-              variant="text"
+              rounded="lg"
               class="admin-user__btn"
-              :class="{ 'admin-user__btn--rail': isRail }"
+              :aria-label="isRail ? username : undefined"
             >
-              <v-avatar
-                :size="isRail ? 32 : 30"
-                color="rgba(255,255,255,0.2)"
-                class="text-body-small"
-              >
-                {{ username.slice(0, 1) }}
-              </v-avatar>
-              <template v-if="!isRail">
-                <span class="admin-user__name">{{ username }}</span>
+              <template #prepend>
+                <v-avatar size="30" color="#efe6d3" class="admin-user__avatar">
+                  {{ username.slice(0, 1) }}
+                </v-avatar>
+              </template>
+              <v-list-item-title v-if="!isRail" class="admin-user__name">{{
+                username
+              }}</v-list-item-title>
+              <template v-if="!isRail" #append>
                 <v-icon
                   icon="mdi-chevron-up"
+                  size="20"
                   class="admin-user__chevron"
                   :class="{ 'admin-user__chevron--open': isActive }"
                 />
               </template>
-            </v-btn>
+            </v-list-item>
           </template>
           <v-list density="compact" min-width="224">
             <v-list-item
@@ -298,7 +298,7 @@ const onSearch = () => {
   </v-navigation-drawer>
 
   <!-- ===== 上部バー ===== -->
-  <v-app-bar color="sidebar" height="48" flat>
+  <v-app-bar color="sidebar" height="48" flat border="b">
     <v-app-bar-nav-icon
       size="small"
       aria-label="サイドバーの開閉"
@@ -344,15 +344,23 @@ const onSearch = () => {
 </template>
 
 <style scoped>
+/* ===== サイドバー ===== */
+.admin-sidebar {
+  border-right: 1px solid #ece4d3;
+}
+
 /* ===== ブランド ===== */
 .admin-brand {
+  position: relative;
+  overflow: hidden;
   display: flex;
   width: 100%;
   align-items: center;
   gap: 8px;
-  padding: 24px 16px;
+  padding: 20px 16px;
   border: 0;
-  background: #fffff0;
+  border-bottom: 1px solid #ece4d3;
+  background: transparent;
   cursor: pointer;
 }
 .admin-brand--rail {
@@ -360,8 +368,8 @@ const onSearch = () => {
   padding: 12px 0;
 }
 .admin-brand__logo {
-  width: 49px;
-  height: 49px;
+  width: 44px;
+  height: 44px;
   flex-shrink: 0;
   object-fit: cover;
 }
@@ -371,122 +379,53 @@ const onSearch = () => {
 }
 .admin-brand__title {
   white-space: nowrap;
-  font-size: 1.9rem;
+  font-size: 1.75rem;
   line-height: 1;
 }
 
-/* ===== メインナビ(従来のタブ型デザイン) ===== */
+/* ===== メインナビ ===== */
 .admin-nav {
-  position: relative;
-  height: 100%;
-  padding: 8px 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 4px;
+  color: #3f3328;
 }
-.admin-nav__stripe {
-  pointer-events: none;
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 6px;
-  background: #fff;
-}
-.admin-nav__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.admin-nav__group {
+  min-height: 32px;
+  padding-inline-start: 12px !important;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: #9a8b74;
 }
 .admin-nav__item {
-  position: relative;
-  overflow: visible;
-  justify-content: flex-start;
-  gap: 12px;
-  height: 44px !important;
-  padding: 0 0 0 16px !important;
-  border-radius: 0;
-  color: #fff;
-  font-weight: 400;
+  min-height: 42px;
+}
+.admin-nav__item :deep(.v-list-item-title) {
+  font-size: 0.9rem;
   letter-spacing: normal;
 }
-.admin-nav__item :deep(.v-btn__content) {
-  justify-content: flex-start;
-  gap: 12px;
+/* アイコンと文字の間を詰める(既定は 32px) */
+.admin-nav__item :deep(.v-list-item__spacer) {
+  width: 14px !important;
 }
-.admin-nav__item--divider {
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
+/* 選択中: 臙脂の文字＋薄い臙脂の背景(Vuetify の選択の重ねを少し濃く) */
+.admin-nav__item.v-list-item--active {
+  font-weight: 600;
 }
-.admin-nav__item--active {
-  background: #fff;
-  color: #111827;
-  border-radius: 9999px 0 0 9999px;
-}
-.admin-nav__item--active :deep(.v-btn__overlay) {
-  opacity: 0 !important;
-}
-/* スパンドレル(タブノッチ)。半径はボタンの高さ44px÷2=22px。位置はストライプの左端に合わせる */
-.admin-nav__item--active::before,
-.admin-nav__item--active::after {
-  content: "";
-  pointer-events: none;
-  position: absolute;
-  right: 6px;
-  width: 22px;
-  height: 22px;
-}
-.admin-nav__item--active::before {
-  top: -22px;
-  background: radial-gradient(circle at top left, #111827 22px, #fff 22px);
-}
-.admin-nav__item--active::after {
-  bottom: -22px;
-  background: radial-gradient(circle at bottom left, #111827 22px, #fff 22px);
-}
-/* 折りたたみ時: 小さな角丸アイコンボタン */
-.admin-nav__item--rail {
-  width: 32px !important;
-  height: 32px !important;
-  min-width: 0 !important;
-  margin: 6px auto;
-  padding: 0 !important;
-  border-radius: 6px;
-  border-top: 0;
-}
-.admin-nav__item--rail :deep(.v-btn__content) {
-  justify-content: center;
-}
-.admin-nav__item--rail.admin-nav__item--active::before,
-.admin-nav__item--rail.admin-nav__item--active::after {
-  display: none;
-}
-.admin-nav__label {
-  font-size: 0.875rem;
+.admin-nav__item.v-list-item--active :deep(.v-list-item__overlay) {
+  opacity: 0.1;
 }
 
 /* ===== ユーザーメニュー ===== */
 .admin-user {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px;
+  border-top: 1px solid #ece4d3;
 }
-.admin-user__btn {
-  height: auto !important;
-  padding: 8px 16px !important;
-  border-radius: 0;
-  color: #fff;
-  letter-spacing: normal;
-}
-.admin-user__btn :deep(.v-btn__content) {
-  width: 100%;
-  gap: 8px;
-}
-.admin-user__btn--rail {
-  padding: 8px 0 !important;
-}
-.admin-user__btn--rail :deep(.v-btn__content) {
-  justify-content: center;
+.admin-user__avatar {
+  font-size: 0.8rem;
+  color: #5a4630;
 }
 .admin-user__name {
-  flex: 1;
-  text-align: left;
   font-size: 0.9rem;
+  font-weight: 500;
 }
 .admin-user__chevron {
   transition: transform 0.2s;
