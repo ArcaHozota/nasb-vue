@@ -16,6 +16,11 @@ test("サイドバー: 紺地に項目を並べ(見出し・区切り線なし)�
   const current = nav.locator('[aria-current="page"]');
   await expect(current).toHaveCount(1);
   await expect(current).toContainText("賛美歌一覧");
+  // 背景は紺(#0F172A)、選択中は少し明るい背景(#1E293B)
+  await expect(page.locator(".admin-sidebar")).toHaveCSS("background-color", "rgb(15, 23, 42)");
+  await expect(current).toHaveCSS("background-color", "rgb(30, 41, 59)");
+  // 画面の見出しバーも選択中と同じ #1E293B
+  await expect(page.locator(".hymn-list__header")).toHaveCSS("background-color", "rgb(30, 41, 59)");
   // 選択中は左端に臙脂の線(3px)
   await expect(current).toHaveCSS("border-left-color", "rgb(196, 60, 90)");
   await expect(current).toHaveCSS("border-left-width", "3px");

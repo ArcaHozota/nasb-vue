@@ -456,7 +456,7 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
   display: flex;
   align-items: center;
   padding: 12px 16px;
-  background: #1f2937;
+  background: #1e293b;
   color: #fff;
 }
 .hymn-list__toolbar {

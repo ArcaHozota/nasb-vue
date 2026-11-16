@@ -200,11 +200,7 @@ const onSearch = () => {
     </template>
 
     <!-- ===== メインナビ ===== -->
-    <v-list
-      bg-color="transparent"
-      class="admin-nav"
-      aria-label="メニュー"
-    >
+    <v-list bg-color="transparent" class="admin-nav" aria-label="メニュー">
       <v-list-item
         v-for="item in navItems"
         :key="item.key"
@@ -343,7 +339,7 @@ const onSearch = () => {
   gap: 8px;
   padding: 20px 16px;
   border: 0;
-  border-bottom: 1px solid #1f2937;
+  border-bottom: 1px solid #1e293b;
   background: transparent;
   cursor: pointer;
 }
@@ -384,7 +380,7 @@ const onSearch = () => {
 /* 選択中: 左端に臙脂の線、少し明るい背景、白い文字(Vuetify の選択の重ねは消す) */
 .admin-nav__item.v-list-item--active {
   border-left-color: #c43c5a;
-  background: #1f2937;
+  background: #1e293b;
   color: #fff;
   font-weight: 600;
 }
@@ -395,7 +391,7 @@ const onSearch = () => {
 /* ===== ユーザーメニュー ===== */
 .admin-user {
   padding: 8px;
-  border-top: 1px solid #1f2937;
+  border-top: 1px solid #1e293b;
 }
 .admin-user__avatar {
   font-size: 0.8rem;
@@ -414,7 +410,7 @@ const onSearch = () => {
 
 /* ===== 上部バー ===== */
 .admin-bar {
-  border-bottom: 1px solid #1f2937;
+  border-bottom: 1px solid #1e293b;
 }
 .admin-search {
   width: 176px;

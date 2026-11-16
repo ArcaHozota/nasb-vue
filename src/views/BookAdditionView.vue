@@ -432,7 +432,7 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
   display: flex;
   align-items: center;
   padding: 12px 16px;
-  background: #1f2937;
+  background: #1e293b;
   color: #fff;
 }
 .book-addition__row {
