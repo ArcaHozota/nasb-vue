@@ -76,8 +76,6 @@ const closeOnMobile = () => {
 // ===== ナビ =====
 type NavItem = {
   key: string;
-  /** 見出し(聖書・賛美歌・その他)。同じ見出しの項目を続けて並べる */
-  group: string;
   icon: string;
   title: string;
   action: () => void;
@@ -94,7 +92,6 @@ const navItems = computed<NavItem[]>(() => {
   return [
     {
       key: "bookSearch",
-      group: "聖書",
       icon: "mdi-anchor",
       title: "聖書章節選択",
       action: () => feedback.toast(DELAY_APOLOGY),
@@ -103,7 +100,6 @@ const navItems = computed<NavItem[]>(() => {
     },
     {
       key: "bookAdd",
-      group: "聖書",
       icon: "mdi-package-variant-closed",
       title: "聖書章節入力",
       action: () => go("/books/add"),
@@ -111,7 +107,6 @@ const navItems = computed<NavItem[]>(() => {
     },
     {
       key: "hymns",
-      group: "賛美歌",
       icon: "mdi-music",
       title: "賛美歌一覧",
       action: () => go("/hymns"),
@@ -123,7 +118,6 @@ const navItems = computed<NavItem[]>(() => {
     },
     {
       key: "randomFive",
-      group: "賛美歌",
       icon: "mdi-shuffle-variant",
       title: "ランダム検索",
       action: () => go("/hymns/random-five"),
@@ -131,7 +125,6 @@ const navItems = computed<NavItem[]>(() => {
     },
     {
       key: "receipts",
-      group: "その他",
       icon: "mdi-receipt-text-outline",
       title: "レシート明細入力",
       // /receipts のページはまだ無いため「未実装」のトーストだけ出す。
@@ -140,10 +133,6 @@ const navItems = computed<NavItem[]>(() => {
     },
   ];
 });
-/** 見出しは、グループの最初の項目の前にだけ出す */
-const startsGroup = (idx: number) =>
-  idx === 0 || navItems.value[idx].group !== navItems.value[idx - 1].group;
-
 const onNav = (item: NavItem) => {
   item.action();
   closeOnMobile();
@@ -180,8 +169,8 @@ const onSearch = () => {
 </script>
 
 <template>
-  <!-- サイドバー: クリーム地＋臙脂(PC版ホームと同じ色)。項目は Vuetify の v-list nav
-       (ホバーで薄い背景、押すと波紋、選択中は臙脂の薄い角丸) -->
+  <!-- サイドバー: 紺地。項目は Vuetify の v-list-item(ホバーで薄い背景、押すと波紋)。
+       区切り線・見出しは置かず、選択中の項目は左端の臙脂の線と少し明るい背景で示す -->
   <v-navigation-drawer
     v-model="drawer"
     :rail="isRail"
@@ -211,31 +200,29 @@ const onSearch = () => {
     </template>
 
     <!-- ===== メインナビ ===== -->
-    <v-list nav color="primary" class="admin-nav" aria-label="メニュー">
-      <template v-for="(item, idx) in navItems" :key="item.key">
-        <template v-if="startsGroup(idx)">
-          <v-list-subheader v-if="!isRail" class="admin-nav__group">{{
-            item.group
-          }}</v-list-subheader>
-          <v-divider v-else-if="idx > 0" class="my-2" />
-        </template>
-        <v-list-item
-          :prepend-icon="item.icon"
-          :title="item.title"
-          :active="item.isActive"
-          :aria-current="item.isActive ? 'page' : undefined"
-          rounded="lg"
-          class="admin-nav__item"
-          @click="onNav(item)"
-        >
-          <v-tooltip
-            activator="parent"
-            location="end"
-            :disabled="!isRail"
-            :text="item.title"
-          />
-        </v-list-item>
-      </template>
+    <v-list
+      bg-color="transparent"
+      class="admin-nav"
+      aria-label="メニュー"
+    >
+      <v-list-item
+        v-for="item in navItems"
+        :key="item.key"
+        :prepend-icon="item.icon"
+        :title="item.title"
+        :active="item.isActive"
+        :aria-current="item.isActive ? 'page' : undefined"
+        rounded="0"
+        class="admin-nav__item"
+        @click="onNav(item)"
+      >
+        <v-tooltip
+          activator="parent"
+          location="end"
+          :disabled="!isRail"
+          :text="item.title"
+        />
+      </v-list-item>
     </v-list>
 
     <!-- ===== ユーザーメニュー ===== -->
@@ -250,7 +237,7 @@ const onSearch = () => {
               :aria-label="isRail ? username : undefined"
             >
               <template #prepend>
-                <v-avatar size="30" color="#efe6d3" class="admin-user__avatar">
+                <v-avatar size="30" color="#374151" class="admin-user__avatar">
                   {{ username.slice(0, 1) }}
                 </v-avatar>
               </template>
@@ -295,7 +282,7 @@ const onSearch = () => {
   </v-navigation-drawer>
 
   <!-- ===== 上部バー ===== -->
-  <v-app-bar color="sidebar" height="48" flat border="b">
+  <v-app-bar color="sidebar" height="48" flat class="admin-bar">
     <v-app-bar-nav-icon
       size="small"
       aria-label="サイドバーの開閉"
@@ -343,7 +330,7 @@ const onSearch = () => {
 <style scoped>
 /* ===== サイドバー ===== */
 .admin-sidebar {
-  border-right: 1px solid #ece4d3;
+  border-right: 0;
 }
 
 /* ===== ブランド ===== */
@@ -356,9 +343,14 @@ const onSearch = () => {
   gap: 8px;
   padding: 20px 16px;
   border: 0;
-  border-bottom: 1px solid #ece4d3;
+  border-bottom: 1px solid #1f2937;
   background: transparent;
   cursor: pointer;
+}
+/* 紺地の上なので、ロゴ(十字・文字)はクリーム色にする */
+.admin-brand :deep(.jerusalem-cross),
+.admin-brand .admin-brand__title {
+  color: #f3e3c3;
 }
 .admin-brand--rail {
   justify-content: center;
@@ -372,18 +364,14 @@ const onSearch = () => {
 
 /* ===== メインナビ ===== */
 .admin-nav {
-  padding-top: 4px;
-  color: #3f3328;
-}
-.admin-nav__group {
-  min-height: 32px;
-  padding-inline-start: 12px !important;
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  color: #9a8b74;
+  padding-block: 8px;
+  color: #d1d5db;
 }
 .admin-nav__item {
-  min-height: 42px;
+  min-height: 44px;
+  /* 選択中の左の線(3px)と同じ幅を、選んでいない項目にも透明で取って文字の位置をそろえる */
+  border-left: 3px solid transparent;
+  padding-inline-start: 13px !important;
 }
 .admin-nav__item :deep(.v-list-item-title) {
   font-size: 0.9rem;
@@ -393,22 +381,25 @@ const onSearch = () => {
 .admin-nav__item :deep(.v-list-item__spacer) {
   width: 14px !important;
 }
-/* 選択中: 臙脂の文字＋薄い臙脂の背景(Vuetify の選択の重ねを少し濃く) */
+/* 選択中: 左端に臙脂の線、少し明るい背景、白い文字(Vuetify の選択の重ねは消す) */
 .admin-nav__item.v-list-item--active {
+  border-left-color: #c43c5a;
+  background: #1f2937;
+  color: #fff;
   font-weight: 600;
 }
 .admin-nav__item.v-list-item--active :deep(.v-list-item__overlay) {
-  opacity: 0.1;
+  opacity: 0;
 }
 
 /* ===== ユーザーメニュー ===== */
 .admin-user {
   padding: 8px;
-  border-top: 1px solid #ece4d3;
+  border-top: 1px solid #1f2937;
 }
 .admin-user__avatar {
   font-size: 0.8rem;
-  color: #5a4630;
+  color: #e5e7eb;
 }
 .admin-user__name {
   font-size: 0.9rem;
@@ -422,6 +413,9 @@ const onSearch = () => {
 }
 
 /* ===== 上部バー ===== */
+.admin-bar {
+  border-bottom: 1px solid #1f2937;
+}
 .admin-search {
   width: 176px;
   min-width: 0;
