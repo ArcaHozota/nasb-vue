@@ -10,20 +10,7 @@ Next.js + shadcn/ui 版(nasb-next)からの移行先。業務ロジックは nas
 - `pnpm e2e` : 画面を通したテスト(Playwright。nasb-next の e2e/ と同じ。`/api/**` はブラウザ側で差し替えるのでバックエンド不要)
 - `docker build .` : nginx で静的配信(ポート3000、SPAフォールバック付き)
 
-## 構成
+## 設計書
 
-- `src/main.ts` : アプリを作り、`src/plugins/index.ts` の `registerPlugins` でプラグイン(Pinia・ルーター・Vuetify・Vue Query・フォント)をまとめて登録する(create-vuetify のひな形と同じ形)
-- `src/plugins/vuetify.ts` : テーマ(primary #800020 / secondary #003399 / success #355e3b / warning #f6c91c / info #353542 / error #d32f2f / sidebar #0f172a、ライト固定)。モバイル判定の境目は 768px
-- `src/plugins/icons.ts` : アイコン。`@mdi/js` の SVG を使い、使うものだけをバンドルする。テンプレートは `mdi-xxx` の名前で書き、新しいアイコンは `ICONS` に1行足す
-- `src/plugins/fonts.ts` : Fontsource で Noto Sans JP / Noto Serif JP / Noto Serif KR / Niconne を自前配信
-- `src/styles/settings.scss` : Vuetify の Sass 変数(本文フォント)
-- `src/styles/app.css` : 画面固有のクラス(ガラスカード・赤字エディタ・開いた讃美歌集など。旧 globals.css)
-- `src/router/` : ルート定義と全体ガード(ログイン確認・未保存の確認)
-- `src/api/` `src/lib/` : 通信・業務ロジック(nasb-next からそのまま移植。テスト付き)
-- `src/stores/` : Pinia(auth / csrf / feedback / unsavedGuard)
-- `src/composables/` : 旧 hooks(useDebouncedValue / useUnsavedChanges / usePlaylistCreation / useIsMobile / useSessionCheck)
-
-## 文字サイズのクラス
-
-Vuetify 4 は Material Design 3 の名前になっている(`text-h6` などは無い)。
-`text-title-large` / `text-title-medium` / `text-body-medium` / `text-body-small` / `text-headline-medium` などを使う。
+- [総合設計書](docs/DesignDocument.md) : 要件・画面と遷移・構成・API・テスト・インフラ
+- [画面デザインの決まり](docs/UIGuidelines.md) : 配色・文字・大きさ・部品の見た目

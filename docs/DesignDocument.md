@@ -99,14 +99,24 @@ flowchart LR
 
 | 領域                       | 責務                                                               |
 | -------------------------- | ------------------------------------------------------------------ |
+| `src/main.ts`              | アプリを作り、`src/plugins/index.ts` の `registerPlugins` でプラグインをまとめて登録する（create-vuetify のひな形と同じ形） |
 | `src/views`・`src/layouts` | 画面、画面単位の状態、管理画面の共通レイアウト                     |
 | `src/components`           | フォーム、楽譜、ホーム詳細、通知等の再利用部品                     |
 | `src/router`               | ルート定義、画面幅・未保存・認証のガード                           |
 | `src/api`                  | Axios 共通設定、賛美歌APIとデータ型                                |
-| `src/stores`               | 認証、CSRF、通知・確認、未保存状態を Pinia で管理                  |
-| `src/composables`          | 画面幅判定、遅延反映、未保存確認、セッション確認、プレイリスト作成 |
-| `src/lib`                  | 検索、歌詞、楽譜、調号、赤字編集、ダウンロード等の処理             |
+| `src/stores`               | 認証（auth）、CSRF（csrf）、通知・確認（feedback）、未保存状態（unsavedGuard）を Pinia で管理 |
+| `src/composables`          | 画面幅判定（useIsMobile）、遅延反映（useDebouncedValue）、未保存確認（useUnsavedChanges）、セッション確認（useSessionCheck）、プレイリスト作成（usePlaylistCreation） |
+| `src/lib`                  | 検索、歌詞、楽譜、調号、赤字編集、ダウンロード等の処理。nasb-next から移植し、テストを付ける |
 | `src/plugins`              | Pinia、ルーター、Vuetify、Vue Query、フォント等の登録              |
+| `src/styles`               | 要素の既定の余白のリセット・書体のクラス・ロゴの効果（`main.css`）、画面固有のクラス（`app.css`。nasb-next の globals.css から移したガラスカード・赤字エディタ等）、Vuetify の Sass 変数（`settings.scss`。本文・見出しのフォント） |
+
+`src/plugins` の各ファイルは次のとおり。
+
+- `vuetify.ts`: テーマ色（値は [UIGuidelines.md](UIGuidelines.md) の 3.1）、日本語の文言、モバイル判定の境目（768px）。ライトテーマ固定。
+- `icons.ts`: `@mdi/js` の SVG のうち使うものだけを登録する。テンプレートでは `mdi-xxx` の名前で書き、新しいアイコンは `ICONS` に1行足す。
+- `fonts.ts`: Fontsource で Noto Sans JP / Noto Serif JP / Noto Serif KR / Niconne を自前配信する。
+- `queryClient.ts`: TanStack Vue Query の共通設定。
+- `index.ts`: 上記と Pinia・ルーターをまとめて登録する（Pinia を最初に登録する。ルーターのガードや Axios のインターセプターがストアを使うため）。
 
 Vue 3、TypeScript、Vue Router、Pinia、Vuetify、TanStack Vue Query、Axios、Vite を使用する。依存バージョンは `package.json` とロックファイルを正とする。
 

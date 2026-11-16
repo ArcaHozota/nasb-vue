@@ -8,7 +8,7 @@
 
 - 部品は Vuetify 4 の標準部品を使い、押したときの波紋（ripple）やホバーの表示など Vuetify 本来の効果を活かす。独自の見た目に作り込むのは、標準部品で表せない場合に限る。
 - ボタンの文字は大文字化しない（`VBtn` の既定クラス `text-none`）。
-- 文字の大きさのクラスは Vuetify 4 の MD3 名（`text-title-medium`、`text-body-medium` 等）を使う。
+- 文字の大きさのクラスは Vuetify 4 の Material Design 3 の名前（`text-title-large`、`text-title-medium`、`text-body-medium`、`text-body-small`、`text-headline-medium` 等）を使う。Vuetify 3 までの `text-h6` 等は無い。
 - アイコンは Material Design Icons を `src/plugins/icons.ts` に登録した SVG で使い、テンプレートでは `mdi-xxx` の名前で書く。新しいアイコンは同ファイルに追加する。
 - 画面はライトテーマ固定とする。
 - PC とモバイルの境目は幅768pxとする（`MOBILE_BREAKPOINT`）。
