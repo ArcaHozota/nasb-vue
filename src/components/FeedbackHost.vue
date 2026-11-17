@@ -3,12 +3,24 @@
 // App.vue 直下にグローバルマウントする(旧 components/FeedbackHost.tsx)。
 // トースト → v-snackbar-queue、確認ダイアログ → v-dialog。
 // フォーカストラップ・背面スクロールのロックは v-dialog 側が担当する。
-import { computed, onBeforeUnmount, onMounted } from "vue";
+import { computed, onBeforeUnmount, onMounted, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useFeedbackStore } from "@/stores/feedback";
 
 const feedback = useFeedbackStore();
 const { dialog, toasts } = storeToRefs(feedback);
+
+// トーストの明朝体(太字)は、最初のトーストを出すときに読み込む(どの画面でも同じ書体で出す)
+let toastFontLoaded = false;
+watch(
+  () => toasts.value.length,
+  (n) => {
+    if (n === 0 || toastFontLoaded) return;
+    toastFontLoaded = true;
+    void import("@/plugins/fonts/toast");
+  },
+  { immediate: true },
+);
 
 // 色はテーマ色の名前そのまま(primary / success / secondary)
 const color = computed(() => dialog.value.variant);
@@ -26,12 +38,14 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown, true));
 </script>
 
 <template>
-  <!-- スナックバー(旧 Sonner / MUI Snackbar 相当): 画面下中央・濃いグレー -->
+  <!-- スナックバー(旧 Sonner / MUI Snackbar 相当): 画面下中央。背景はテーマの info、
+       文字は白の Noto Serif JP 太字で中央揃え(.app-toast は v-snackbar__wrapper に付く。トーストは body 直下に出るのでスコープなしで指定) -->
   <v-snackbar-queue
     v-model="toasts"
     location="bottom center"
-    color="grey-darken-4"
+    color="info"
     rounded="sm"
+    content-class="app-toast"
   />
 
   <!-- 確認ダイアログ(旧 AlertDialog 相当)。
@@ -94,5 +108,15 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown, true));
 .feedback-dialog-bar {
   height: 3px;
   border-radius: 9999px;
+}
+</style>
+
+<style>
+/* トースト: 白の Noto Serif JP 太字、文字は中央揃え */
+.app-toast .v-snackbar__content {
+  color: #fff;
+  font-family: "Noto Serif JP", serif;
+  font-weight: 700;
+  text-align: center;
 }
 </style>

@@ -43,10 +43,17 @@ for (const status of [200, 401, 500]) {
     if (status === 200) {
       const appearance = await page.locator(".login-card").evaluate((card) => ({
         cardOpacity: getComputedStyle(card, "::before").opacity,
+        cardBackground: getComputedStyle(card, "::before").backgroundColor,
         cardBlur: getComputedStyle(card, "::before").backdropFilter,
         buttonOpacity: getComputedStyle(card.querySelector("button")!).opacity,
       }));
-      expect(appearance).toEqual({ cardOpacity: "0.33", cardBlur: "none", buttonOpacity: "1" });
+      // 背景色は不透明にしてから全体を33%にする(実効的な背景色の不透明度も33%)
+      expect(appearance).toEqual({
+        cardOpacity: "0.33",
+        cardBackground: "rgb(15, 23, 42)",
+        cardBlur: "none",
+        buttonOpacity: "1",
+      });
     }
 
     await page.clock.runFor(3299);

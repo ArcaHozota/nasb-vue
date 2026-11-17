@@ -170,7 +170,10 @@ const onLogin = async () => {
 .login-card form {
   position: relative;
 }
+/* 待機中: 背景・枠・影をまとめて33%にする。背景色は待機中だけ不透明にしてから全体を33%にし、
+   実効的な背景色の不透明度も33%にする(66%のまま全体を33%にすると約22%まで薄くなるため)。 */
 .login-card--loading::before {
+  background: rgb(15, 23, 42);
   opacity: 0.33;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
