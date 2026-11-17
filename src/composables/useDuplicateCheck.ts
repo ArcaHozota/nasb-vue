@@ -1,6 +1,12 @@
-import { onScopeDispose, ref, toValue, watch, type MaybeRefOrGetter } from "vue";
+import {
+  onScopeDispose,
+  ref,
+  toValue,
+  watch,
+  type MaybeRefOrGetter,
+} from "vue";
 import axios from "axios";
-import { extractErrorMessage } from "@/lib/constants";
+import { extractMessage } from "@/lib/constants";
 
 /** 入力が変わったら以前の検査を無効にし、最新の値の結果だけを返す。 */
 export function useDuplicateCheck(options: {
@@ -40,13 +46,15 @@ export function useDuplicateCheck(options: {
     error.value = "";
     pending = (async () => {
       try {
-        await Promise.resolve().then(() => options.request(value, abort.signal));
+        await Promise.resolve().then(() =>
+          options.request(value, abort.signal),
+        );
         return current === version && value === toValue(options.value);
       } catch (e: unknown) {
         if (current !== version || abort.signal.aborted) return false;
         error.value =
           axios.isAxiosError(e) && e.response?.status === 409
-            ? extractErrorMessage(e, options.duplicateMessage).trim() ||
+            ? extractMessage(e, options.duplicateMessage).trim() ||
               options.duplicateMessage
             : options.failureMessage;
         return false;

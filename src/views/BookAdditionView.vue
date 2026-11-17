@@ -7,7 +7,7 @@ import api from "@/api/axios";
 import { useFeedbackStore } from "@/stores/feedback";
 import { useUnsavedChanges } from "@/composables/useUnsavedChanges";
 import { useDebouncedValue } from "@/composables/useDebouncedValue";
-import { EMPTY_STRING, extractErrorMessage } from "@/lib/constants";
+import { EMPTY_STRING, extractMessage } from "@/lib/constants";
 import { verseNumberError } from "@/lib/verse";
 import PageBackground from "@/components/PageBackground.vue";
 import backgroundImage from "@/assets/mainmenu-bg.webp?no-inline";
@@ -116,10 +116,10 @@ const chapterModel = computed({
 });
 
 watch(booksQuery.error, (e) => {
-  if (e) feedback.toast(extractErrorMessage(e, "書の取得に失敗しました"));
+  if (e) feedback.toast(extractMessage(e, "書の取得に失敗しました"));
 });
 watch(chaptersQuery.error, (e) => {
-  if (e) feedback.toast(extractErrorMessage(e, "章の取得に失敗しました"));
+  if (e) feedback.toast(extractMessage(e, "章の取得に失敗しました"));
 });
 
 // ===== 既存の節の確認(章・節を入力して一定時間たったら問い合わせる) =====
@@ -167,7 +167,7 @@ const existing = computed(() =>
 );
 
 watch(verseQuery.error, (e) => {
-  if (e) feedback.toast(extractErrorMessage(e, "既存の節の確認に失敗しました"));
+  if (e) feedback.toast(extractMessage(e, "既存の節の確認に失敗しました"));
 });
 
 // 画面に出す本文: 入力済みならそれ、未入力なら既存の節の本文(無ければ空)
@@ -253,7 +253,7 @@ const doSave = async () => {
       chapterId: EMPTY_STRING,
     });
   } catch (e: unknown) {
-    feedback.toast(extractErrorMessage(e, "保存に失敗しました"));
+    feedback.toast(extractMessage(e, "保存に失敗しました"));
   } finally {
     saving.value = false;
   }

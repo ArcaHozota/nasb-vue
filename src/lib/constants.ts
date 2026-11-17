@@ -19,8 +19,14 @@ export const base64ToUtf8 = (str: string): string => {
 
 import type { AxiosError } from "axios";
 
-/** 応答本文または message の、空白だけではない文字列を表示用に取り出す。 */
-export const responseMessage = (data: unknown, fallback: string): string => {
+/** Axios エラー・応答本文から表示用の文言を取り出す。通常の Error は既定文言にする。 */
+export const extractMessage = (value: unknown, fallback: string): string => {
+  const data =
+    value && typeof value === "object" && "response" in value
+      ? (value as AxiosError<unknown>).response?.data
+      : value instanceof Error
+        ? undefined
+        : value;
   const message =
     typeof data === "string"
       ? data
@@ -32,9 +38,4 @@ export const responseMessage = (data: unknown, fallback: string): string => {
         : undefined;
   const text = typeof message === "string" ? message.trim() : EMPTY_STRING;
   return text || fallback;
-};
-
-export const extractErrorMessage = (e: unknown, fallback: string): string => {
-  const data = (e as AxiosError<unknown>)?.response?.data;
-  return responseMessage(data, fallback);
 };

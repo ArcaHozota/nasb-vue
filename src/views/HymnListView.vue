@@ -16,7 +16,7 @@ import {
 } from "@/api/hymns";
 import { usePlaylistCreation } from "@/composables/usePlaylistCreation";
 import { useFeedbackStore } from "@/stores/feedback";
-import { EMPTY_STRING, extractErrorMessage } from "@/lib/constants";
+import { EMPTY_STRING, extractMessage } from "@/lib/constants";
 import { fetchScoreKeysOrToast, invalidateScoreKeys } from "@/lib/scoreKeys";
 import { downloadScoreOrToast } from "@/lib/download";
 import { hymnNameSizeClass } from "@/lib/text";
@@ -134,7 +134,7 @@ const onDelete = async (item: HymnSummary) => {
   try {
     await api.get(`/hymns/${item.id}/delete-check`);
   } catch (e: unknown) {
-    feedback.toast(extractErrorMessage(e, "削除できません"));
+    feedback.toast(extractMessage(e, "削除できません"));
     return;
   }
   const ok = await feedback.confirm(
@@ -147,7 +147,7 @@ const onDelete = async (item: HymnSummary) => {
     feedback.toast(String(headers["x-page-num"] ?? "削除しました"));
     void invalidateHymns(queryClient);
   } catch (e: unknown) {
-    feedback.toast(extractErrorMessage(e, "削除に失敗しました"));
+    feedback.toast(extractMessage(e, "削除に失敗しました"));
   }
 };
 

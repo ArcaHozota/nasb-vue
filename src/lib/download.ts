@@ -3,7 +3,7 @@
 // ホーム・賛美歌一覧・楽譜アップロードのモーダルで共通に使う。
 import axios from "axios";
 import api from "@/api/axios";
-import { extractErrorMessage, responseMessage } from "@/lib/constants";
+import { extractMessage } from "@/lib/constants";
 import { useFeedbackStore } from "@/stores/feedback";
 
 /** サーバーのメッセージとして画面に出してよい最大の長さ(HTMLのエラーページ等を除くため) */
@@ -11,7 +11,7 @@ const MAX_PLAIN_ERROR_LENGTH = 200;
 
 /**
  * `responseType: "blob"` のリクエストが失敗したとき、エラー本文も Blob で届くため
- * extractErrorMessage ではサーバーのメッセージを読めない。Blob を文字列に戻して読む。
+ * extractMessage ではサーバーのメッセージを読めない。Blob を文字列に戻して読む。
  * 読めなければ fallback を返す。
  */
 export async function extractBlobErrorMessage(
@@ -19,12 +19,12 @@ export async function extractBlobErrorMessage(
   fallback: string,
 ): Promise<string> {
   const data = axios.isAxiosError(e) ? e.response?.data : undefined;
-  if (!(data instanceof Blob)) return extractErrorMessage(e, fallback);
+  if (!(data instanceof Blob)) return extractMessage(e, fallback);
   try {
     const text = (await data.text()).trim();
     if (!text) return fallback;
     try {
-      return responseMessage(JSON.parse(text), fallback);
+      return extractMessage(JSON.parse(text), fallback);
     } catch {
       // JSON ではない文字列。HTML のエラーページや長文は表示しない
       return text.length <= MAX_PLAIN_ERROR_LENGTH && !text.startsWith("<")
@@ -77,7 +77,7 @@ export async function downloadScoreOrToast(id: string, chord?: string) {
     await downloadScore(id, chord);
   } catch (e: unknown) {
     useFeedbackStore().toast(
-      responseMessage(
+      extractMessage(
         e instanceof Error ? e.message : undefined,
         "楽譜の取得に失敗しました",
       ),

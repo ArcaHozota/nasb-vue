@@ -2,7 +2,7 @@
 // YouTube連携まわりの共通処理。
 
 import api from "@/api/axios";
-import { responseMessage } from "@/lib/constants";
+import { extractMessage } from "@/lib/constants";
 
 // バックエンドの ProjectConstants.MESSAGE_YOUTUBE_REAUTH_REQUIRED と同じ文言。
 // 再認証が必要な409(JSON文字列ボディ)と、未連携の409(ボディなし)を見分けるために使う。
@@ -49,8 +49,8 @@ const POLL_TIMEOUT_MS = 10 * 60 * 1000;
  * (前段のCloudFrontは30秒で切れるため)。ここで playlist-status を見て完了・失敗を待つ。
  *
  * - 開始時のエラー(409:未連携・再認証など)は、これまでと同じく axios のエラーとして投げる。
- * - 追加の失敗は、サーバーのメッセージを持つ Error を投げる(extractErrorMessage の fallback ではなく
- *   e.message を使う側で表示すること)。
+ * - 追加の失敗は、サーバーのメッセージを持つ PlaylistError を投げる。
+ *   extractMessage(e.message, fallback) で文言を表示すること。
  * - options.signal が中止されたら、進捗の確認をやめて PlaylistCancelled を投げる。作成の受け付け(POST)は
  *   途中で切らない(切ってもサーバー側では作られるため)。受け付けられたら options.onStarted に ID を渡す。
  */
@@ -94,7 +94,7 @@ export async function createPlaylistAndWait(
   if (status.state === "cancelled") throw new PlaylistCancelled();
   if (status.state === "failed") {
     throw new PlaylistError(
-      responseMessage(status, "プレイリスト作成に失敗しました"),
+      extractMessage(status, "プレイリスト作成に失敗しました"),
     );
   }
   return status;

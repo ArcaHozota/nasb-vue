@@ -16,7 +16,7 @@ import { useUnsavedChanges } from "@/composables/useUnsavedChanges";
 import { useDuplicateCheck } from "@/composables/useDuplicateCheck";
 import { useUnsavedGuard } from "@/stores/unsavedGuard";
 import { confirmDiscardUnsaved } from "@/router/guards";
-import { EMPTY_STRING, extractErrorMessage } from "@/lib/constants";
+import { EMPTY_STRING, extractMessage } from "@/lib/constants";
 import { required } from "@/lib/form";
 import Hint from "@/components/Hint.vue";
 import PageBackground from "@/components/PageBackground.vue";
@@ -88,7 +88,7 @@ const studentQuery = useQuery(
   })),
 );
 watch(studentQuery.error, (e) => {
-  if (e) feedback.toast(extractErrorMessage(e, "データの取得に失敗しました"));
+  if (e) feedback.toast(extractMessage(e, "データの取得に失敗しました"));
 });
 
 // ユーザーが入力した分だけを持ち、画面に出す値は「読み込んだ内容 + 入力」で作る
@@ -158,7 +158,7 @@ const unlinkMutation = useMutation({
     feedback.toast("YouTube連携を解除しました");
   },
   onError: (e) => {
-    feedback.toast(extractErrorMessage(e, "連携解除に失敗しました"));
+    feedback.toast(extractMessage(e, "連携解除に失敗しました"));
     // 解除に失敗したので、実態に合わせてトグルもONへ戻す
     toggleOverride.value = true;
   },
@@ -242,7 +242,7 @@ const updateMutation = useMutation({
     feedback.toast(typeof data === "string" ? data : "更新しました");
     void router.push("/mainmenu");
   },
-  onError: (e) => feedback.toast(extractErrorMessage(e, "更新に失敗しました")),
+  onError: (e) => feedback.toast(extractMessage(e, "更新に失敗しました")),
 });
 const validating = ref(false);
 const saving = computed(

@@ -5,7 +5,7 @@
 // 楽譜をアップロードしたら invalidateScoreKeys() でその曲のキャッシュを捨てる。
 import type { QueryClient } from "@tanstack/vue-query";
 import api from "@/api/axios";
-import { extractErrorMessage } from "@/lib/constants";
+import { extractMessage } from "@/lib/constants";
 import { keyOrder } from "@/lib/keySignature";
 import { useFeedbackStore } from "@/stores/feedback";
 
@@ -57,9 +57,7 @@ export async function fetchScoreKeysOrToast(
   try {
     return await fetchScoreKeysCached(queryClient, id);
   } catch (e: unknown) {
-    useFeedbackStore().toast(
-      extractErrorMessage(e, "楽譜の取得に失敗しました"),
-    );
+    useFeedbackStore().toast(extractMessage(e, "楽譜の取得に失敗しました"));
     return null;
   }
 }

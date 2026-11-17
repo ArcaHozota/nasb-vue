@@ -14,7 +14,7 @@ import { useAuthStore } from "@/stores/auth";
 import { useFeedbackStore } from "@/stores/feedback";
 import { confirmDiscardUnsaved } from "@/router/guards";
 import { hardRedirectHome } from "@/lib/session";
-import { DELAY_APOLOGY, EMPTY_STRING, extractErrorMessage } from "@/lib/constants";
+import { DELAY_APOLOGY, EMPTY_STRING, extractMessage } from "@/lib/constants";
 import { useIsMobile } from "@/composables/useIsMobile";
 import { useSessionCheck } from "@/composables/useSessionCheck";
 import JerusalemCross from "@/components/JerusalemCross.vue";
@@ -151,7 +151,7 @@ const onLogout = async () => {
     await auth.logout();
   } catch (e: unknown) {
     feedback.toast(
-      extractErrorMessage(e, "").trim() ||
+      extractMessage(e, "").trim() ||
       "ログアウトに失敗しました。もう一度お試しください。",
     );
     return;

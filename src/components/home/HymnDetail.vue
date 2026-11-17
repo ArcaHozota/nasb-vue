@@ -8,7 +8,7 @@ import { computed, ref } from "vue";
 import { useQuery } from "@tanstack/vue-query";
 import Highlighted from "@/components/Highlighted.vue";
 import KeyStaff from "@/components/home/KeyStaff.vue";
-import { extractErrorMessage } from "@/lib/constants";
+import { extractMessage } from "@/lib/constants";
 import { keyColor, keyLabel } from "@/lib/keySignature";
 import { countHits, lyricQueryOptions } from "@/lib/lyrics";
 import { scoreKeysQueryOptions } from "@/lib/scoreKeys";
@@ -146,7 +146,7 @@ const termsLabel = computed(() => props.terms.join("・"));
       >
       <span v-if="keysQuery.error.value" class="hymn-detail__err">
         {{
-          extractErrorMessage(keysQuery.error.value, "楽譜の確認に失敗しました")
+          extractMessage(keysQuery.error.value, "楽譜の確認に失敗しました")
         }}
       </span>
     </div>
@@ -187,7 +187,7 @@ const termsLabel = computed(() => props.terms.join("・"));
       </div>
       <p v-if="lyricQuery.error.value" class="py-6 text-body-medium">
         {{
-          extractErrorMessage(
+          extractMessage(
             lyricQuery.error.value,
             "歌詞の取得に失敗しました",
           )

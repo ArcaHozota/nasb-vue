@@ -26,7 +26,7 @@ import {
 } from "@/lib/localSearch";
 import { downloadScoreOrToast } from "@/lib/download";
 import { consumeRedirectMessage } from "@/lib/session";
-import { EMPTY_STRING, extractErrorMessage } from "@/lib/constants";
+import { EMPTY_STRING, extractMessage } from "@/lib/constants";
 import { useFeedbackStore } from "@/stores/feedback";
 import { useIsMobile } from "@/composables/useIsMobile";
 import DesktopHome from "@/components/home/DesktopHome.vue";
@@ -128,7 +128,7 @@ watch(
   () => desktopQuery.error.value ?? mobileQuery.error.value,
   (err) => {
     if (!err) return;
-    feedback.toast(extractErrorMessage(err, "データの取得に失敗しました"));
+    feedback.toast(extractMessage(err, "データの取得に失敗しました"));
   },
 );
 

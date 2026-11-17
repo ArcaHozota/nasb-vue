@@ -16,7 +16,7 @@ import {
   PlaylistError,
   type PlaylistTarget,
 } from "@/lib/youtube";
-import { extractErrorMessage, responseMessage } from "@/lib/constants";
+import { extractMessage } from "@/lib/constants";
 import { useFeedbackStore } from "@/stores/feedback";
 import { usePlaylistJob } from "@/stores/playlistJob";
 
@@ -89,9 +89,10 @@ export function usePlaylistCreation() {
         return;
       }
       feedback.toast(
-        e instanceof PlaylistError
-          ? responseMessage(e.message, "プレイリスト作成に失敗しました")
-          : extractErrorMessage(e, "プレイリスト作成に失敗しました"),
+        extractMessage(
+          e instanceof PlaylistError ? e.message : e,
+          "プレイリスト作成に失敗しました",
+        ),
       );
     } finally {
       job.finish();

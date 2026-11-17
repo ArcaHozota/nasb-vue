@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { base64ToUtf8, extractErrorMessage, utf8ToBase64 } from "./constants";
+import { base64ToUtf8, extractMessage, utf8ToBase64 } from "./constants";
 import { required } from "./form";
 
 describe("utf8ToBase64 / base64ToUtf8", () => {
@@ -14,7 +14,7 @@ describe("utf8ToBase64 / base64ToUtf8", () => {
   });
 });
 
-describe("extractErrorMessage", () => {
+describe("extractMessage", () => {
   it.each([
     undefined,
     null,
@@ -34,15 +34,19 @@ describe("extractErrorMessage", () => {
     { message: {} },
     { message: { message: "nested" } },
   ])("空・無効な応答 %j には既定文言を使う", (data) => {
+    expect(extractMessage(data, "保存に失敗しました")).toBe(
+      "保存に失敗しました",
+    );
     expect(
-      extractErrorMessage({ response: { data } }, "保存に失敗しました"),
+      extractMessage({ response: { data } }, "保存に失敗しました"),
     ).toBe("保存に失敗しました");
   });
 
   it.each(["  詳細なエラーです\n", { message: "  詳細なエラーです\n" }])(
     "有効な文言は前後の空白だけを除いて保持する: %j",
     (data) => {
-      expect(extractErrorMessage({ response: { data } }, "fallback")).toBe(
+      expect(extractMessage(data, "fallback")).toBe("詳細なエラーです");
+      expect(extractMessage({ response: { data } }, "fallback")).toBe(
         "詳細なエラーです",
       );
     },
@@ -50,22 +54,36 @@ describe("extractErrorMessage", () => {
 
   it("応答本文が文字列ならそれを返す", () => {
     expect(
-      extractErrorMessage({ response: { data: "重複しています" } }, "fb"),
+      extractMessage({ response: { data: "重複しています" } }, "fb"),
     ).toBe("重複しています");
   });
 
   it("応答本文の message を返す", () => {
     expect(
-      extractErrorMessage({ response: { data: { message: "失敗" } } }, "fb"),
+      extractMessage({ response: { data: { message: "失敗" } } }, "fb"),
     ).toBe("失敗");
   });
 
   it("読めなければ fallback", () => {
-    expect(extractErrorMessage(new Error("x"), "fb")).toBe("fb");
-    expect(extractErrorMessage(null, "fb")).toBe("fb");
+    expect(extractMessage(new Error("x"), "fb")).toBe("fb");
+    expect(extractMessage(null, "fb")).toBe("fb");
     expect(
-      extractErrorMessage({ response: { data: { other: 1 } } }, "fb"),
+      extractMessage({ response: { data: { other: 1 } } }, "fb"),
     ).toBe("fb");
+  });
+
+  it("Axios エラーでは通信エラーの message より応答本文を優先する", () => {
+    const error = Object.assign(new Error("Request failed"), {
+      response: { data: { message: "保存できません" } },
+    });
+    expect(extractMessage(error, "fb")).toBe("保存できません");
+    error.response.data.message = " ";
+    expect(extractMessage(error, "fb")).toBe("fb");
+  });
+
+  it("空文字の既定文言も保持する", () => {
+    expect(extractMessage({ response: { data: " " } }, "")).toBe("");
+    expect(extractMessage(undefined, "")).toBe("");
   });
 });
 

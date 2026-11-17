@@ -12,7 +12,7 @@ import { useFeedbackStore } from "@/stores/feedback";
 import { useAuthStore } from "@/stores/auth";
 import { useUnsavedChanges } from "@/composables/useUnsavedChanges";
 import { useDuplicateCheck } from "@/composables/useDuplicateCheck";
-import { EMPTY_STRING, extractErrorMessage } from "@/lib/constants";
+import { EMPTY_STRING, extractMessage } from "@/lib/constants";
 import { required } from "@/lib/form";
 
 const props = defineProps<{
@@ -80,7 +80,7 @@ const detailQuery = useQuery(
 // 読み込めないまま空のフォームで更新できてしまわないよう、モーダルを閉じる
 watch(detailQuery.error, (err) => {
   if (!err) return;
-  feedback.toast(extractErrorMessage(err, "データの取得に失敗しました"));
+  feedback.toast(extractMessage(err, "データの取得に失敗しました"));
   emit("close");
 });
 
@@ -187,7 +187,7 @@ const saveMutation = useMutation({
       emit("saved", { mode: "add", pageNum: result.pageNum });
     }
   },
-  onError: (e) => feedback.toast(extractErrorMessage(e, "保存に失敗しました")),
+  onError: (e) => feedback.toast(extractMessage(e, "保存に失敗しました")),
 });
 const validating = ref(false);
 const saving = computed(() => validating.value || saveMutation.isPending.value);

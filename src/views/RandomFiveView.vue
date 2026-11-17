@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/vue-query";
 import { fetchRandomHymns, hymnKeys, type RandomPath } from "@/api/hymns";
 import { usePlaylistCreation } from "@/composables/usePlaylistCreation";
 import { useFeedbackStore } from "@/stores/feedback";
-import { EMPTY_STRING, extractErrorMessage } from "@/lib/constants";
+import { EMPTY_STRING, extractMessage } from "@/lib/constants";
 import PageBackground from "@/components/PageBackground.vue";
 import backgroundImage from "@/assets/mainmenu-bg6.webp?no-inline";
 import Hint from "@/components/Hint.vue";
@@ -77,7 +77,7 @@ const searched = computed(
 );
 
 watch(randomQuery.error, (err) => {
-  if (err) feedback.toast(extractErrorMessage(err, "通信エラー"));
+  if (err) feedback.toast(extractMessage(err, "通信エラー"));
 });
 
 const onRandom = () => {

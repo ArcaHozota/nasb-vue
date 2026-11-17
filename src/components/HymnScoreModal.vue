@@ -5,7 +5,7 @@ import { ref } from "vue";
 import axios from "axios";
 import api from "@/api/axios";
 import { useFeedbackStore } from "@/stores/feedback";
-import { EMPTY_STRING, extractErrorMessage, responseMessage } from "@/lib/constants";
+import { EMPTY_STRING, extractMessage } from "@/lib/constants";
 import { downloadScore } from "@/lib/download";
 
 const props = defineProps<{
@@ -100,7 +100,7 @@ const doUpload = async (overwrite: boolean) => {
       // この調の楽譜は登録済み: ファイル・調・オリジナルの入力はそのまま残して、下で確認する
       conflict = true;
     } else {
-      feedback.toast(extractErrorMessage(e, "通信エラーが発生しました。"));
+      feedback.toast(extractMessage(e, "通信エラーが発生しました。"));
     }
   } finally {
     uploading.value = false;
@@ -138,7 +138,7 @@ const downloadExisting = async () => {
   try {
     await downloadScore(props.hymnId, chord.value);
   } catch (e: unknown) {
-    feedback.toast(responseMessage(e instanceof Error ? e.message : undefined, "楽譜の取得に失敗しました"));
+    feedback.toast(extractMessage(e instanceof Error ? e.message : undefined, "楽譜の取得に失敗しました"));
   }
 };
 
