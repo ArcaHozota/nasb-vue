@@ -2,7 +2,7 @@
 // 賛美歌の追加・編集モーダル(旧 components/HymnFormModal.tsx)。
 // 賛美歌一覧から v-if で開く。ルーティングやURLパラメータは使わず、一覧側の状態(pageSize 等)を props で受け取る。
 // Esc・背景クリック・「閉じる」のどれで閉じようとしても close() を通り、入力中の内容があれば確認する。
-import { computed, reactive, watch } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { storeToRefs } from "pinia";
 import api from "@/api/axios";
@@ -11,6 +11,7 @@ import { invalidateLyric } from "@/lib/lyrics";
 import { useFeedbackStore } from "@/stores/feedback";
 import { useAuthStore } from "@/stores/auth";
 import { useUnsavedChanges } from "@/composables/useUnsavedChanges";
+import { useDuplicateCheck } from "@/composables/useDuplicateCheck";
 import { EMPTY_STRING, extractErrorMessage } from "@/lib/constants";
 import { required } from "@/lib/form";
 
@@ -119,33 +120,30 @@ const emptyErrors = () => ({
 });
 const errors = reactive(emptyErrors());
 
-const checkDuplicate = async (
-  key: "nameJp" | "nameKr",
-  url: string,
-  name: string,
-) => {
-  errors[key] = EMPTY_STRING;
-  if (!name) return;
-  try {
-    await api.get(url, {
-      params: { id: form.value.id ?? EMPTY_STRING, [key]: name },
-    });
-  } catch (e) {
-    errors[key] = extractErrorMessage(e, "この名称は既に使われています。");
-  }
-};
-const checkNameJp = () =>
-  checkDuplicate(
-    "nameJp",
-    "/hymns/duplicate-check-jp",
-    form.value.nameJp.trim(),
-  );
-const checkNameKr = () =>
-  checkDuplicate(
-    "nameKr",
-    "/hymns/duplicate-check-kr",
-    form.value.nameKr.trim().normalize("NFC"),
-  );
+const duplicateCheck = (key: "nameJp" | "nameKr", url: string) =>
+  useDuplicateCheck({
+  value: () => {
+    const name = form.value[key].trim();
+    return key === "nameKr" ? name.normalize("NFC") : name;
+  },
+    request: (name, signal) =>
+      api.get(url, {
+        params: { id: form.value.id ?? EMPTY_STRING, [key]: name },
+        signal,
+      }),
+    duplicateMessage: "この名称は既に使われています。",
+    failureMessage: "名称の重複確認に失敗しました。もう一度お試しください。",
+  });
+const jpCheck = duplicateCheck("nameJp", "/hymns/duplicate-check-jp");
+const krCheck = duplicateCheck("nameKr", "/hymns/duplicate-check-kr");
+const checkNameJp = jpCheck.check;
+const checkNameKr = krCheck.check;
+watch(nameJp, () => {
+  errors.nameJp = EMPTY_STRING;
+});
+watch(nameKr, () => {
+  errors.nameKr = EMPTY_STRING;
+});
 
 const saveMutation = useMutation({
   mutationFn: async (f: FormState) => {
@@ -191,13 +189,15 @@ const saveMutation = useMutation({
   },
   onError: (e) => feedback.toast(extractErrorMessage(e, "保存に失敗しました")),
 });
-const saving = saveMutation.isPending;
+const validating = ref(false);
+const saving = computed(() => validating.value || saveMutation.isPending.value);
 
-const onSubmit = () => {
+const onSubmit = async () => {
+  if (saving.value || (isEdit.value && detailQuery.isFetching.value)) return;
   const f = form.value;
   Object.assign(errors, {
-    nameJp: required(f.nameJp) || errors.nameJp,
-    nameKr: required(f.nameKr) || errors.nameKr,
+    nameJp: required(f.nameJp),
+    nameKr: required(f.nameKr),
     link: required(f.link),
     lyric: required(f.lyric),
   });
@@ -211,10 +211,20 @@ const onSubmit = () => {
     );
     return;
   }
-  saveMutation.mutate(f);
+  validating.value = true;
+  try {
+    const valid = await Promise.all([jpCheck.check(), krCheck.check()]);
+    if (valid.every(Boolean)) await saveMutation.mutateAsync(f);
+  } catch {
+    // 保存失敗の通知は mutation の onError が行う
+  } finally {
+    validating.value = false;
+  }
 };
 
 const onReset = () => {
+  jpCheck.reset();
+  krCheck.reset();
   // 入力を捨てると、基準(追加は空、編集は読み込んだ内容)に戻る
   for (const k of EDITABLE) delete edits[k];
   Object.assign(errors, emptyErrors());
@@ -258,7 +268,9 @@ const close = async () => {
   >
     <v-card
       class="noto-sans"
-      :prepend-icon="isEdit ? 'mdi-notebook-edit-outline' : 'mdi-plus-circle-outline'"
+      :prepend-icon="
+        isEdit ? 'mdi-notebook-edit-outline' : 'mdi-plus-circle-outline'
+      "
     >
       <template #title>
         <span id="hymn-form-title">
@@ -283,7 +295,9 @@ const close = async () => {
               v-model="nameJp"
               label="日本語名称"
               :disabled="saving"
-              :error-messages="errors.nameJp || undefined"
+              :error-messages="
+                errors.nameJp || jpCheck.error.value || undefined
+              "
               :color="color"
               @blur="checkNameJp"
             />
@@ -294,7 +308,9 @@ const close = async () => {
               v-model="nameKr"
               label="韓国語名称"
               :disabled="saving"
-              :error-messages="errors.nameKr || undefined"
+              :error-messages="
+                errors.nameKr || krCheck.error.value || undefined
+              "
               :color="color"
               @blur="checkNameKr"
             />

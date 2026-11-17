@@ -9,7 +9,12 @@ test("賛美歌一覧のプレイリスト作成は、検索条件だけを送�
 
   const search = page.getByRole("search").getByLabel("キーワード");
   await search.fill("賛美");
+  const searched = page.waitForResponse((response) => {
+    const url = new URL(response.url());
+    return url.pathname === "/api/hymns" && url.searchParams.get("keyword") === "賛美";
+  });
   await search.press("Enter");
+  await searched; // 件数が検索前と同じでも、検索の通信が終わってから回数を比較する
   await expect(page.getByText("全12件 / 1 / 2ページ")).toBeVisible();
   const hymnRequests = () =>
     api.calls.filter((c) => c.method === "GET" && c.path === "/hymns");

@@ -5,13 +5,17 @@
 // バックエンドのYouTube連携API(/youtube/status, /youtube/authorize-url,
 // /youtube/callback, /youtube/unlink)実装済み。トグルは連携状態を反映し、
 // ONへの切り替えでGoogle同意画面へ画面遷移、OFFへの切り替えで連携解除を行う。
-import { computed, onMounted, reactive, ref, watch } from "vue";
+import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { storeToRefs } from "pinia";
 import api from "@/api/axios";
 import { useFeedbackStore } from "@/stores/feedback";
 import { useAuthStore } from "@/stores/auth";
+import { useUnsavedChanges } from "@/composables/useUnsavedChanges";
+import { useDuplicateCheck } from "@/composables/useDuplicateCheck";
+import { useUnsavedGuard } from "@/stores/unsavedGuard";
+import { confirmDiscardUnsaved } from "@/router/guards";
 import { EMPTY_STRING, extractErrorMessage } from "@/lib/constants";
 import { required } from "@/lib/form";
 import Hint from "@/components/Hint.vue";
@@ -88,6 +92,7 @@ watch(studentQuery.error, (e) => {
 
 // ユーザーが入力した分だけを持ち、画面に出す値は「読み込んだ内容 + 入力」で作る
 const edits = reactive<Partial<Editable>>({});
+const saved = ref(false);
 const form = computed<StudentForm>(() => ({
   ...(studentQuery.data.value ?? { ...emptyForm, id: userId.value }),
   ...edits,
@@ -96,6 +101,7 @@ const field = <K extends keyof Editable>(key: K) =>
   computed<string>({
     get: () => form.value[key],
     set: (v) => {
+      saved.value = false;
       edits[key] = v;
     },
   });
@@ -104,6 +110,13 @@ const username = field("username");
 const password = field("password");
 const dateOfBirth = field("dateOfBirth");
 const email = field("email");
+const isDirty = computed(
+  () => !saved.value &&
+    (Object.keys(edits) as (keyof Editable)[]).some(
+      (key) => form.value[key] !== (studentQuery.data.value ?? emptyForm)[key],
+    ),
+);
+useUnsavedChanges(isDirty);
 
 const emptyErrors = () => ({
   loginAccount: EMPTY_STRING,
@@ -167,7 +180,10 @@ const youtubeHint = computed(() =>
       : "「YouTube連携」をONにすると押せます",
 );
 
-const onYoutubeConnect = () => {
+const onYoutubeConnect = async () => {
+  if (!(await confirmDiscardUnsaved())) return;
+  // 破棄に同意済みなので、通常のページ遷移で二重に確認しない。
+  useUnsavedGuard().setBypass();
   // 連携開始はバックエンドが直接Google同意画面へリダイレクトするため、
   // XHR やルーターの遷移ではなく、ブラウザの通常の画面遷移にする。
   window.location.href = "/api/youtube/authorize-url";
@@ -188,21 +204,20 @@ onMounted(() => {
   void router.replace("/personal");
 });
 
-const checkAccount = async () => {
-  errors.loginAccount = EMPTY_STRING;
-  const name = form.value.loginAccount.trim();
-  if (!name) return;
-  try {
-    await api.get("/students/duplicate-check", {
+const accountCheck = useDuplicateCheck({
+  value: () => form.value.loginAccount.trim(),
+  request: (name, signal) =>
+    api.get("/students/duplicate-check", {
       params: { id: form.value.id ?? EMPTY_STRING, loginAccount: name },
-    });
-  } catch (e: unknown) {
-    errors.loginAccount = extractErrorMessage(
-      e,
-      "このアカウントは既に使われています。",
-    );
-  }
-};
+      signal,
+    }),
+  duplicateMessage: "このアカウントは既に使われています。",
+  failureMessage: "アカウントの重複確認に失敗しました。もう一度お試しください。",
+});
+const checkAccount = accountCheck.check;
+watch(loginAccount, () => {
+  errors.loginAccount = EMPTY_STRING;
+});
 
 const updateMutation = useMutation({
   mutationFn: async (f: StudentForm) =>
@@ -216,7 +231,9 @@ const updateMutation = useMutation({
         dateOfBirth: f.dateOfBirth,
       })
     ).data as unknown,
-  onSuccess: (data) => {
+  onSuccess: async (data) => {
+    saved.value = true;
+    await nextTick(); // 未保存ガードが解除されてから移動する
     // 次に開いたとき、更新後の内容を読み込み直す
     void queryClient.invalidateQueries({ queryKey: studentKey(userId.value) });
     feedback.toast(typeof data === "string" ? data : "更新しました");
@@ -224,12 +241,14 @@ const updateMutation = useMutation({
   },
   onError: (e) => feedback.toast(extractErrorMessage(e, "更新に失敗しました")),
 });
-const saving = updateMutation.isPending;
+const validating = ref(false);
+const saving = computed(() => validating.value || updateMutation.isPending.value);
 
-const onUpdate = () => {
+const onUpdate = async () => {
+  if (saving.value) return;
   const f = form.value;
   Object.assign(errors, {
-    loginAccount: required(f.loginAccount) || errors.loginAccount,
+    loginAccount: required(f.loginAccount),
     username: required(f.username),
     password: required(f.password),
     dateOfBirth: required(f.dateOfBirth),
@@ -239,11 +258,21 @@ const onUpdate = () => {
     feedback.toast("入力情報不正");
     return;
   }
-  updateMutation.mutate(f);
+  validating.value = true;
+  try {
+    if (await accountCheck.check()) await updateMutation.mutateAsync(f);
+  } catch {
+    // 更新失敗の通知は mutation の onError が行う
+  } finally {
+    validating.value = false;
+  }
 };
 
 // 入力を捨てて、サーバーの最新の内容を読み込み直す
 const onRestore = () => {
+  if (saving.value) return;
+  saved.value = false;
+  accountCheck.reset();
   Object.assign(errors, emptyErrors());
   for (const k of Object.keys(edits) as (keyof Editable)[]) delete edits[k];
   if (userId.value) void studentQuery.refetch();
@@ -282,7 +311,7 @@ const inputProps = {
 
       <div class="pa-6">
         <!-- ===== 基本情報 ===== -->
-        <fieldset class="personal__set">
+        <fieldset class="personal__set" :disabled="saving">
           <legend class="personal__legend">基本情報</legend>
           <v-row density="compact">
             <v-col cols="12" sm="6">
@@ -294,7 +323,7 @@ const inputProps = {
                 v-model="loginAccount"
                 v-bind="inputProps"
                 placeholder="アカウントを入力してください"
-                :error-messages="errors.loginAccount || undefined"
+                :error-messages="errors.loginAccount || accountCheck.error.value || undefined"
                 @blur="checkAccount"
               />
             </v-col>
@@ -334,7 +363,7 @@ const inputProps = {
         <v-divider class="my-5" />
 
         <!-- ===== セキュリティ ===== -->
-        <fieldset class="personal__set">
+        <fieldset class="personal__set" :disabled="saving">
           <legend class="personal__legend">セキュリティ</legend>
           <label for="personal-password" class="form-label">パスワード</label>
           <v-text-field
@@ -362,7 +391,7 @@ const inputProps = {
         <v-divider class="my-5" />
 
         <!-- ===== 外部連携 ===== -->
-        <fieldset class="personal__set">
+        <fieldset class="personal__set" :disabled="saving">
           <legend class="personal__legend">外部連携</legend>
           <div class="personal__link-row">
             <!-- 左: アイコン・タイトル・状態 -->
@@ -443,6 +472,7 @@ const inputProps = {
           variant="flat"
           prepend-icon="mdi-lightning-bolt"
           :loading="saving"
+          :disabled="saving || !studentQuery.data.value || studentQuery.isFetching.value"
           @click="onUpdate"
         >
           更新
@@ -451,6 +481,7 @@ const inputProps = {
           color="#6b7280"
           variant="flat"
           prepend-icon="mdi-trash-can-outline"
+          :disabled="saving"
           @click="onRestore"
         >
           廃棄

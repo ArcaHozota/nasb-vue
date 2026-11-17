@@ -14,6 +14,7 @@ withDefaults(
     noDataText?: string;
     loading?: boolean;
     disabled?: boolean;
+    errorMessages?: string;
   }>(),
   { placeholder: "書を選択", noDataText: "該当する書がありません" },
 );
@@ -49,7 +50,8 @@ const stopWhileComposing = (e: KeyboardEvent) => {
       density="compact"
       color="primary"
       menu-icon="mdi-unfold-more-horizontal"
-      hide-details
+      :error-messages="errorMessages"
+      :hide-details="!errorMessages"
       auto-select-first
       :menu-props="{ maxHeight: 288 }"
       @keydown.capture="stopWhileComposing"

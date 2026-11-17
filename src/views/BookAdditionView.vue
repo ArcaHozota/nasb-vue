@@ -8,12 +8,13 @@ import { useFeedbackStore } from "@/stores/feedback";
 import { useUnsavedChanges } from "@/composables/useUnsavedChanges";
 import { useDebouncedValue } from "@/composables/useDebouncedValue";
 import { EMPTY_STRING, extractErrorMessage } from "@/lib/constants";
+import { verseNumberError } from "@/lib/verse";
 import PageBackground from "@/components/PageBackground.vue";
 import Hint from "@/components/Hint.vue";
 import RedLetterEditor from "@/components/RedLetterEditor.vue";
 import BookCombobox from "@/components/BookCombobox.vue";
 
-type BookOrChapter = { id: number; name: string };
+type BookOrChapter = { id: number | string; name: string };
 
 /** 既存の節の本文(エディタに入れる形。英語の末尾の # は改行フラグを表す) */
 type VerseText = { textEn: string; textJp: string };
@@ -44,7 +45,12 @@ const verseId = ref(EMPTY_STRING);
 // ユーザーが入力した本文。null の間は「既存の節の本文(あれば)」を表示する
 const edited = ref<VerseText | null>(null);
 const saving = ref(false);
-const errors = reactive({ textEn: false, textJp: false, verseId: false });
+const errors = reactive({
+  textEn: false,
+  textJp: false,
+  verseId: EMPTY_STRING,
+  chapterId: EMPTY_STRING,
+});
 
 const textEnEditor = ref<InstanceType<typeof RedLetterEditor> | null>(null);
 const textJpEditor = ref<InstanceType<typeof RedLetterEditor> | null>(null);
@@ -78,6 +84,20 @@ const chapterId = computed(() =>
     ? pickedChapterId.value
     : (chapters.value[0]?.id ?? EMPTY_STRING),
 );
+const chapterReady = computed(
+  () => chapters.value.some((c) => String(c.id) === String(chapterId.value)),
+);
+const chapterError = computed(
+  () => errors.chapterId ||
+    (chaptersQuery.isError.value
+      ? "章の取得に失敗しました。"
+      : chaptersQuery.isSuccess.value && !chapterReady.value
+        ? "章を選択してください。"
+        : EMPTY_STRING),
+);
+watch(chapterReady, (ready) => {
+  if (ready) errors.chapterId = EMPTY_STRING;
+});
 
 const bookModel = computed({
   get: () => bookId.value,
@@ -104,7 +124,7 @@ watch(chaptersQuery.error, (e) => {
 // 登録済みなら編集モード(ボタンが「更新」になり、本文を読み込む)
 const lookupVerse = computed(() => verseId.value.trim());
 const lookupReady = computed(
-  () => !!chapterId.value && /^\d+$/.test(lookupVerse.value),
+  () => chapterReady.value && !verseNumberError(lookupVerse.value),
 );
 const lookupKey = computed(() => `${chapterId.value}|${lookupVerse.value}`);
 const debouncedKey = useDebouncedValue(lookupKey, LOOKUP_DELAY);
@@ -128,13 +148,15 @@ const verseQuery = useQuery(
     },
     enabled: lookupReady.value && debouncedKey.value === lookupKey.value,
     gcTime: 0, // 節の内容は他の人が更新するかもしれないので、キャッシュは残さない
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   })),
 );
 const lookup = computed<VerseLookup>(() => {
   if (!lookupReady.value) return "idle";
   if (debouncedKey.value !== lookupKey.value) return "loading"; // 入力が落ち着くのを待っている
   if (verseQuery.isError.value) return "error";
-  if (verseQuery.isPending.value) return "loading";
+  if (verseQuery.isPending.value || verseQuery.isFetching.value) return "loading";
   return verseQuery.data.value ? "found" : "none";
 });
 const existing = computed(() =>
@@ -193,7 +215,7 @@ const textJpModel = computed({
   },
 });
 watch(verseId, (v) => {
-  if (isFilled(v)) errors.verseId = false;
+  if (errors.verseId) errors.verseId = verseNumberError(v);
 });
 
 // 既存の節の本文を入力欄へ読み込む(入力済みの内容は捨てる)
@@ -209,7 +231,7 @@ const onWrapSelection = () => {
 };
 
 const doSave = async () => {
-  if (saving.value) return;
+  if (saving.value || !lookupReady.value || lookup.value === "loading") return;
   saving.value = true;
   try {
     const { data } = await api.post("/books", {
@@ -221,7 +243,7 @@ const doSave = async () => {
     feedback.toast(typeof data === "string" ? data : "追加済み");
     verseId.value = EMPTY_STRING;
     edited.value = null;
-    Object.assign(errors, { textEn: false, textJp: false, verseId: false });
+    Object.assign(errors, { textEn: false, textJp: false, verseId: EMPTY_STRING, chapterId: EMPTY_STRING });
   } catch (e: unknown) {
     feedback.toast(extractErrorMessage(e, "保存に失敗しました"));
   } finally {
@@ -234,12 +256,18 @@ const onStore = async () => {
   Object.assign(errors, {
     textEn: !isFilled(textEn.value),
     textJp: !isFilled(textJp.value),
-    verseId: !isFilled(verseId.value),
+    verseId: verseNumberError(verseId.value),
+    chapterId: chapterReady.value ? EMPTY_STRING : "章を選択してください。",
   });
-  if (errors.textEn || errors.textJp || errors.verseId) {
+  if (errors.textEn || errors.textJp || errors.verseId || errors.chapterId) {
     feedback.toast("入力情報不正");
     return;
   }
+  if (lookup.value === "loading") {
+    feedback.toast("既存の節の確認が終わるまでお待ちください。");
+    return;
+  }
+  const confirmedKey = lookupKey.value;
   // 登録済み(更新になる)場合、または既存かどうか確認できなかった場合は、上書き確認を出す
   // (アプリ共通の確認ダイアログ。タイトル「通知」・青)
   if (lookup.value === "found" || lookup.value === "error") {
@@ -252,7 +280,7 @@ const onStore = async () => {
     );
     if (!ok) return;
   }
-  void doSave();
+  if (confirmedKey === lookupKey.value) void doSave();
 };
 
 const isUpdate = computed(() => lookup.value === "found");
@@ -379,6 +407,7 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
               :disabled="saving"
               :books="chapters"
               :loading="chapterLoading"
+              :error-messages="chapterError || undefined"
               placeholder="章を選択"
               no-data-text="該当する章がありません"
               class="noto-serif"
@@ -398,7 +427,7 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
               variant="outlined"
               density="compact"
               color="primary"
-              :error-messages="errors.verseId ? REQUIRED_MESSAGE : undefined"
+              :error-messages="errors.verseId || undefined"
               :hide-details="!errors.verseId"
               class="noto-serif"
             />
@@ -417,7 +446,7 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
               variant="flat"
               class="noto-serif"
               :loading="saving"
-              :disabled="saving || lookup === 'loading'"
+              :disabled="saving || !chapterReady || lookup === 'loading'"
               :prepend-icon="isUpdate ? 'mdi-cross' : 'mdi-book-outline'"
               @click="onStore"
             >

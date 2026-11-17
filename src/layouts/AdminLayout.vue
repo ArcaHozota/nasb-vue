@@ -14,7 +14,7 @@ import { useAuthStore } from "@/stores/auth";
 import { useFeedbackStore } from "@/stores/feedback";
 import { confirmDiscardUnsaved } from "@/router/guards";
 import { hardRedirectHome } from "@/lib/session";
-import { DELAY_APOLOGY, EMPTY_STRING } from "@/lib/constants";
+import { DELAY_APOLOGY, EMPTY_STRING, extractErrorMessage } from "@/lib/constants";
 import { useIsMobile } from "@/composables/useIsMobile";
 import { useSessionCheck } from "@/composables/useSessionCheck";
 import JerusalemCross from "@/components/JerusalemCross.vue";
@@ -140,11 +140,24 @@ const onNav = (item: NavItem) => {
 };
 
 // ===== ログアウト =====
+const loggingOut = ref(false);
 const onLogout = async () => {
+  if (loggingOut.value) return;
   if (!(await confirmDiscardUnsaved())) return;
   const ok = await feedback.confirm("ログアウトしますか？", "警告");
-  if (!ok) return;
-  await auth.logout();
+  if (!ok || loggingOut.value) return;
+  loggingOut.value = true;
+  try {
+    await auth.logout();
+  } catch (e: unknown) {
+    feedback.toast(
+      extractErrorMessage(e, "").trim() ||
+      "ログアウトに失敗しました。もう一度お試しください。",
+    );
+    return;
+  } finally {
+    loggingOut.value = false;
+  }
   // 状態を完全にリセットするためフルリロードする
   // (vue-query のキャッシュを残すと、次にログインした人に前の人のデータが見えてしまう)。
   // 破棄に同意済みの未保存警告(beforeunload)は出さない。

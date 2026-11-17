@@ -48,7 +48,8 @@ export const useAuthStore = defineStore("auth", () => {
   async function logout(): Promise<void> {
     await api.post("/logout");
     user.value = null;
-    await useCsrfStore().fetchCsrf(); // 新しいトークンを取得しておく
+    // 呼び出し元でホームへフルリロードする。新しいトークンは次の起動時に取得する。
+    useCsrfStore().csrf = null;
   }
 
   async function login(username: string, password: string): Promise<void> {
