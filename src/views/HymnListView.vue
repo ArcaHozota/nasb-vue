@@ -58,7 +58,15 @@ const pageParams = computed(() => ({
   pageSize: pageSize.value,
   keyword: submittedKeyword.value,
 }));
-const { data, isFetching } = useQuery(
+const {
+  data,
+  error,
+  isError,
+  isSuccess,
+  isFetching,
+  isPlaceholderData,
+  refetch,
+} = useQuery(
   computed(() => ({
     queryKey: hymnKeys.page(pageParams.value),
     queryFn: () => fetchHymnPage(pageParams.value),
@@ -75,7 +83,13 @@ const totalPages = computed(() =>
 // 最後のページの最後の1件を削除した等で、今のページが総ページ数を超えたら最終ページへ戻す
 // (取得中は前ページのデータなので判定しない)
 watch([isFetching, totalPages], () => {
-  if (!isFetching.value && data.value && page.value > totalPages.value) {
+  if (
+    isSuccess.value &&
+    !isFetching.value &&
+    !isPlaceholderData.value &&
+    data.value &&
+    page.value > totalPages.value
+  ) {
     page.value = totalPages.value;
   }
 });
@@ -235,6 +249,7 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
                 class="px-0"
                 aria-label="プレイリスト作成"
                 :loading="playlist.creating.value"
+                :disabled="isFetching || isError"
                 @click="onCreatePlaylist"
               >
                 <v-icon icon="mdi-playlist-music" />
@@ -243,7 +258,37 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
           </div>
         </div>
 
-        <div class="hymn-list__table-wrap">
+        <v-alert
+          v-if="isError"
+          type="error"
+          variant="tonal"
+          class="mb-4"
+          role="alert"
+        >
+          <p>{{ extractMessage(error, "賛美歌一覧の取得に失敗しました") }}</p>
+          <p v-if="data" class="mt-1">
+            一覧を更新できませんでした。表示中の一覧は前回取得した内容です。
+          </p>
+          <v-btn
+            class="mt-2"
+            color="error"
+            variant="outlined"
+            :loading="isFetching"
+            :disabled="isFetching"
+            @click="refetch()"
+          >
+            再試行
+          </v-btn>
+        </v-alert>
+
+        <div
+          v-if="!isError || data"
+          class="hymn-list__table-wrap"
+          :aria-busy="isFetching"
+        >
+          <span v-if="isFetching" role="status" class="sr-only">
+            賛美歌一覧を読み込み中です
+          </span>
           <v-table class="hymn-list__table" density="comfortable" hover>
             <colgroup>
               <col style="width: 12%" />
@@ -275,7 +320,9 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
                   </td>
                 </tr>
               </template>
-              <tr v-else-if="!isFetching && records.length === 0">
+              <tr
+                v-else-if="isSuccess && !isFetching && !isPlaceholderData && records.length === 0"
+              >
                 <td colspan="4" class="py-6 text-center text-disabled">
                   データがありません
                 </td>
@@ -291,7 +338,7 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
                 "
                 :class="[
                   'hymn-list__row',
-                  { 'is-link': row.link, 'is-stale': isFetching },
+                  { 'is-link': row.link, 'is-stale': isFetching || isError },
                 ]"
                 @click="openYoutube(row)"
                 @keydown.enter.self="openYoutube(row)"
@@ -392,8 +439,9 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
 
         <!-- ページネーション -->
         <div class="hymn-list__pager mt-3">
-          <div>
+          <div v-if="data && !isPlaceholderData">
             全{{ totalRecords }}件 / {{ page }} / {{ totalPages }}ページ
+            <span v-if="isError">（前回取得時）</span>
           </div>
           <div class="d-flex align-center flex-wrap ga-3">
             <v-select
@@ -409,6 +457,7 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
               @update:model-value="onPageSizeChange"
             />
             <v-pagination
+              v-if="data"
               v-model="page"
               :length="totalPages"
               :total-visible="5"
