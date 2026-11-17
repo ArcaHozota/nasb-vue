@@ -193,7 +193,7 @@ const onSearch = () => {
           closeOnMobile();
         "
       >
-        <JerusalemCross :size="isRail ? 32 : 44" />
+        <JerusalemCross :size="isRail ? 33 : 44" />
         <span v-if="!isRail" class="effect-shine admin-brand__title"
           >NASB1995</span
         >

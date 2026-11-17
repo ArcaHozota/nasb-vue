@@ -87,7 +87,7 @@ const caption = computed(() => {
         aria-label="ホーム(検索をリセット)"
         @click="emit('reload')"
       >
-        <JerusalemCross :size="34" />
+        <JerusalemCross :size="33" />
         <span class="desktop-home__logo">NASB1995</span>
       </v-btn>
 
