@@ -58,8 +58,11 @@ test.describe("ログイン", () => {
     const username = page.getByLabel("ユーザー名");
     await username.fill("tester");
     await username.press("Enter");
-    await username.press("Enter");
-    await username.press("Enter");
+    // 待機中は入力欄が非表示・無効になる。フォームの連続送信もガードする。
+    await page.getByRole("form", { name: "ログイン", exact: true }).evaluate((form) => {
+      (form as HTMLFormElement).requestSubmit();
+      (form as HTMLFormElement).requestSubmit();
+    });
 
     await expect(
       page.getByText("ユーザー名またはパスワードが正しくありません。"),
