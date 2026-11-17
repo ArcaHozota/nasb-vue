@@ -208,6 +208,7 @@ const onWrapSelection = () => {
 };
 
 const doSave = async () => {
+  if (saving.value) return;
   saving.value = true;
   try {
     const { data } = await api.post("/books", {
@@ -228,6 +229,7 @@ const doSave = async () => {
 };
 
 const onStore = async () => {
+  if (saving.value) return;
   Object.assign(errors, {
     textEn: !isFilled(textEn.value),
     textJp: !isFilled(textJp.value),
@@ -285,6 +287,7 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
             <RedLetterEditor
               ref="textEnEditor"
               v-model="textEnModel"
+              :disabled="saving"
               :error="enError"
               :helper-text="enError ? REQUIRED_MESSAGE : undefined"
             />
@@ -300,6 +303,7 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
               variant="text"
               color="red-darken-3"
               aria-label="選択範囲を赤文字にする"
+              :disabled="saving"
               @mousedown.prevent
               @click="onWrapSelection"
             />
@@ -312,6 +316,7 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
             <RedLetterEditor
               ref="textJpEditor"
               v-model="textJpModel"
+              :disabled="saving"
               :error="jpError"
               :helper-text="jpError ? REQUIRED_MESSAGE : undefined"
             />
@@ -329,6 +334,7 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
               v-if="differsFromExisting"
               type="button"
               class="book-addition__load ml-2"
+              :disabled="saving"
               @click="loadExisting"
             >
               既存の内容を読み込む
@@ -347,6 +353,7 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
             <BookCombobox
               id="book-select"
               v-model="bookModel"
+              :disabled="saving"
               :books="books"
               class="noto-serif"
             />
@@ -366,6 +373,7 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
             <BookCombobox
               id="chapter-select"
               v-model="chapterModel"
+              :disabled="saving"
               :books="chapters"
               :loading="chapterLoading"
               placeholder="章を選択"
@@ -381,6 +389,7 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
             <v-text-field
               id="verse-input"
               v-model="verseId"
+              :disabled="saving"
               type="text"
               placeholder="節の数を入力しましょう"
               variant="outlined"
@@ -405,7 +414,7 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
               variant="flat"
               class="noto-serif"
               :loading="saving"
-              :disabled="lookup === 'loading'"
+              :disabled="saving || lookup === 'loading'"
               :prepend-icon="isUpdate ? 'mdi-cross' : 'mdi-book-outline'"
               @click="onStore"
             >

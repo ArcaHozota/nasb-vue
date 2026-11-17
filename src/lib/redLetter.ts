@@ -32,20 +32,115 @@ export function segmentsToRaw(segments: Segment[]): string {
     .join(EMPTY_STRING);
 }
 
+const BLOCK_TAGS = new Set([
+  "DIV",
+  "P",
+  "LI",
+  "UL",
+  "OL",
+  "BLOCKQUOTE",
+  "PRE",
+  "H1",
+  "H2",
+  "H3",
+  "H4",
+  "H5",
+  "H6",
+  "SECTION",
+  "ARTICLE",
+  "TR",
+]);
+
+type CaretPosition = { node: Node; offset: number };
+type DomContent = {
+  segments: Segment[];
+  length: number;
+  caretOffset?: number;
+  startsWithBlock?: boolean;
+  endsWithBlock?: boolean;
+};
+
+// 本文とキャレットに同じ変換を使う。Range.toString() は div・br の改行を数えない。
+function readDom(container: HTMLElement, caret?: CaretPosition): DomContent {
+  const readChildren = (parent: Node, red: boolean): DomContent => {
+    const result: DomContent = { segments: [], length: 0 };
+    const append = (text: string, isRed: boolean) => {
+      if (!text) return;
+      const last = result.segments.at(-1);
+      if (last?.red === isRed) last.text += text;
+      else result.segments.push({ text, red: isRed });
+      result.length += text.length;
+    };
+    let previous: { block: boolean; endsWithBreak: boolean } | undefined;
+    const children = Array.from(parent.childNodes);
+    children.forEach((node, index) => {
+      if (caret?.node === parent && caret.offset === index)
+        result.caretOffset = result.length;
+
+      let content: DomContent;
+      let block = false;
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent ?? EMPTY_STRING;
+        content = {
+          segments: [{ text, red }],
+          length: text.length,
+          caretOffset: caret?.node === node ? caret.offset : undefined,
+        };
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const el = node as HTMLElement;
+        block = BLOCK_TAGS.has(el.tagName);
+        if (el.tagName === "BR") {
+          // 空行の唯一の br や、末尾の連続 br の最後はブラウザのキャレット用。
+          const lineContainer =
+            parent === container || BLOCK_TAGS.has(parent.nodeName);
+          const placeholder =
+            lineContainer &&
+            index === children.length - 1 &&
+            (index === 0 ||
+              children[index - 1]?.nodeName === "BR" ||
+              previous?.endsWithBreak);
+          content = {
+            segments: placeholder ? [] : [{ text: "\n", red }],
+            length: placeholder ? 0 : 1,
+          };
+        } else {
+          content = readChildren(
+            el,
+            red || el.classList.contains("red-letter"),
+          );
+        }
+      } else return;
+
+      // 赤字 span などでブロックが包まれていても、その境界を外側へ引き継ぐ。
+      const startsWithBlock = block || !!content.startsWithBlock;
+      const endsWithBlock = block || !!content.endsWithBlock;
+      if (content.length > 0 || startsWithBlock || endsWithBlock) {
+        if (
+          previous &&
+          (startsWithBlock || previous.block) &&
+          !previous.endsWithBreak
+        )
+          append("\n", red);
+        if (!previous) result.startsWithBlock = startsWithBlock;
+        result.endsWithBlock = endsWithBlock;
+        previous = {
+          block: endsWithBlock,
+          endsWithBreak: content.segments.at(-1)?.text.endsWith("\n") ?? false,
+        };
+      }
+      if (content.caretOffset !== undefined)
+        result.caretOffset = result.length + content.caretOffset;
+      content.segments.forEach((segment) => append(segment.text, segment.red));
+    });
+    if (caret?.node === parent && caret.offset === children.length)
+      result.caretOffset = result.length;
+    return result;
+  };
+  return readChildren(container, false);
+}
+
 export function domToSegments(container: HTMLElement): Segment[] {
-  const segments: Segment[] = [];
-  container.childNodes.forEach((node) => {
-    if (node.nodeType === Node.TEXT_NODE) {
-      segments.push({ text: node.textContent ?? EMPTY_STRING, red: false });
-    } else if (node.nodeType === Node.ELEMENT_NODE) {
-      const el = node as HTMLElement;
-      segments.push({
-        text: el.textContent ?? EMPTY_STRING,
-        red: el.classList.contains("red-letter"),
-      });
-    }
-  });
-  return segments;
+  return readDom(container).segments;
 }
 
 export function renderSegments(container: HTMLElement, segments: Segment[]) {
@@ -60,16 +155,22 @@ export function renderSegments(container: HTMLElement, segments: Segment[]) {
       container.appendChild(document.createTextNode(seg.text));
     }
   });
+  // 末尾が改行だけだと、ブラウザが次の入力を前の行へ戻すことがある。
+  // 空の最終行にキャレットを置けるよう br を添える(読み取り時は本文に含めない)。
+  if (segments.at(-1)?.text.endsWith("\n"))
+    container.appendChild(document.createElement("br"));
 }
 
 export function getCaretOffset(container: HTMLElement): number {
   const sel = window.getSelection();
   if (!sel || sel.rangeCount === 0) return 0;
   const range = sel.getRangeAt(0);
-  const pre = range.cloneRange();
-  pre.selectNodeContents(container);
-  pre.setEnd(range.endContainer, range.endOffset);
-  return pre.toString().length;
+  return (
+    readDom(container, {
+      node: range.endContainer,
+      offset: range.endOffset,
+    }).caretOffset ?? 0
+  );
 }
 
 export function setCaretOffset(container: HTMLElement, offset: number) {

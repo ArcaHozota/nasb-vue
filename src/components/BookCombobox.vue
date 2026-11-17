@@ -13,6 +13,7 @@ withDefaults(
     placeholder?: string;
     noDataText?: string;
     loading?: boolean;
+    disabled?: boolean;
   }>(),
   { placeholder: "書を選択", noDataText: "該当する書がありません" },
 );
@@ -43,7 +44,7 @@ const stopWhileComposing = (e: KeyboardEvent) => {
       :placeholder="placeholder"
       :no-data-text="noDataText"
       :loading="loading"
-      :disabled="loading || books.length === 0"
+      :disabled="disabled || loading || books.length === 0"
       variant="outlined"
       density="compact"
       color="primary"

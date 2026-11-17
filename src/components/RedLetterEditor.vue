@@ -2,7 +2,7 @@
 // 赤字(イエスの言葉)を入れられる入力欄(旧 components/RedLetterEditor.tsx)。
 // contentEditable な <div> に対して DOM 操作で「{{...}}」記法 ⇔ 赤字 span を相互変換する。
 // 親は v-model で生の文字列(「{{...}}」記法)を受け取り、ref 経由で wrapSelection() を呼ぶ。
-import { onMounted, ref, watch } from "vue";
+import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { EMPTY_STRING } from "@/lib/constants";
 import {
   domToSegments,
@@ -14,29 +14,34 @@ import {
   setCaretOffset,
 } from "@/lib/redLetter";
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     placeholder?: string;
     error?: boolean;
     helperText?: string;
     minHeight?: number;
+    disabled?: boolean;
   }>(),
-  { minHeight: 84 },
+  { minHeight: 84, disabled: false },
 );
 const model = defineModel<string>({ required: true });
 
 const container = ref<HTMLDivElement | null>(null);
-// 自分の入力で model を更新したときは、DOM を作り直さない(キャレットが飛ぶため)
-let skipNextSync = false;
 let isComposing = false;
+let renderFrame: number | undefined;
+const cancelRender = () => {
+  if (renderFrame !== undefined) cancelAnimationFrame(renderFrame);
+  renderFrame = undefined;
+};
+onBeforeUnmount(cancelRender);
 
 // 外部からの値の変更(初期化・保存後のクリアなど)の時だけ DOM を作り直す
 watch(model, (value) => {
-  if (skipNextSync) {
-    skipNextSync = false;
-    return;
-  }
-  if (container.value) renderSegments(container.value, parseToSegments(value));
+  const el = container.value;
+  // 自分の入力が反映された場合は、DOM を作り直さない(キャレットが飛ぶため)。
+  if (!el || value === segmentsToRaw(domToSegments(el))) return;
+  cancelRender();
+  renderSegments(el, parseToSegments(value));
 });
 onMounted(() => {
   if (container.value)
@@ -45,26 +50,51 @@ onMounted(() => {
 
 const reconcile = () => {
   const el = container.value;
-  if (!el) return;
+  if (!el || props.disabled) return;
   const caret = getCaretOffset(el);
   const segments = domToSegments(el);
   const raw = segmentsToRaw(segments);
-  // 値が変わらないときは watch が走らないので、フラグを立てない
-  if (raw !== model.value) {
-    skipNextSync = true;
-    model.value = raw;
-  }
-  requestAnimationFrame(() => {
+  if (raw !== model.value) model.value = raw;
+  // 新しい入力や外部からの初期化を、古い描画予約で上書きしない。
+  cancelRender();
+  renderFrame = requestAnimationFrame(() => {
+    renderFrame = undefined;
     if (!container.value) return;
     renderSegments(container.value, segments);
-    setCaretOffset(container.value, caret);
+    if (document.activeElement === container.value)
+      setCaretOffset(container.value, caret);
   });
 };
 
 const onInput = () => {
   if (!isComposing) reconcile();
 };
+const onBeforeInput = (e: InputEvent) => {
+  if (
+    e.inputType !== "insertLineBreak" ||
+    e.isComposing ||
+    isComposing ||
+    props.disabled
+  )
+    return;
+  const el = container.value;
+  const selection = window.getSelection();
+  if (!el || !selection || selection.rangeCount === 0) return;
+  const range = selection.getRangeAt(0);
+  if (!el.contains(range.commonAncestorContainer)) return;
+  // Shift+Enter は改行を1つだけ挿入する。ブラウザによる末尾の余分な改行を避ける。
+  e.preventDefault();
+  range.deleteContents();
+  const newline = document.createTextNode("\n");
+  range.insertNode(newline);
+  range.setStartAfter(newline);
+  range.collapse(true);
+  selection.removeAllRanges();
+  selection.addRange(range);
+  reconcile();
+};
 const onCompositionStart = () => {
+  cancelRender();
   isComposing = true;
 };
 const onCompositionEnd = () => {
@@ -74,6 +104,7 @@ const onCompositionEnd = () => {
 
 /** 選択範囲を赤字にする。選択範囲がすでに1つの赤字 span と一致する場合は通常の文字に戻す(トグル) */
 const wrapSelection = () => {
+  if (props.disabled) return;
   const el = container.value;
   const sel = window.getSelection();
   if (!el || !sel || sel.rangeCount === 0 || sel.isCollapsed) return;
@@ -115,11 +146,16 @@ defineExpose({ wrapSelection });
   <div>
     <div
       ref="container"
-      contenteditable="true"
+      :contenteditable="!disabled"
+      :aria-disabled="disabled"
       :data-placeholder="placeholder"
-      :class="['noto-serif red-letter-editor', { 'is-error': error }]"
+      :class="[
+        'noto-serif red-letter-editor',
+        { 'is-error': error, 'is-disabled': disabled },
+      ]"
       :style="{ minHeight: `${minHeight}px` }"
       @input="onInput"
+      @beforeinput="onBeforeInput"
       @compositionstart="onCompositionStart"
       @compositionend="onCompositionEnd"
     />
