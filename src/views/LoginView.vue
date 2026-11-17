@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // ログイン画面(旧 app/login/page.tsx)
 import { ref } from "vue";
+import "@/plugins/fonts/login";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth";
@@ -93,7 +94,7 @@ const onLogin = async () => {
           height="46"
           block
           :loading="loading"
-          class="login-card__submit font-weight-bold"
+          class="login-card__submit"
         >
           ログイン
         </v-btn>
@@ -126,10 +127,10 @@ const onLogin = async () => {
   backdrop-filter: blur(24px) saturate(115%);
 }
 .login-card__title {
-  margin-bottom: 26px;
+  margin-bottom: 24px;
   text-align: center;
   font-size: 1.625rem;
-  font-weight: 700;
+  font-weight: 900;
   letter-spacing: 0.025em;
   color: #fff;
 }
@@ -152,8 +153,9 @@ const onLogin = async () => {
   opacity: 1;
 }
 .login-card__submit {
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.33);
   border-radius: 6px;
+  font-weight: 800;
 }
 .login-card__error {
   background: rgba(254, 242, 242, 0.95) !important;

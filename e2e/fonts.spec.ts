@@ -29,7 +29,7 @@ async function expectWoff2Sources(page: Page) {
   }
 }
 
-test("ログイン画面は全体用ゴシック体だけをWOFF2で読み込む", async ({
+test("ログイン画面ではゴシック体の追加ウェイトもWOFF2で読み込む", async ({
   page,
 }) => {
   await mockApi(page);
@@ -42,7 +42,19 @@ test("ログイン画面は全体用ゴシック体だけをWOFF2で読み込む
     "Noto Sans JP:400",
     "Noto Sans JP:500",
     "Noto Sans JP:700",
+    "Noto Sans JP:800",
+    "Noto Sans JP:900",
   ]);
+  const loaded = await page.evaluate(async () => {
+    const faces = await Promise.all([
+      document.fonts.load('900 26px "Noto Sans JP"', "NASB1995"),
+      document.fonts.load('800 14px "Noto Sans JP"', "ログイン"),
+    ]);
+    return faces.map((list) =>
+      list.length > 0 && list.every((face) => face.status === "loaded"),
+    );
+  });
+  expect(loaded).toEqual([true, true]);
   await expectWoff2Sources(page);
 });
 
@@ -61,6 +73,8 @@ test("ホームと管理画面で必要な明朝体の太さを読み込み、�
   expect(home).not.toContain("Noto Serif JP:600");
   expect(home).not.toContain("Noto Serif KR:600");
   expect(home).not.toContain("Noto Serif KR:700");
+  expect(home).not.toContain("Noto Sans JP:800");
+  expect(home).not.toContain("Noto Sans JP:900");
 
   await page.goto("/hymns");
   await expect(

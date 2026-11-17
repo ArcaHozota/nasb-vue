@@ -104,8 +104,8 @@ flowchart LR
 | `src/components`           | フォーム、楽譜、ホーム詳細、通知等の再利用部品                                                                                                                                                                                      |
 | `src/router`               | ルート定義、画面幅・未保存・認証のガード                                                                                                                                                                                            |
 | `src/api`                  | Axios 共通設定、賛美歌APIとデータ型                                                                                                                                                                                                 |
-| `src/stores`               | 認証（auth）、CSRF（csrf）、通知・確認（feedback）、未保存状態（unsavedGuard）、作成中のプレイリスト（playlistJob）を Pinia で管理                                                                                                                                       |
-| `src/composables`          | 画面幅判定（useIsMobile）、遅延反映（useDebouncedValue）、未保存確認（useUnsavedChanges）、重複確認（useDuplicateCheck）、セッション確認（useSessionCheck）、プレイリスト作成（usePlaylistCreation）                                                               |
+| `src/stores`               | 認証（auth）、CSRF（csrf）、通知・確認（feedback）、未保存状態（unsavedGuard）、作成中のプレイリスト（playlistJob）を Pinia で管理                                                                                                  |
+| `src/composables`          | 画面幅判定（useIsMobile）、遅延反映（useDebouncedValue）、未保存確認（useUnsavedChanges）、重複確認（useDuplicateCheck）、セッション確認（useSessionCheck）、プレイリスト作成（usePlaylistCreation）                                |
 | `src/lib`                  | 検索、歌詞、楽譜、調号、赤字編集、ダウンロード等の処理。nasb-next から移植し、テストを付ける                                                                                                                                        |
 | `src/plugins`              | Pinia、ルーター、Vuetify、Vue Query、フォント等の登録                                                                                                                                                                               |
 | `src/styles`               | 要素の既定の余白のリセット・書体のクラス・ロゴの効果（`main.css`）、画面固有のクラス（`app.css`。nasb-next の globals.css から移したガラスカード・赤字エディタ等）、Vuetify の Sass 変数（`settings.scss`。本文・見出しのフォント） |
@@ -114,7 +114,7 @@ flowchart LR
 
 - `vuetify.ts`: テーマ色（値は [UIGuidelines.md](UIGuidelines.md) の 3.1）、日本語の文言、モバイル判定の境目（768px）。ライトテーマ固定。
 - `icons.ts`: `@mdi/js` の SVG のうち使うものだけを登録する。テンプレートでは `mdi-xxx` の名前で書き、新しいアイコンは `ICONS` に1行足す。
-- `fonts.ts`: 全体で使う Noto Sans JP を Fontsource で自前配信する。明朝体（Noto Serif JP・KR）とロゴ（Niconne）は `fonts/` 配下のモジュールを必要な画面から読み込む（内訳は [UIGuidelines.md](UIGuidelines.md) の 4章）。
+- `fonts.ts`: 全体で使う Noto Sans JP を Fontsource で自前配信する。明朝体（Noto Serif JP・KR）、ロゴ（Niconne）、ログイン画面用の Noto Sans JP の追加ウェイト（800・900）は `fonts/` 配下のモジュールを必要な画面から読み込む（内訳は [UIGuidelines.md](UIGuidelines.md) の 4章）。
 - `queryClient.ts`: TanStack Vue Query の共通設定。
 - `index.ts`: 上記と Pinia・ルーターをまとめて登録する（Pinia を最初に登録する。ルーターのガードや Axios のインターセプターがストアを使うため）。
 
@@ -122,7 +122,7 @@ Vue 3、TypeScript、Vue Router、Pinia、Vuetify、TanStack Vue Query、Axios�
 
 ### 4.2 認証・通信・画面遷移
 
-ログイン画面は背景画像の上に青灰色のスモークガラスカードを置く。カードは不透明度66%・背景ぼかし24px、ラベルと見出しは白、入力欄は白97%の背景と濃い文字色を使う。ログインボタンはテーマの `primary`（臙脂）とする。寸法・余白・フォーカス・エラー表示の詳細は [UIGuidelines.md](UIGuidelines.md) の9章に定める。
+ログイン画面は背景画像の上に青灰色のスモークガラスカードを置く。カードは不透明度66%・背景ぼかし24px、ラベルと見出しは白、入力欄は白97%の背景と濃い文字色を使う。書体は Noto Sans JP とし、見出しは太さ900・下余白24px、ログインボタンは太さ800・テーマの `primary`（臙脂）・白33%の枠とする。寸法・余白・フォーカス・エラー表示の詳細は [UIGuidelines.md](UIGuidelines.md) の9章に定める。
 
 1. Axios は `/api` を基点とし、認証情報を含める。GET・HEAD・OPTIONS 以外には取得済み CSRF トークンを指定ヘッダーで付与する。
 2. 403 応答時はトークンを再取得し、当該リクエストを最大1回再送する。すべての403が CSRF 原因とは限らず、再送後の失敗は呼び出し元に返す。
