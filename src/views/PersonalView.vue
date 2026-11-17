@@ -20,6 +20,7 @@ import { EMPTY_STRING, extractErrorMessage } from "@/lib/constants";
 import { required } from "@/lib/form";
 import Hint from "@/components/Hint.vue";
 import PageBackground from "@/components/PageBackground.vue";
+import backgroundImage from "@/assets/mainmenu-bg4.webp?no-inline";
 
 type StudentForm = {
   id: string | null;
@@ -111,7 +112,8 @@ const password = field("password");
 const dateOfBirth = field("dateOfBirth");
 const email = field("email");
 const isDirty = computed(
-  () => !saved.value &&
+  () =>
+    !saved.value &&
     (Object.keys(edits) as (keyof Editable)[]).some(
       (key) => form.value[key] !== (studentQuery.data.value ?? emptyForm)[key],
     ),
@@ -212,7 +214,8 @@ const accountCheck = useDuplicateCheck({
       signal,
     }),
   duplicateMessage: "このアカウントは既に使われています。",
-  failureMessage: "アカウントの重複確認に失敗しました。もう一度お試しください。",
+  failureMessage:
+    "アカウントの重複確認に失敗しました。もう一度お試しください。",
 });
 const checkAccount = accountCheck.check;
 watch(loginAccount, () => {
@@ -242,7 +245,9 @@ const updateMutation = useMutation({
   onError: (e) => feedback.toast(extractErrorMessage(e, "更新に失敗しました")),
 });
 const validating = ref(false);
-const saving = computed(() => validating.value || updateMutation.isPending.value);
+const saving = computed(
+  () => validating.value || updateMutation.isPending.value,
+);
 
 const onUpdate = async () => {
   if (saving.value) return;
@@ -289,7 +294,7 @@ const inputProps = {
 
 <template>
   <div class="personal noto-sans">
-    <PageBackground src="/assets/mainmenu-bg4.webp" />
+    <PageBackground :src="backgroundImage" />
 
     <v-breadcrumbs
       class="personal__breadcrumbs"
@@ -323,7 +328,9 @@ const inputProps = {
                 v-model="loginAccount"
                 v-bind="inputProps"
                 placeholder="アカウントを入力してください"
-                :error-messages="errors.loginAccount || accountCheck.error.value || undefined"
+                :error-messages="
+                  errors.loginAccount || accountCheck.error.value || undefined
+                "
                 @blur="checkAccount"
               />
             </v-col>
@@ -472,7 +479,9 @@ const inputProps = {
           variant="flat"
           prepend-icon="mdi-lightning-bolt"
           :loading="saving"
-          :disabled="saving || !studentQuery.data.value || studentQuery.isFetching.value"
+          :disabled="
+            saving || !studentQuery.data.value || studentQuery.isFetching.value
+          "
           @click="onUpdate"
         >
           更新

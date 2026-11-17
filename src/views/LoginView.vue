@@ -6,6 +6,7 @@ import axios from "axios";
 import { useAuthStore } from "@/stores/auth";
 import { EMPTY_STRING } from "@/lib/constants";
 import PageBackground from "@/components/PageBackground.vue";
+import backgroundImage from "@/assets/login-bg.webp?no-inline";
 
 const router = useRouter();
 const auth = useAuthStore();
@@ -39,7 +40,7 @@ const onLogin = async () => {
 
 <template>
   <div class="login-page">
-    <PageBackground src="/assets/login-bg.webp" />
+    <PageBackground :src="backgroundImage" />
 
     <div class="login-card">
       <form aria-label="ログイン" @submit.prevent="onLogin">

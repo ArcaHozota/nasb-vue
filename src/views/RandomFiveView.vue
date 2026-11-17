@@ -9,6 +9,7 @@ import { usePlaylistCreation } from "@/composables/usePlaylistCreation";
 import { useFeedbackStore } from "@/stores/feedback";
 import { EMPTY_STRING, extractErrorMessage } from "@/lib/constants";
 import PageBackground from "@/components/PageBackground.vue";
+import backgroundImage from "@/assets/mainmenu-bg6.webp?no-inline";
 import Hint from "@/components/Hint.vue";
 
 /** 出した検索。nonce は検索のたびに変える(同じキーワードでも毎回引き直すため) */
@@ -130,7 +131,7 @@ const onCreatePlaylist = () =>
 
 <template>
   <div class="random-five">
-    <PageBackground src="/assets/mainmenu-bg6.webp" />
+    <PageBackground :src="backgroundImage" />
 
     <div class="randomfive-card noto-serif glass-panel">
       <div class="random-five__header">

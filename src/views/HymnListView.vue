@@ -21,6 +21,7 @@ import { fetchScoreKeysOrToast, invalidateScoreKeys } from "@/lib/scoreKeys";
 import { downloadScoreOrToast } from "@/lib/download";
 import { hymnNameSizeClass } from "@/lib/text";
 import PageBackground from "@/components/PageBackground.vue";
+import backgroundImage from "@/assets/mainmenu-bg5.webp?no-inline";
 import HymnScoreModal from "@/components/HymnScoreModal.vue";
 import HymnFormModal from "@/components/HymnFormModal.vue";
 import Hint from "@/components/Hint.vue";
@@ -167,7 +168,7 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
 
 <template>
   <div class="hymn-list">
-    <PageBackground src="/assets/mainmenu-bg5.webp" />
+    <PageBackground :src="backgroundImage" />
 
     <div class="hymnlist-card glass-panel">
       <div class="hymn-list__header noto-serif">

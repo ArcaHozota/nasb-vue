@@ -10,6 +10,7 @@ import { useDebouncedValue } from "@/composables/useDebouncedValue";
 import { EMPTY_STRING, extractErrorMessage } from "@/lib/constants";
 import { verseNumberError } from "@/lib/verse";
 import PageBackground from "@/components/PageBackground.vue";
+import backgroundImage from "@/assets/mainmenu-bg.webp?no-inline";
 import Hint from "@/components/Hint.vue";
 import RedLetterEditor from "@/components/RedLetterEditor.vue";
 import BookCombobox from "@/components/BookCombobox.vue";
@@ -84,11 +85,12 @@ const chapterId = computed(() =>
     ? pickedChapterId.value
     : (chapters.value[0]?.id ?? EMPTY_STRING),
 );
-const chapterReady = computed(
-  () => chapters.value.some((c) => String(c.id) === String(chapterId.value)),
+const chapterReady = computed(() =>
+  chapters.value.some((c) => String(c.id) === String(chapterId.value)),
 );
 const chapterError = computed(
-  () => errors.chapterId ||
+  () =>
+    errors.chapterId ||
     (chaptersQuery.isError.value
       ? "章の取得に失敗しました。"
       : chaptersQuery.isSuccess.value && !chapterReady.value
@@ -156,7 +158,8 @@ const lookup = computed<VerseLookup>(() => {
   if (!lookupReady.value) return "idle";
   if (debouncedKey.value !== lookupKey.value) return "loading"; // 入力が落ち着くのを待っている
   if (verseQuery.isError.value) return "error";
-  if (verseQuery.isPending.value || verseQuery.isFetching.value) return "loading";
+  if (verseQuery.isPending.value || verseQuery.isFetching.value)
+    return "loading";
   return verseQuery.data.value ? "found" : "none";
 });
 const existing = computed(() =>
@@ -243,7 +246,12 @@ const doSave = async () => {
     feedback.toast(typeof data === "string" ? data : "追加済み");
     verseId.value = EMPTY_STRING;
     edited.value = null;
-    Object.assign(errors, { textEn: false, textJp: false, verseId: EMPTY_STRING, chapterId: EMPTY_STRING });
+    Object.assign(errors, {
+      textEn: false,
+      textJp: false,
+      verseId: EMPTY_STRING,
+      chapterId: EMPTY_STRING,
+    });
   } catch (e: unknown) {
     feedback.toast(extractErrorMessage(e, "保存に失敗しました"));
   } finally {
@@ -301,7 +309,7 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
 
 <template>
   <div class="book-addition">
-    <PageBackground src="/assets/mainmenu-bg.webp" />
+    <PageBackground :src="backgroundImage" />
 
     <div class="bookaddition-card noto-serif glass-panel">
       <div class="book-addition__header">
@@ -311,7 +319,9 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
 
       <div class="pa-6">
         <div class="book-addition__row mb-2">
-          <div id="verse-en-label" class="label-text book-addition__label">英語</div>
+          <div id="verse-en-label" class="label-text book-addition__label">
+            英語
+          </div>
           <div class="flex-grow-1">
             <RedLetterEditor
               ref="textEnEditor"
@@ -341,7 +351,9 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
         </div>
 
         <div class="book-addition__row mb-3">
-          <div id="verse-jp-label" class="label-text book-addition__label">日本語</div>
+          <div id="verse-jp-label" class="label-text book-addition__label">
+            日本語
+          </div>
           <div class="flex-grow-1">
             <RedLetterEditor
               ref="textJpEditor"

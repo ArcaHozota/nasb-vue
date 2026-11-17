@@ -5,6 +5,9 @@ import { useRouter } from "vue-router";
 import { useFeedbackStore } from "@/stores/feedback";
 import { DELAY_APOLOGY } from "@/lib/constants";
 import { consumeRedirectMessage } from "@/lib/session";
+import burgundyImage from "@/assets/burgundy.svg?no-inline";
+import bourbonImage from "@/assets/bourbon.svg?no-inline";
+import newaragonImage from "@/assets/newaragon.svg?no-inline";
 
 const router = useRouter();
 const feedback = useFeedbackStore();
@@ -13,19 +16,19 @@ const cards = [
   {
     key: "books",
     title: "聖書奉読",
-    img: "/assets/burgundy.svg",
+    img: burgundyImage,
     action: () => feedback.toast(DELAY_APOLOGY),
   },
   {
     key: "hymns",
     title: "賛美歌集め",
-    img: "/assets/bourbon.svg",
+    img: bourbonImage,
     action: () => router.push("/hymns"),
   },
   {
     key: "random",
     title: "ランダム選択",
-    img: "/assets/newaragon.svg",
+    img: newaragonImage,
     action: () => router.push("/hymns/random-five"),
   },
 ];
