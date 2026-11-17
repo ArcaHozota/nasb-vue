@@ -71,7 +71,16 @@ PC・モバイルのホームの調のチップは、選んでいない調をそ
 | 韓国語名           | Noto Serif KR         |
 | ロゴ「NASB1995」   | Niconne               |
 
-フォントは Fontsource で自前配信する（`src/plugins/fonts.ts`）。
+フォントは Fontsource で自前配信し、WOFF2 に統一する。Fontsource の文字範囲は維持する。
+
+| 読み込み元                         | 用途・ウェイト                                                              |
+| ---------------------------------- | --------------------------------------------------------------------------- |
+| `src/plugins/fonts.ts`             | 全体用 Noto Sans JP（400・500・700）                                        |
+| `src/plugins/fonts/serif.ts`       | ホーム・管理画面共用 Noto Serif JP（400・700）、KR（400）                   |
+| `src/plugins/fonts/serif-admin.ts` | 管理画面で使う明朝体の追加ウェイト（JP 600、KR 600・700。共用分も読み込む） |
+| `src/plugins/fonts/logo.ts`        | ホーム・管理画面のロゴ用 Niconne（Latin 400）                               |
+
+明朝体・ロゴは必要な画面から対応するモジュールを import する。`vite.config.ts` で Fontsource CSS の WOFF フォールバックを除き、同じ字形の重複配布を防ぐ。
 
 ## 5. ロゴ
 

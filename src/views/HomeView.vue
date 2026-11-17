@@ -4,6 +4,8 @@
 //   モバイル: 曲の一覧(MobileHome)。下までフリックすると読み足し、曲を押すと詳細が下からシートで出る。
 // ここはデータ取得・検索・ページ送りの状態だけを持つ。
 import { computed, onMounted, ref, watch } from "vue";
+import "@/plugins/fonts/serif";
+import "@/plugins/fonts/logo";
 import { useRouter } from "vue-router";
 import {
   keepPreviousData,

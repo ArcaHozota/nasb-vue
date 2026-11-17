@@ -17,6 +17,33 @@ async function openBookEditor(page: Page) {
   await expect(page.locator("#chapter-select")).toHaveValue("第1章");
 }
 
+test("本文エディタの名称・複数行・入力エラーを読み上げ用に関連付ける", async ({ page }) => {
+  await openBookEditor(page);
+  const english = page.getByRole("textbox", { name: "英語", exact: true });
+  const japanese = page.getByRole("textbox", { name: "日本語", exact: true });
+  for (const editor of [english, japanese]) {
+    await expect(editor).toHaveAttribute("aria-multiline", "true");
+    await expect(editor).toHaveAttribute("aria-invalid", "false");
+    await expect(editor).toHaveAccessibleDescription("");
+  }
+  await english.focus();
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("button", { name: "選択範囲を赤文字にする", exact: true })).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(japanese).toBeFocused();
+
+  await page.getByRole("button", { name: "追加", exact: true }).click();
+  for (const editor of [english, japanese]) {
+    await expect(editor).toHaveAttribute("aria-invalid", "true");
+    await expect(editor).toHaveAccessibleDescription("入力してください。");
+  }
+  expect(await english.getAttribute("aria-describedby")).not.toBe(await japanese.getAttribute("aria-describedby"));
+  await english.fill("English text");
+  await expect(english).toHaveAttribute("aria-invalid", "false");
+  await expect(english).toHaveAccessibleDescription("");
+  await expect(japanese).toHaveAccessibleDescription("入力してください。");
+});
+
 for (const key of ["Enter", "Shift+Enter"]) {
   test(`本文の${key}の改行と、その後の入力・送信内容を保持する`, async ({
     page,
@@ -126,7 +153,8 @@ for (const status of [200, 500]) {
       await expect(
         page.getByRole("button", { name: "追加", exact: true }),
       ).toBeDisabled();
-      await editors.nth(0).click();
+      // 無効な textbox へのクリック待機を避け、実際のマウス操作だけを送る。
+      await editors.nth(0).click({ force: true });
       await page.keyboard.type("Unwanted input");
       await expect(editors.nth(0)).toHaveJSProperty("textContent", "English");
     } finally {

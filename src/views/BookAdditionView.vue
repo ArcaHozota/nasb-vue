@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // 聖書章節入力(旧 (admin)/books/add/page.tsx)
 import { computed, reactive, ref, watch } from "vue";
+import "@/plugins/fonts/serif-admin";
 import { useQuery } from "@tanstack/vue-query";
 import api from "@/api/axios";
 import { useFeedbackStore } from "@/stores/feedback";
@@ -282,11 +283,12 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
 
       <div class="pa-6">
         <div class="book-addition__row mb-2">
-          <div class="label-text book-addition__label">英語</div>
+          <div id="verse-en-label" class="label-text book-addition__label">英語</div>
           <div class="flex-grow-1">
             <RedLetterEditor
               ref="textEnEditor"
               v-model="textEnModel"
+              labelled-by="verse-en-label"
               :disabled="saving"
               :error="enError"
               :helper-text="enError ? REQUIRED_MESSAGE : undefined"
@@ -311,11 +313,12 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
         </div>
 
         <div class="book-addition__row mb-3">
-          <div class="label-text book-addition__label">日本語</div>
+          <div id="verse-jp-label" class="label-text book-addition__label">日本語</div>
           <div class="flex-grow-1">
             <RedLetterEditor
               ref="textJpEditor"
               v-model="textJpModel"
+              labelled-by="verse-jp-label"
               :disabled="saving"
               :error="jpError"
               :helper-text="jpError ? REQUIRED_MESSAGE : undefined"

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // 賛美歌一覧(旧 (admin)/hymns/page.tsx)
 import { computed, ref, watch } from "vue";
+import "@/plugins/fonts/serif-admin";
 import {
   keepPreviousData,
   useQuery,

@@ -2,7 +2,7 @@
 // 赤字(イエスの言葉)を入れられる入力欄(旧 components/RedLetterEditor.tsx)。
 // contentEditable な <div> に対して DOM 操作で「{{...}}」記法 ⇔ 赤字 span を相互変換する。
 // 親は v-model で生の文字列(「{{...}}」記法)を受け取り、ref 経由で wrapSelection() を呼ぶ。
-import { onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { onBeforeUnmount, onMounted, ref, useId, watch } from "vue";
 import { EMPTY_STRING } from "@/lib/constants";
 import {
   domToSegments,
@@ -16,6 +16,7 @@ import {
 
 const props = withDefaults(
   defineProps<{
+    labelledBy: string;
     placeholder?: string;
     error?: boolean;
     helperText?: string;
@@ -25,6 +26,7 @@ const props = withDefaults(
   { minHeight: 84, disabled: false },
 );
 const model = defineModel<string>({ required: true });
+const helperId = `red-letter-helper-${useId()}`;
 
 const container = ref<HTMLDivElement | null>(null);
 let isComposing = false;
@@ -146,6 +148,11 @@ defineExpose({ wrapSelection });
   <div>
     <div
       ref="container"
+      role="textbox"
+      aria-multiline="true"
+      :aria-labelledby="labelledBy"
+      :aria-invalid="!!error"
+      :aria-describedby="helperText ? helperId : undefined"
       :contenteditable="!disabled"
       :aria-disabled="disabled"
       :data-placeholder="placeholder"
@@ -161,6 +168,7 @@ defineExpose({ wrapSelection });
     />
     <p
       v-if="helperText"
+      :id="helperId"
       :class="[
         'text-body-small mt-1',
         error ? 'text-error' : 'text-medium-emphasis',

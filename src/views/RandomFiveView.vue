@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // 賛美歌ランダム選択(旧 (admin)/hymns/random-five/page.tsx)
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import "@/plugins/fonts/serif-admin";
 import { useRoute } from "vue-router";
 import { useQuery } from "@tanstack/vue-query";
 import { fetchRandomHymns, hymnKeys, type RandomPath } from "@/api/hymns";

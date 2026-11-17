@@ -7,6 +7,7 @@
 // モバイル(768px未満)は左から出るドロワー。折りたたみ状態は localStorage に保存して次回も復元する。
 // 画面全体の高さを固定し、スクロールは右側のメインエリア内だけに閉じ込める。
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import "@/plugins/fonts/logo";
 import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useAuthStore } from "@/stores/auth";
