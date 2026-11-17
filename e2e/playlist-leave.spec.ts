@@ -75,3 +75,39 @@ test("プレイリストの作成中に画面を離れると確認し、「戻�
   await expect(page).toHaveURL(/\/hymns$/);
   await expect(dialog).toHaveCount(0);
 });
+
+test("作成中のログアウトは、先に「ログアウトしますか？」を聞き、やめたら作成を中止しない", async ({
+  page,
+}) => {
+  const api = await mockApi(page, {
+    loggedIn: true,
+    hymns: makeHymns(3),
+    playlistRunning: true,
+  });
+  await page.route("**/api/logout", (route) => route.fulfill({ status: 204 }));
+  await page.goto("/hymns");
+  await page.getByRole("button", { name: "プレイリスト作成" }).click();
+  await expect
+    .poll(() => api.calls.filter((c) => c.path === "/youtube/playlist-status").length)
+    .toBeGreaterThan(0);
+
+  const dialog = page.getByRole("alertdialog");
+  const logout = page.getByRole("button", { name: "ログアウト", exact: true });
+  const cancels = () => api.calls.filter((c) => c.path === "/youtube/cancel-playlist");
+
+  // ログアウトをやめたら、作成は中止しない
+  await logout.click();
+  await expect(dialog).toContainText("ログアウトしますか？");
+  await dialog.getByRole("button", { name: "戻る" }).click();
+  await expect(page).toHaveURL(/\/hymns$/);
+  await page.waitForTimeout(300);
+  expect(cancels()).toEqual([]);
+
+  // ログアウトする -> 作成の中止を確認 -> OK で中止してログアウト
+  await logout.click();
+  await dialog.getByRole("button", { name: "OK" }).click();
+  await expect(dialog).toContainText("プレイリストを作成中です。");
+  await dialog.getByRole("button", { name: "OK" }).click();
+  await expect(page).toHaveURL(/\/home$/);
+  expect(cancels().map((c) => c.query)).toEqual([{ playlistId: "PL1" }]);
+});
