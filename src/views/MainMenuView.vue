@@ -7,7 +7,7 @@ import { DELAY_APOLOGY } from "@/lib/constants";
 import { consumeRedirectMessage } from "@/lib/session";
 import burgundyImage from "@/assets/burgundy.svg?no-inline";
 import bourbonImage from "@/assets/bourbon.svg?no-inline";
-import newaragonImage from "@/assets/newaragon.svg?no-inline";
+import orleansImage from "@/assets/orleans.svg?no-inline";
 
 const router = useRouter();
 const feedback = useFeedbackStore();
@@ -28,7 +28,7 @@ const cards = [
   {
     key: "random",
     title: "ランダム選択",
-    img: newaragonImage,
+    img: orleansImage,
     action: () => router.push("/hymns/random-five"),
   },
 ];
