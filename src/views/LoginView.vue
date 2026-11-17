@@ -54,10 +54,11 @@ const onLogin = async () => {
           type="text"
           variant="outlined"
           density="compact"
-          bg-color="rgba(255,255,255,0.8)"
+          bg-color="rgba(255,255,255,0.97)"
+          base-color="#64748b"
           color="primary"
           hide-details
-          class="mb-4"
+          class="login-card__input"
         />
 
         <label for="login-password" class="login-card__label">パスワード</label>
@@ -68,10 +69,11 @@ const onLogin = async () => {
           type="password"
           variant="outlined"
           density="compact"
-          bg-color="rgba(255,255,255,0.8)"
+          bg-color="rgba(255,255,255,0.97)"
+          base-color="#64748b"
           color="primary"
           hide-details
-          class="mb-4"
+          class="login-card__input"
         />
 
         <v-alert
@@ -88,9 +90,10 @@ const onLogin = async () => {
           type="submit"
           color="primary"
           variant="flat"
+          height="46"
           block
           :loading="loading"
-          class="font-weight-bold"
+          class="login-card__submit font-weight-bold"
         >
           ログイン
         </v-btn>
@@ -104,36 +107,53 @@ const onLogin = async () => {
   position: relative;
   display: flex;
   min-height: 100vh;
+  padding: 24px 0;
   align-items: center;
   justify-content: center;
 }
 .login-card {
   width: 360px;
   max-width: calc(100% - 32px);
-  padding: 24px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.25);
+  padding: 30px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.66);
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(40px) saturate(150%);
-  -webkit-backdrop-filter: blur(40px) saturate(150%);
+    0 16px 42px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  /* 標準指定を最後に置き、圧縮後も両方の宣言を残す。 */
+  -webkit-backdrop-filter: blur(24px) saturate(115%);
+  backdrop-filter: blur(24px) saturate(115%);
 }
 .login-card__title {
-  margin-bottom: 24px;
+  margin-bottom: 26px;
   text-align: center;
-  font-size: 1.5rem;
+  font-size: 1.625rem;
   font-weight: 700;
   letter-spacing: 0.025em;
   color: #fff;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 .login-card__label {
   display: block;
-  margin-bottom: 6px;
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 8px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #fff;
+}
+.login-card__input {
+  margin-bottom: 20px;
+}
+.login-card__input :deep(.v-field) {
+  border-radius: 6px;
+}
+.login-card__input :deep(.v-field__input) {
+  min-height: 46px;
+  color: #172033;
+  opacity: 1;
+}
+.login-card__submit {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 6px;
 }
 .login-card__error {
   background: rgba(254, 242, 242, 0.95) !important;
