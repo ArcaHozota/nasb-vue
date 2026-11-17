@@ -121,15 +121,12 @@ const onLogin = async () => {
         >
           ログイン
           <template #loader>
-            <span class="login-card__loader">
-              <v-progress-circular
-                indeterminate
-                size="18"
-                width="2"
-                aria-hidden="true"
-              />
-              ログイン中
-            </span>
+            <v-progress-circular
+              indeterminate
+              size="18"
+              width="2"
+              aria-hidden="true"
+            />
           </template>
         </v-btn>
       </form>
@@ -211,11 +208,6 @@ const onLogin = async () => {
   border: 1px solid rgba(255, 255, 255, 0.33);
   border-radius: 6px;
   font-weight: 800;
-}
-.login-card__loader {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
 }
 .login-card__error {
   background: rgba(254, 242, 242, 0.95) !important;
