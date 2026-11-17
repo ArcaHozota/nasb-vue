@@ -49,6 +49,14 @@ describe("createPlaylistAndWait", () => {
     vi.useFakeTimers();
   });
 
+  it.each([undefined, null, "", " \t\n　", 0, false, {}, [], { message: "nested" }])(
+    "失敗理由が空・無効な場合は既定文言のPlaylistErrorを返す: %j", async (message) => {
+      post.mockResolvedValue({ data: { ...status({ state: "failed" }), message } });
+      await expect(createPlaylistAndWait({ hymnIds: ["1"] }))
+        .rejects.toThrow(new PlaylistError("プレイリスト作成に失敗しました"));
+    },
+  );
+
   it("完了(done)になるまで状態を問い合わせ、進捗を知らせる", async () => {
     post.mockResolvedValue({ data: status({ added: 0 }) });
     get

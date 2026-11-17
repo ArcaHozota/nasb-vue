@@ -10,6 +10,37 @@ const blobError = (body: string) => ({
 });
 
 describe("extractBlobErrorMessage", () => {
+  it.each([
+    "",
+    " \t\n ",
+    JSON.stringify(" \t "),
+    '"　"',
+    "null",
+    "{}",
+    "[]",
+    '{"message":null}',
+    '{"message":""}',
+    '{"message":"  "}',
+    '{"message":123}',
+    '{"message":false}',
+    '{"message":[]}',
+    '{"message":{}}',
+    '{"message":{"message":"nested"}}',
+  ])("Blobの空・無効なメッセージ %s には既定文言を使う", async (body) => {
+    expect(await extractBlobErrorMessage(blobError(body), FALLBACK)).toBe(
+      FALLBACK,
+    );
+  });
+
+  it("Blob内の有効なJSONメッセージも前後の空白を除く", async () => {
+    expect(
+      await extractBlobErrorMessage(
+        blobError(JSON.stringify({ message: "  調が違います\n" })),
+        FALLBACK,
+      ),
+    ).toBe("調が違います");
+  });
+
   it("JSON 文字列の本文を読む", async () => {
     expect(
       await extractBlobErrorMessage(blobError('"楽譜がありません"'), FALLBACK),

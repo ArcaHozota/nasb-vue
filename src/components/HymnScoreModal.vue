@@ -5,7 +5,7 @@ import { ref } from "vue";
 import axios from "axios";
 import api from "@/api/axios";
 import { useFeedbackStore } from "@/stores/feedback";
-import { EMPTY_STRING, extractErrorMessage } from "@/lib/constants";
+import { EMPTY_STRING, extractErrorMessage, responseMessage } from "@/lib/constants";
 import { downloadScore } from "@/lib/download";
 
 const props = defineProps<{
@@ -138,7 +138,7 @@ const downloadExisting = async () => {
   try {
     await downloadScore(props.hymnId, chord.value);
   } catch (e: unknown) {
-    feedback.toast(e instanceof Error ? e.message : "楽譜の取得に失敗しました");
+    feedback.toast(responseMessage(e instanceof Error ? e.message : undefined, "楽譜の取得に失敗しました"));
   }
 };
 

@@ -12,7 +12,6 @@ import {
   useInfiniteQuery,
   useQuery,
 } from "@tanstack/vue-query";
-import type { AxiosError } from "axios";
 import {
   fetchHymnPage,
   hymnKeys,
@@ -27,7 +26,7 @@ import {
 } from "@/lib/localSearch";
 import { downloadScoreOrToast } from "@/lib/download";
 import { consumeRedirectMessage } from "@/lib/session";
-import { EMPTY_STRING } from "@/lib/constants";
+import { EMPTY_STRING, extractErrorMessage } from "@/lib/constants";
 import { useFeedbackStore } from "@/stores/feedback";
 import { useIsMobile } from "@/composables/useIsMobile";
 import DesktopHome from "@/components/home/DesktopHome.vue";
@@ -129,8 +128,7 @@ watch(
   () => desktopQuery.error.value ?? mobileQuery.error.value,
   (err) => {
     if (!err) return;
-    const msg = (err as AxiosError<string>)?.response?.data ?? "通信エラー";
-    feedback.toast(typeof msg === "string" ? msg : "通信エラー");
+    feedback.toast(extractErrorMessage(err, "データの取得に失敗しました"));
   },
 );
 

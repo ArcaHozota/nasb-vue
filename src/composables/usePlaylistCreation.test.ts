@@ -36,6 +36,21 @@ describe("usePlaylistCreation", () => {
     });
   });
 
+  it.each(["", " \t\n "])("空のPlaylistErrorにも既定の通知を表示する: %j", async (message) => {
+    createPlaylistAndWait.mockRejectedValue(new PlaylistError(message));
+    await usePlaylistCreation().create(async () => ({ keyword: "愛" }));
+    expect(useFeedbackStore().toasts.map((toast) => toast.text))
+      .toEqual(["プレイリスト作成に失敗しました"]);
+    expect(usePlaylistJob().active).toBe(false);
+  });
+
+  it("本文なしの404にも既定の通知を表示する", async () => {
+    createPlaylistAndWait.mockRejectedValue({ response: { status: 404, data: "" } });
+    await usePlaylistCreation().create(async () => ({ keyword: "愛" }));
+    expect(useFeedbackStore().toasts.map((toast) => toast.text))
+      .toEqual(["プレイリスト作成に失敗しました"]);
+  });
+
   it("作成中は creating/progress を更新し、完了後に YouTube へ移動するか確認する", async () => {
     const confirm = answerConfirm(true);
     const pc = usePlaylistCreation();

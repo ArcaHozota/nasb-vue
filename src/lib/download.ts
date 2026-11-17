@@ -3,7 +3,7 @@
 // ホーム・賛美歌一覧・楽譜アップロードのモーダルで共通に使う。
 import axios from "axios";
 import api from "@/api/axios";
-import { extractErrorMessage } from "@/lib/constants";
+import { extractErrorMessage, responseMessage } from "@/lib/constants";
 import { useFeedbackStore } from "@/stores/feedback";
 
 /** サーバーのメッセージとして画面に出してよい最大の長さ(HTMLのエラーページ等を除くため) */
@@ -24,12 +24,7 @@ export async function extractBlobErrorMessage(
     const text = (await data.text()).trim();
     if (!text) return fallback;
     try {
-      const json: unknown = JSON.parse(text);
-      if (typeof json === "string") return json || fallback;
-      if (json && typeof json === "object" && "message" in json) {
-        return String((json as { message: unknown }).message);
-      }
-      return fallback;
+      return responseMessage(JSON.parse(text), fallback);
     } catch {
       // JSON ではない文字列。HTML のエラーページや長文は表示しない
       return text.length <= MAX_PLAIN_ERROR_LENGTH && !text.startsWith("<")
@@ -82,7 +77,10 @@ export async function downloadScoreOrToast(id: string, chord?: string) {
     await downloadScore(id, chord);
   } catch (e: unknown) {
     useFeedbackStore().toast(
-      e instanceof Error ? e.message : "楽譜の取得に失敗しました",
+      responseMessage(
+        e instanceof Error ? e.message : undefined,
+        "楽譜の取得に失敗しました",
+      ),
     );
   }
 }

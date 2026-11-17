@@ -15,6 +15,39 @@ describe("utf8ToBase64 / base64ToUtf8", () => {
 });
 
 describe("extractErrorMessage", () => {
+  it.each([
+    undefined,
+    null,
+    "",
+    " \t\n　",
+    0,
+    false,
+    [],
+    {},
+    { message: undefined },
+    { message: null },
+    { message: "" },
+    { message: " \t\n　" },
+    { message: 123 },
+    { message: false },
+    { message: [] },
+    { message: {} },
+    { message: { message: "nested" } },
+  ])("空・無効な応答 %j には既定文言を使う", (data) => {
+    expect(
+      extractErrorMessage({ response: { data } }, "保存に失敗しました"),
+    ).toBe("保存に失敗しました");
+  });
+
+  it.each(["  詳細なエラーです\n", { message: "  詳細なエラーです\n" }])(
+    "有効な文言は前後の空白だけを除いて保持する: %j",
+    (data) => {
+      expect(extractErrorMessage({ response: { data } }, "fallback")).toBe(
+        "詳細なエラーです",
+      );
+    },
+  );
+
   it("応答本文が文字列ならそれを返す", () => {
     expect(
       extractErrorMessage({ response: { data: "重複しています" } }, "fb"),

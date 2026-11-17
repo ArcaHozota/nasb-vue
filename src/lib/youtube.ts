@@ -2,6 +2,7 @@
 // YouTube連携まわりの共通処理。
 
 import api from "@/api/axios";
+import { responseMessage } from "@/lib/constants";
 
 // バックエンドの ProjectConstants.MESSAGE_YOUTUBE_REAUTH_REQUIRED と同じ文言。
 // 再認証が必要な409(JSON文字列ボディ)と、未連携の409(ボディなし)を見分けるために使う。
@@ -56,7 +57,10 @@ const POLL_TIMEOUT_MS = 10 * 60 * 1000;
 export async function createPlaylistAndWait(
   target: PlaylistTarget,
   onProgress?: (s: PlaylistStatus) => void,
-  options: { signal?: AbortSignal; onStarted?: (playlistId: string) => void } = {},
+  options: {
+    signal?: AbortSignal;
+    onStarted?: (playlistId: string) => void;
+  } = {},
 ): Promise<PlaylistStatus> {
   const { signal, onStarted } = options;
   const body =
@@ -89,7 +93,9 @@ export async function createPlaylistAndWait(
   }
   if (status.state === "cancelled") throw new PlaylistCancelled();
   if (status.state === "failed") {
-    throw new PlaylistError(status.message ?? "プレイリスト作成に失敗しました");
+    throw new PlaylistError(
+      responseMessage(status, "プレイリスト作成に失敗しました"),
+    );
   }
   return status;
 }
