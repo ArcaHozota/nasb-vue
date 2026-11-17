@@ -14,6 +14,7 @@ vi.mock("@/lib/youtube", async (importOriginal) => ({
 import { usePlaylistCreation } from "./usePlaylistCreation";
 import { useFeedbackStore } from "@/stores/feedback";
 import { PlaylistError } from "@/lib/youtube";
+import { usePlaylistJob } from "@/stores/playlistJob";
 
 /** confirm を、決まった答えを返す関数に差し替える */
 const answerConfirm = (ok: boolean) => {
@@ -28,7 +29,11 @@ describe("usePlaylistCreation", () => {
     setActivePinia(createPinia());
     push.mockReset();
     createPlaylistAndWait.mockReset();
-    vi.stubGlobal("window", { open: vi.fn() });
+    vi.stubGlobal("window", {
+      open: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    });
   });
 
   it("作成中は creating/progress を更新し、完了後に YouTube へ移動するか確認する", async () => {
@@ -78,5 +83,71 @@ describe("usePlaylistCreation", () => {
     expect(useFeedbackStore().toasts.map((t) => t.text)).toEqual([
       "上限を超えました",
     ]);
+  });
+
+  it("作成中にもう一度押しても、2つ目は始めない(別の画面で作成中のものも含む)", async () => {
+    answerConfirm(false);
+    let finish!: () => void;
+    createPlaylistAndWait.mockImplementation(
+      () => new Promise<void>((r) => (finish = r)),
+    );
+    const first = usePlaylistCreation().create(async () => ({ keyword: "愛" }));
+    await vi.waitFor(() => expect(createPlaylistAndWait).toHaveBeenCalled());
+
+    await usePlaylistCreation().create(async () => ({ keyword: "望" }));
+    expect(createPlaylistAndWait).toHaveBeenCalledTimes(1);
+    expect(useFeedbackStore().toasts.map((t) => t.text)).toEqual([
+      "プレイリストを作成中です。完了までお待ちください。",
+    ]);
+    finish();
+    await first;
+    expect(usePlaylistJob().active).toBe(false);
+  });
+
+  it("離れる確認を出している間に完了したら、答えが出るまで完了の確認を出さない。「OK」(中止して移動)なら出さない", async () => {
+    const confirm = answerConfirm(true);
+    const job = usePlaylistJob();
+    createPlaylistAndWait.mockImplementation(async () => {
+      job.leaving = true; // 完了したときに、ちょうど離れる確認が出ている
+    });
+    const done = usePlaylistCreation().create(async () => ({ keyword: "愛" }));
+    await vi.waitFor(() => expect(createPlaylistAndWait).toHaveBeenCalled());
+    await Promise.resolve();
+    expect(confirm).not.toHaveBeenCalled(); // 確認ダイアログを上書きしない
+
+    job.cancelled = true; // 「OK」で中止した
+    job.leaving = false;
+    await done;
+    expect(confirm).not.toHaveBeenCalled();
+    expect(job.active).toBe(false);
+  });
+
+  it("離れる確認で「戻る」なら、そのあとで完了の確認を出す", async () => {
+    const confirm = answerConfirm(false);
+    const job = usePlaylistJob();
+    createPlaylistAndWait.mockImplementation(async () => {
+      job.leaving = true;
+    });
+    const done = usePlaylistCreation().create(async () => ({ keyword: "愛" }));
+    await vi.waitFor(() => expect(createPlaylistAndWait).toHaveBeenCalled());
+    expect(confirm).not.toHaveBeenCalled();
+
+    job.leaving = false; // 「戻る」
+    await done;
+    expect(confirm).toHaveBeenCalledWith(
+      "プレイリストを作成しました。今はYouTubeへ移動してよろしいでしょうか。",
+      "お知らせ",
+      { variant: "success" },
+    );
+  });
+
+  it("中止したら、失敗のトーストも出さない", async () => {
+    const job = usePlaylistJob();
+    createPlaylistAndWait.mockImplementation(async () => {
+      job.cancelled = true;
+      throw new Error("canceled");
+    });
+    await usePlaylistCreation().create(async () => ({ keyword: "愛" }));
+    expect(useFeedbackStore().toasts).toEqual([]);
   });
 });

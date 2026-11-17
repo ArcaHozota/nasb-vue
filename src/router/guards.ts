@@ -1,7 +1,7 @@
 // src/router/guards.ts
 // ルーターの全体ガード。旧 (admin)/layout.tsx に分散していた処理をここに集める。
 //  - requireAuth   : meta.requiresAuth の画面は、ログインを確認してから表示する(未ログインならホームへ)
-//  - confirmUnsaved: 編集中の内容があるまま画面内を移動するとき、先に確認する
+//  - confirmUnsaved: 編集中の内容があるまま、またはプレイリストの作成中に画面内を移動するとき、先に確認する
 //  - blockOnMobile : meta.pcOnly の画面(ログイン・管理画面)は、モバイルの幅では開かせずホームへ戻す
 import type {
   NavigationGuardWithThis,
@@ -10,6 +10,7 @@ import type {
 import { useAuthStore } from "@/stores/auth";
 import { useFeedbackStore } from "@/stores/feedback";
 import { useUnsavedGuard } from "@/stores/unsavedGuard";
+import { confirmLeavePlaylist } from "@/stores/playlistJob";
 import { MOBILE_BREAKPOINT } from "@/composables/useIsMobile";
 
 declare module "vue-router" {
@@ -57,15 +58,22 @@ const isSamePage = (
   from: RouteLocationNormalized,
 ) => to.path === from.path;
 
-/** 未保存の内容を破棄してよいか確認する(ログアウト前など、ルーター外からも使う) */
+/**
+ * 画面を離れてよいか確認する(ログアウト前など、ルーター外からも使う)。
+ *   1. 未保存の内容があれば、破棄して移動するか
+ *   2. プレイリストの作成中なら、作成を中止して移動するか(OK で中止。取り消せないので最後に聞く)
+ */
 export async function confirmDiscardUnsaved(): Promise<boolean> {
   const guard = useUnsavedGuard();
-  if (!guard.dirty || guard.bypass) return true;
-  return useFeedbackStore().confirm(
-    "編集中の内容があります。破棄して移動しますか？",
-    "お知らせ",
-    { variant: "success" },
-  );
+  if (guard.dirty && !guard.bypass) {
+    const ok = await useFeedbackStore().confirm(
+      "編集中の内容があります。破棄して移動しますか？",
+      "お知らせ",
+      { variant: "success" },
+    );
+    if (!ok) return false;
+  }
+  return confirmLeavePlaylist();
 }
 
 export const confirmUnsaved: NavigationGuardWithThis<undefined> = async (

@@ -29,6 +29,8 @@ type Options = {
   login?: { status: number; delayMs?: number };
   /** 賛美歌の一覧(DELETE で減る) */
   hymns?: Hymn[];
+  /** true なら、プレイリストの作成を終わらせない(中止されるまで running を返す) */
+  playlistRunning?: boolean;
 };
 
 export type MockApi = {
@@ -49,9 +51,13 @@ const json = (route: Route, status: number, body: unknown) =>
     body: JSON.stringify(body),
   });
 
-export async function mockApi(page: Page, opts: Options = {}): Promise<MockApi> {
+export async function mockApi(
+  page: Page,
+  opts: Options = {},
+): Promise<MockApi> {
   const state: MockApi = { calls: [], hymns: [...(opts.hymns ?? [])] };
   let loggedIn = opts.loggedIn ?? false;
+  let playlistState = "done";
 
   await page.route("**/api/**", async (route) => {
     const req = route.request();
@@ -106,18 +112,30 @@ export async function mockApi(page: Page, opts: Options = {}): Promise<MockApi> 
     }
 
     // ランダム選択(画面内の検索ボタン / ヘッダーの検索)。先頭から5曲を返す
-    if ((path === "/hymns/random" || path === "/common/search") && method === "GET") {
+    if (
+      (path === "/hymns/random" || path === "/common/search") &&
+      method === "GET"
+    ) {
       return json(route, 200, state.hymns.slice(0, 5));
     }
 
+    const playlist = (state: string) => ({
+      playlistId: "PL1",
+      playlistUrl: "https://www.youtube.com/playlist?list=PL1",
+      state,
+      total: 3,
+      added: state === "done" ? 3 : 1,
+    });
     if (path === "/youtube/create-playlist" && method === "POST") {
-      return json(route, 202, {
-        playlistId: "PL1",
-        playlistUrl: "https://www.youtube.com/playlist?list=PL1",
-        state: "done",
-        total: 1,
-        added: 1,
-      });
+      playlistState = opts.playlistRunning ? "running" : "done";
+      return json(route, 202, playlist(playlistState));
+    }
+    if (path === "/youtube/playlist-status" && method === "GET") {
+      return json(route, 200, playlist(playlistState));
+    }
+    if (path === "/youtube/cancel-playlist" && method === "POST") {
+      if (playlistState === "running") playlistState = "cancelled";
+      return json(route, 200, playlist(playlistState));
     }
 
     // ホームの右カード: 歌詞と、楽譜が登録済みの調(G がオリジナル)

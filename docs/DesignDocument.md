@@ -175,26 +175,34 @@ Vue 3、TypeScript、Vue Router、Pinia、Vuetify、TanStack Vue Query、Axios�
 
 一覧からは検索キーワード、ランダム選択からは表示結果の曲ID配列を送信する。一覧ではページをまたぐ対象曲の収集をバックエンドに委ねる。作成要求後、`running` の間は1.5秒ごとに状態を取得し、追加済み件数を表示する。`done` では YouTube へ移動するか確認し、`failed` では理由を表示する。10分経過時は待機を終了するが、サーバー処理は継続し得る。409の未連携・再認証時は本人情報画面への移動を案内する。
 
+作成中の状態は画面をまたぐストア（`src/stores/playlistJob.ts`）で持ち、作成は同時に1つだけとする（作成中にもう一度押すと案内を出す）。作成中に画面を離れるときは次のとおりとする。
+
+- 画面内の移動・ログアウト: 確認ダイアログ（タイトル「お知らせ」、本文「プレイリストを作成中です。移動すると作成を中止し、作りかけのプレイリストを削除します。移動しますか？」）を出す。未保存の編集内容の確認があるときは、その後に出す。
+  - 戻る・Esc: 画面に残り、作成と進捗の表示を続ける。
+  - OK: 進捗の確認を止め、`POST /youtube/cancel-playlist` で作成の中止を頼んで移動する。以後、完了・失敗の通知は出さない。サーバーは次の動画を追加する前に止め、作りかけのプレイリストを削除する。作成の受け付け前（`playlistId` が未取得）に中止したときは、受け付けの直後に中止を頼む。中止を頼んだときにすでに完了していた場合は、完了したプレイリストを残し、その旨をトーストで知らせる。
+- 確認ダイアログを出している間に作成が完了・失敗しても、答えが出るまで完了の確認やエラーを出さない（確認ダイアログを上書きしない）。
+- 再読み込み・タブを閉じる: ブラウザ標準の確認を出す。実際にページを離れたときは、ページが閉じても届く通信（`fetch` の `keepalive`）で中止を頼む。受け付け前に離れた作成は、サーバーで最後まで進む。
+
 ### 4.7 API インターフェース一覧
 
 パスは `/api` を除いたフロントエンド上の指定。認可条件、全応答形式、エラーコードの完全な定義はバックエンドの仕様を参照・確認する。
 
-| メソッド・パス                                                                           | 用途・主な指定                                                                      |
-| ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| GET `/common/csrf`、`/common/me`                                                         | CSRF トークン、本人情報の取得                                                       |
-| POST `/login`、`/logout`                                                                 | ログイン、ログアウト                                                                |
-| GET `/hymns`                                                                             | `pageNum`、`pageSize`、`keyword` で一覧・検索。`records`、`totalRecords` を受け取る |
-| GET `/hymns/search-index`                                                                | 画面内検索の索引取得                                                                |
-| GET `/hymns/{id}`、`/hymns/{id}/lyric`                                                   | 編集用詳細、歌詞の取得                                                              |
-| POST `/hymns`、PUT・DELETE `/hymns/{id}`                                                 | 賛美歌の追加、更新、削除                                                            |
-| GET `/hymns/duplicate-check-jp`、`/hymns/duplicate-check-kr`、`/hymns/{id}/delete-check` | 重複および削除可否の確認                                                            |
-| GET・POST `/hymns/{id}/score`                                                            | 楽譜・調情報の取得、楽譜登録                                                        |
-| GET `/hymns/random`、`/common/search`                                                    | キーワードによるランダム選択                                                        |
-| GET `/books`、`/books/{bookId}/chapters`、`/books/{chapterId}/verse`                     | 書・章・既存節を取得。節には `verseNo` を指定                                       |
-| POST `/books`                                                                            | `chapterId`、節番号 `id`、`textEn`、`textJp` を保存                                 |
-| GET・PUT `/students/{id}`、GET `/students/duplicate-check`                               | 本人情報の取得・更新、アカウント重複確認                                            |
-| GET `/youtube/status`、`/youtube/authorize-url`、POST `/youtube/unlink`                  | 連携状態確認、連携開始、解除                                                        |
-| POST `/youtube/create-playlist`、GET `/youtube/playlist-status`                          | 作成開始、`playlistId` による進捗確認                                               |
+| メソッド・パス                                                                                   | 用途・主な指定                                                                                          |
+| ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| GET `/common/csrf`、`/common/me`                                                                 | CSRF トークン、本人情報の取得                                                                           |
+| POST `/login`、`/logout`                                                                         | ログイン、ログアウト                                                                                    |
+| GET `/hymns`                                                                                     | `pageNum`、`pageSize`、`keyword` で一覧・検索。`records`、`totalRecords` を受け取る                     |
+| GET `/hymns/search-index`                                                                        | 画面内検索の索引取得                                                                                    |
+| GET `/hymns/{id}`、`/hymns/{id}/lyric`                                                           | 編集用詳細、歌詞の取得                                                                                  |
+| POST `/hymns`、PUT・DELETE `/hymns/{id}`                                                         | 賛美歌の追加、更新、削除                                                                                |
+| GET `/hymns/duplicate-check-jp`、`/hymns/duplicate-check-kr`、`/hymns/{id}/delete-check`         | 重複および削除可否の確認                                                                                |
+| GET・POST `/hymns/{id}/score`                                                                    | 楽譜・調情報の取得、楽譜登録                                                                            |
+| GET `/hymns/random`、`/common/search`                                                            | キーワードによるランダム選択                                                                            |
+| GET `/books`、`/books/{bookId}/chapters`、`/books/{chapterId}/verse`                             | 書・章・既存節を取得。節には `verseNo` を指定                                                           |
+| POST `/books`                                                                                    | `chapterId`、節番号 `id`、`textEn`、`textJp` を保存                                                     |
+| GET・PUT `/students/{id}`、GET `/students/duplicate-check`                                       | 本人情報の取得・更新、アカウント重複確認                                                                |
+| GET `/youtube/status`、`/youtube/authorize-url`、POST `/youtube/unlink`                          | 連携状態確認、連携開始、解除                                                                            |
+| POST `/youtube/create-playlist`、GET `/youtube/playlist-status`、POST `/youtube/cancel-playlist` | 作成開始、`playlistId` による進捗確認、作成の中止（作成中なら `cancelled`、完了済みならその状態を返す） |
 
 ## 5. テスト・ビルド・運用
 

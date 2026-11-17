@@ -3,7 +3,7 @@
 // App.vue 直下にグローバルマウントする(旧 components/FeedbackHost.tsx)。
 // トースト → v-snackbar-queue、確認ダイアログ → v-dialog。
 // フォーカストラップ・背面スクロールのロックは v-dialog 側が担当する。
-import { computed } from "vue";
+import { computed, onBeforeUnmount, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useFeedbackStore } from "@/stores/feedback";
 
@@ -12,6 +12,17 @@ const { dialog, toasts } = storeToRefs(feedback);
 
 // 色はテーマ色の名前そのまま(primary / success / secondary)
 const color = computed(() => dialog.value.variant);
+
+// Esc は「戻る」と同じく false を返す(onCancel は呼ばない)。
+// 開いた直後のフォーカスはカードの外側の枠(v-overlay__content)にあり、カードやダイアログに付けた
+// keydown では受け取れないため、確認ダイアログを出している間だけ画面全体で受け取る。
+const onKeydown = (e: KeyboardEvent) => {
+  if (e.key !== "Escape" || !dialog.value.show) return;
+  e.stopPropagation();
+  feedback.answer(false);
+};
+onMounted(() => window.addEventListener("keydown", onKeydown, true));
+onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown, true));
 </script>
 
 <template>
@@ -24,7 +35,7 @@ const color = computed(() => dialog.value.variant);
   />
 
   <!-- 確認ダイアログ(旧 AlertDialog 相当)。
-       外側クリックでは閉じない(persistent)。Esc は「戻る」と同じく false を返す(onCancel は呼ばない)。 -->
+       外側クリックでは閉じない(persistent)。Esc は onKeydown で受け取る -->
   <v-dialog
     :model-value="dialog.show"
     persistent
@@ -33,11 +44,7 @@ const color = computed(() => dialog.value.variant);
     aria-labelledby="feedback-dialog-title"
     aria-describedby="feedback-dialog-text"
   >
-    <v-card
-      class="noto-sans"
-      rounded="lg"
-      @keydown.esc.stop="feedback.answer(false)"
-    >
+    <v-card class="noto-sans" rounded="lg">
       <div class="pt-3">
         <div
           id="feedback-dialog-title"
@@ -58,7 +65,6 @@ const color = computed(() => dialog.value.variant);
           {{ dialog.text }}
         </p>
         <div class="feedback-dialog-actions d-flex justify-end ga-2 mt-6">
-          <!-- 先頭の「戻る」に初期フォーカスが当たる(誤操作で OK しないように) -->
           <v-btn
             variant="text"
             class="text-medium-emphasis"
