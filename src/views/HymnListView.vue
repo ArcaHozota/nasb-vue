@@ -157,8 +157,9 @@ const onDelete = async (item: HymnSummary) => {
   );
   if (!ok) return;
   try {
-    const { headers } = await api.delete(`/hymns/${item.id}`);
-    feedback.toast(String(headers["x-page-num"] ?? "削除しました"));
+    // 削除の応答には X-Page-Num が付かない(付くのは追加だけ)ので、通知は固定の文言にする
+    await api.delete(`/hymns/${item.id}`);
+    feedback.toast("削除しました");
     void invalidateHymns(queryClient);
   } catch (e: unknown) {
     feedback.toast(extractMessage(e, "削除に失敗しました"));

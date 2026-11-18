@@ -24,6 +24,8 @@ test.describe("賛美歌一覧", () => {
     const dialog = page.getByRole("alertdialog");
     await expect(dialog).toContainText("賛美歌11");
     await dialog.getByRole("button", { name: "OK" }).click();
+    // 削除の通知は固定の文言(削除の応答に X-Page-Num は付かない)
+    await expect(page.locator(".app-toast")).toHaveText("削除しました");
 
     // 空の2ページ目に取り残されず、1ページ目(残り10件)を表示する
     await expect(page.getByText("全10件 / 1 / 1ページ")).toBeVisible();
