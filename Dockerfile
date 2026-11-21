@@ -1,15 +1,11 @@
-# --- Bun(パッケージ管理・スクリプトの起動)。package.json の packageManager と同じ版 ---
-FROM oven/bun:1.4.5-alpine AS bun
-
 # --- build stage ---
-# ビルド(vue-tsc・Vite)は Node で動かし、Bun はインストールとスクリプトの起動だけに使う
 FROM node:22-alpine AS build
-COPY --from=bun /usr/local/bin/bun /usr/local/bin/bun
 WORKDIR /app
-COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile
+RUN corepack enable yarn
+COPY package.json yarn.lock .yarnrc.yml ./
+RUN yarn install --immutable
 COPY . .
-RUN bun run build
+RUN yarn build
 
 # --- runtime stage: 静的配信(SPA) ---
 # /api は前段(nginx/CloudFront等)でバックエンドへルーティングする想定。

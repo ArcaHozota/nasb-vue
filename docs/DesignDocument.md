@@ -118,7 +118,7 @@ flowchart LR
 - `queryClient.ts`: TanStack Vue Query の共通設定。
 - `index.ts`: 上記と Pinia・ルーターをまとめて登録する（Pinia を最初に登録する。ルーターのガードや Axios のインターセプターがストアを使うため）。
 
-Vue 3、TypeScript、Vue Router、Pinia、Vuetify、TanStack Vue Query、Axios、Vite を使用する。パッケージ管理とスクリプトの起動には Bun を使い、ビルド・型検査・テストは Node 上で動かす。依存バージョンは `package.json` とロックファイル（`bun.lock`）を正とする。
+Vue 3、TypeScript、Vue Router、Pinia、Vuetify、TanStack Vue Query、Axios、Vite を使用する。パッケージ管理とスクリプトの起動には Yarn 4 を使い、ビルド・型検査・テストは Node.js で動かす。Corepack は `package.json` で指定された Yarn のバージョンを使用する。依存関係は `yarn.lock` に従って `node_modules` に導入する。
 
 ### 4.2 認証・通信・画面遷移
 
@@ -216,15 +216,15 @@ Vue 3、TypeScript、Vue Router、Pinia、Vuetify、TanStack Vue Query、Axios�
 
 | コマンド         | 目的                                                                                                                    |
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `bun install`    | ロックファイルに従う依存関係の導入                                                                                      |
-| `bun run dev`    | 開発サーバーの起動                                                                                                      |
-| `bun run build`  | 型検査と本番向けビルド                                                                                                  |
-| `bun run test`   | Vitest によるユニット・DOMテスト                                                                                        |
-| `bun run lint`   | ESLint による静的解析                                                                                                   |
-| `bun run e2e`    | Playwright による画面操作テスト                                                                                         |
+| `yarn install --immutable` | ロックファイルに従う依存関係の導入。開発環境と Docker で使用する |
+| `yarn dev`       | 開発サーバーの起動                                                                                                      |
+| `yarn build`     | 型検査と本番向けビルド                                                                                                  |
+| `yarn test`      | Vitest によるユニット・DOMテスト                                                                                        |
+| `yarn lint`      | ESLint による静的解析                                                                                                   |
+| `yarn e2e`       | Playwright による画面操作テスト                                                                                         |
 | `docker build .` | ビルド済みファイルを nginx で配信するイメージの作成。本番のアプリサーバーは arm64 のため、本番用は `linux/arm64` で作る |
 
-テストには、認証ガード、画面幅ガード、CSRF再送、セッション失効、検索、調の並び、未保存確認、プレイリスト、ログイン、ホーム（PC・モバイル）、サイドバー、賛美歌操作等のケースがある。Playwright を更新した後は、E2E の前に `bunx playwright install chromium` でブラウザを導入する。E2E は API をモックするため、実バックエンドや Google・YouTube との接続を保証しない。実環境の結合試験、性能・セキュリティ試験、受入基準や実施結果は別途確認する。
+テストには、認証ガード、画面幅ガード、CSRF再送、セッション失効、検索、調の並び、未保存確認、プレイリスト、ログイン、ホーム（PC・モバイル）、サイドバー、賛美歌操作等のケースがある。E2E の初回実行前や Playwright の更新後は、`yarn exec playwright install chromium` でブラウザを導入する。CI では `yarn build` の後に `yarn e2e` を実行する。E2E は API をモックするため、実バックエンドや Google・YouTube との接続を保証しない。実環境の結合試験、性能・セキュリティ試験、受入基準や実施結果は別途確認する。
 
 ## 6. インフラ構成
 
