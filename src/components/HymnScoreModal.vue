@@ -114,7 +114,7 @@ const doUpload = async (overwrite: boolean) => {
 //   Esc : 何もしない
 const confirmOverwrite = async () => {
   const ok = await feedback.confirm(
-    `${chordText()}の楽譜は登録済みです。上書きしますか？`,
+    `${chordText()}の楽譜は登録済みです。上書きしますか。`,
     "通知",
     { variant: "secondary", onCancel: downloadExisting },
   );
@@ -138,7 +138,12 @@ const downloadExisting = async () => {
   try {
     await downloadScore(props.hymnId, chord.value);
   } catch (e: unknown) {
-    feedback.toast(extractMessage(e instanceof Error ? e.message : undefined, "楽譜の取得に失敗しました"));
+    feedback.toast(
+      extractMessage(
+        e instanceof Error ? e.message : undefined,
+        "楽譜の取得に失敗しました",
+      ),
+    );
   }
 };
 

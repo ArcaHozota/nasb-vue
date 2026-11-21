@@ -16,7 +16,7 @@ import { useUnsavedGuard } from "@/stores/unsavedGuard";
 import type { PlaylistStatus } from "@/lib/youtube";
 
 export const PLAYLIST_LEAVE_CONFIRM_TEXT =
-  "プレイリストを作成中です。移動すると作成を中止し、作りかけのプレイリストを削除します。移動しますか？";
+  "プレイリストを作成中です。移動すると作成を中止し、作りかけのプレイリストを削除します。移動しますか。";
 
 export const usePlaylistJob = defineStore("playlistJob", () => {
   const feedback = useFeedbackStore();

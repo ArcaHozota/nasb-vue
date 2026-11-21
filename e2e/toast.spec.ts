@@ -34,3 +34,19 @@ test("トースト: 背景はテーマの info、文字は白の Noto Serif JP �
     .toBe(true);
   await page.screenshot({ path: process.env.TOAST_SHOT ?? "test-results/toast.png" });
 });
+
+test("確認ダイアログの本文は Noto Serif JP。明朝体を使わない画面でも、最初のダイアログのときに読み込む", async ({
+  page,
+}) => {
+  await mockApi(page, { loggedIn: true, hymns: makeHymns(1) });
+  await page.goto("/mainmenu");
+  await page.getByRole("button", { name: "ログアウト", exact: true }).click();
+
+  const text = page.getByRole("alertdialog").locator("#feedback-dialog-text");
+  await expect(text).toHaveText("ログアウトしますか。");
+  expect(await text.evaluate((el) => getComputedStyle(el).fontFamily)).toContain("Noto Serif JP");
+  await expect(text).toHaveCSS("font-weight", "400");
+  await expect
+    .poll(() => page.evaluate(() => document.fonts.check('400 16px "Noto Serif JP"', "ログアウト")))
+    .toBe(true);
+});

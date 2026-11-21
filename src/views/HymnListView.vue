@@ -152,7 +152,7 @@ const onDelete = async (item: HymnSummary) => {
     return;
   }
   const ok = await feedback.confirm(
-    `この「${item.nameJp}」という歌の情報を削除してもよろしいですか？`,
+    `この「${item.nameJp}」という歌の情報を削除してもよろしいですか。`,
     "警告",
   );
   if (!ok) return;
@@ -322,7 +322,12 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
                 </tr>
               </template>
               <tr
-                v-else-if="isSuccess && !isFetching && !isPlaceholderData && records.length === 0"
+                v-else-if="
+                  isSuccess &&
+                  !isFetching &&
+                  !isPlaceholderData &&
+                  records.length === 0
+                "
               >
                 <td colspan="4" class="py-6 text-center text-disabled">
                   データがありません

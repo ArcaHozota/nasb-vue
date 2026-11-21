@@ -145,7 +145,7 @@ const onLogout = async () => {
   if (loggingOut.value) return;
   // 先にログアウトするかを聞き、そのあとで未保存の破棄・プレイリスト作成の中止を確認する
   // (作成の中止は取り消せないので、ログアウトをやめる余地が残っている間には行わない)
-  const ok = await feedback.confirm("ログアウトしますか？", "警告");
+  const ok = await feedback.confirm("ログアウトしますか。", "警告");
   if (!ok || loggingOut.value) return;
   if (!(await confirmDiscardUnsaved())) return;
   if (loggingOut.value) return;

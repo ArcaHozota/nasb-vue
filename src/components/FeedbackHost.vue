@@ -10,20 +10,34 @@ import { useFeedbackStore } from "@/stores/feedback";
 const feedback = useFeedbackStore();
 const { dialog, toasts } = storeToRefs(feedback);
 
-// トーストの明朝体(太字)は、最初のトーストを出すときに読み込む(どの画面でも同じ書体で出す)
-let toastFontLoaded = false;
+// トースト・ダイアログの明朝体は、最初のトースト・ダイアログを出すときに読み込む(どの画面でも同じ書体で出す)
+let feedbackFontLoaded = false;
 watch(
-  () => toasts.value.length,
-  (n) => {
-    if (n === 0 || toastFontLoaded) return;
-    toastFontLoaded = true;
-    void import("@/plugins/fonts/toast");
+  () => toasts.value.length > 0 || dialog.value.show,
+  (shown) => {
+    if (!shown || feedbackFontLoaded) return;
+    feedbackFontLoaded = true;
+    void import("@/plugins/fonts/feedback");
   },
   { immediate: true },
 );
 
-// 色はテーマ色の名前そのまま(primary / success / secondary)
+// 色はテーマ色の名前そのまま(primary / success / secondary)。アイコンもタイトル・線と同じ色にする
 const color = computed(() => dialog.value.variant);
+// アイコン: 警告(primary)は「!」、お知らせ(success)・通知(secondary)は「?」
+const icon = computed(() =>
+  dialog.value.variant === "primary"
+    ? "mdi-alert-circle-outline"
+    : "mdi-help-circle-outline",
+);
+// 本文の文字の大きさは、文の長さで決める(本文の欄はダイアログの幅の62%と狭いので、長い文ほど小さくする)
+const textSize = computed(() => {
+  const n = [...dialog.value.text].length;
+  if (n <= 20) return "1.156rem";
+  if (n <= 40) return "1.0625rem";
+  if (n <= 60) return "1rem";
+  return "0.9375rem";
+});
 
 // Esc は「戻る」と同じく false を返す(onCancel は呼ばない)。
 // 開いた直後のフォーカスはカードの外側の枠(v-overlay__content)にあり、カードやダイアログに付けた
@@ -71,13 +85,26 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown, true));
         </div>
         <div :class="['feedback-dialog-bar mx-2 mt-2', `bg-${color}`]" />
       </div>
-      <v-card-text class="pa-6">
-        <p
-          id="feedback-dialog-text"
-          class="feedback-dialog-text text-medium-emphasis text-center"
-        >
-          {{ dialog.text }}
-        </p>
+      <!-- 左右の余白は0にして、62% がダイアログの幅に対する割合になるようにする -->
+      <v-card-text class="px-0 py-6">
+        <!-- アイコンと本文: 合わせてダイアログの幅の62%、中央に置く -->
+        <div class="feedback-dialog-body">
+          <v-icon
+            :icon="icon"
+            :data-icon="icon"
+            :color="color"
+            size="36"
+            class="feedback-dialog-icon"
+            aria-hidden="true"
+          />
+          <p
+            id="feedback-dialog-text"
+            class="feedback-dialog-text text-medium-emphasis"
+            :style="{ fontSize: textSize }"
+          >
+            {{ dialog.text }}
+          </p>
+        </div>
       </v-card-text>
       <!-- フッター: 区切り線の下に「戻る」「OK」を右寄せで置く(Vuetify の v-card-actions) -->
       <v-divider />
@@ -99,10 +126,24 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown, true));
 </template>
 
 <style scoped>
-/* 本文: 1.156rem(太さは既定のまま) */
+/* アイコンと本文の欄: ダイアログの幅の62%。アイコンは本文の上下中央にそろえる */
+.feedback-dialog-body {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 62%;
+  margin: 0 auto;
+}
+.feedback-dialog-icon {
+  flex-shrink: 0;
+}
+/* 本文: Noto Serif JP。大きさは文の長さで決める(textSize)。太さは既定のまま */
 .feedback-dialog-text {
-  font-size: 1.156rem;
+  font-family: "Noto Serif JP", serif;
+  flex: 1;
+  min-width: 0;
   line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 /* フッター: 左右と上下に余白を取り、ボタンの間は 8px */
 .feedback-dialog-actions {

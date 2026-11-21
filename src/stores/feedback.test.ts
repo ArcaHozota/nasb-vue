@@ -28,7 +28,7 @@ describe("確認ダイアログ", () => {
   it("「戻る」のボタンなら false を返し、onCancel を呼ぶ", async () => {
     const feedback = useFeedbackStore();
     const onCancel = vi.fn();
-    const p = feedback.confirm("上書きしますか？", "通知", {
+    const p = feedback.confirm("上書きしますか。", "通知", {
       variant: "secondary",
       onCancel,
     });
@@ -41,7 +41,7 @@ describe("確認ダイアログ", () => {
   it("Esc(answer(false))では onCancel を呼ばない", async () => {
     const feedback = useFeedbackStore();
     const onCancel = vi.fn();
-    const p = feedback.confirm("上書きしますか？", "通知", { onCancel });
+    const p = feedback.confirm("上書きしますか。", "通知", { onCancel });
     feedback.answer(false);
     await expect(p).resolves.toBe(false);
     expect(onCancel).not.toHaveBeenCalled();

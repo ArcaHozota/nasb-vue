@@ -81,7 +81,7 @@ export function usePlaylistCreation() {
         const reauthText = getYoutubeReauthConfirmText(e);
         const ok = await feedback.confirm(
           reauthText ??
-            "YouTube連携がまだ完了していません。連携ページへ移動しますか？",
+            "YouTube連携がまだ完了していません。連携ページへ移動しますか。",
           "お知らせ",
           { variant: "success" },
         );

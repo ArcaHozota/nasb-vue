@@ -67,7 +67,7 @@ export async function confirmDiscardUnsaved(): Promise<boolean> {
   const guard = useUnsavedGuard();
   if (guard.dirty && !guard.bypass) {
     const ok = await useFeedbackStore().confirm(
-      "編集中の内容があります。破棄して移動しますか？",
+      "編集中の内容があります。破棄して移動しますか。",
       "お知らせ",
       { variant: "success" },
     );

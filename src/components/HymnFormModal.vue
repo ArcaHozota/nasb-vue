@@ -122,10 +122,10 @@ const errors = reactive(emptyErrors());
 
 const duplicateCheck = (key: "nameJp" | "nameKr", url: string) =>
   useDuplicateCheck({
-  value: () => {
-    const name = form.value[key].trim();
-    return key === "nameKr" ? name.normalize("NFC") : name;
-  },
+    value: () => {
+      const name = form.value[key].trim();
+      return key === "nameKr" ? name.normalize("NFC") : name;
+    },
     request: (name, signal) =>
       api.get(url, {
         params: { id: form.value.id ?? EMPTY_STRING, [key]: name },
@@ -246,8 +246,8 @@ const close = async () => {
   if (isDirty.value) {
     const ok = await feedback.confirm(
       isEdit.value
-        ? "変更を破棄して閉じますか？"
-        : "入力した内容を破棄して閉じますか？",
+        ? "変更を破棄して閉じますか。"
+        : "入力した内容を破棄して閉じますか。",
       "お知らせ",
       { variant: "success" },
     );
