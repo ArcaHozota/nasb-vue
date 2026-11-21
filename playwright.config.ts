@@ -4,7 +4,7 @@ import { defineConfig, devices } from "@playwright/test";
 // バックエンドは起動せず、ブラウザ側で /api/** の応答を差し替える(e2e/mock-api.ts)。
 // 本番と同じビルド結果(dist/)を vite preview で配信して確かめる。
 const PORT = 3100;
-const START = `pnpm exec vite preview --port ${PORT} --strictPort`;
+const START = `bun run preview --port ${PORT} --strictPort`;
 
 export default defineConfig({
   testDir: "./e2e",
@@ -18,8 +18,8 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    // CI では build 済みのものを起動するだけにする(ワークフローで先に pnpm build する)
-    command: process.env.CI ? START : `pnpm build && ${START}`,
+    // CI では build 済みのものを起動するだけにする(ワークフローで先に bun run build する)
+    command: process.env.CI ? START : `bun run build && ${START}`,
     url: `http://localhost:${PORT}/home`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

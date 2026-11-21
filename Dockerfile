@@ -1,12 +1,15 @@
+# --- Bun(パッケージ管理・スクリプトの起動)。package.json の packageManager と同じ版 ---
+FROM oven/bun:1.4.5-alpine AS bun
+
 # --- build stage ---
+# ビルド(vue-tsc・Vite)は Node で動かし、Bun はインストールとスクリプトの起動だけに使う
 FROM node:22-alpine AS build
+COPY --from=bun /usr/local/bin/bun /usr/local/bin/bun
 WORKDIR /app
-# pnpm は package.json の packageManager と同じ版を入れる
-RUN npm install -g pnpm@12.21.0
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm install --frozen-lockfile
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
 COPY . .
-RUN pnpm build
+RUN bun run build
 
 # --- runtime stage: 静的配信(SPA) ---
 # /api は前段(nginx/CloudFront等)でバックエンドへルーティングする想定。

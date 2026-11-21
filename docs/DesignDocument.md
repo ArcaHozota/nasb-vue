@@ -2,7 +2,7 @@
 
 ## 1. 文書の目的と対象
 
-本書は、アジャイル開発で段階的に構築・変更されてきたシステムの現行実装を、要件定義・基本設計・詳細設計の観点でまとめたものである。2026年11月17日時点のこのリポジトリのソース、テストおよび README を根拠とする。インフラ構成（6章）は、バックエンドの手順書・ビルドスクリプトと関係者からの聞き取りを根拠とする。過去の意思決定、開発プロセスの実績、将来の計画を保証するものではない。以後の変更では、本書も実装と併せて更新する。
+本書は、アジャイル開発で段階的に構築・変更されてきたシステムの現行実装を、要件定義・基本設計・詳細設計の観点でまとめたものである。2026年11月21日時点のこのリポジトリのソース、テストおよび README を根拠とする。インフラ構成（6章）は、バックエンドの手順書・ビルドスクリプトと関係者からの聞き取りを根拠とする。過去の意思決定、開発プロセスの実績、将来の計画を保証するものではない。以後の変更では、本書も実装と併せて更新する。
 
 対象は Vue によるフロントエンド、その画面から見た外部インターフェース、およびシステムを動かす AWS のインフラ構成とする。バックエンド・データベース・YouTube・Google 側の内部設計は、バックエンド側の `docs` フォルダの設計書を参照する。インフラは構成と役割のみを記載し、アカウントID・インスタンスID・リソース名などの識別子は記載しない。実装上の仕様と業務上の意図が一致するかは、関係者による確認を要する。画面の配色・大きさ・部品の見た目の決まりは [UIGuidelines.md](UIGuidelines.md) にまとめる。
 
@@ -118,7 +118,7 @@ flowchart LR
 - `queryClient.ts`: TanStack Vue Query の共通設定。
 - `index.ts`: 上記と Pinia・ルーターをまとめて登録する（Pinia を最初に登録する。ルーターのガードや Axios のインターセプターがストアを使うため）。
 
-Vue 3、TypeScript、Vue Router、Pinia、Vuetify、TanStack Vue Query、Axios、Vite を使用する。依存バージョンは `package.json` とロックファイルを正とする。
+Vue 3、TypeScript、Vue Router、Pinia、Vuetify、TanStack Vue Query、Axios、Vite を使用する。パッケージ管理とスクリプトの起動には Bun を使い、ビルド・型検査・テストは Node 上で動かす。依存バージョンは `package.json` とロックファイル（`bun.lock`）を正とする。
 
 ### 4.2 認証・通信・画面遷移
 
@@ -216,15 +216,15 @@ Vue 3、TypeScript、Vue Router、Pinia、Vuetify、TanStack Vue Query、Axios�
 
 | コマンド         | 目的                                                                                                                    |
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `pnpm install`   | ロックファイルに従う依存関係の導入                                                                                      |
-| `pnpm dev`       | 開発サーバーの起動                                                                                                      |
-| `pnpm build`     | 型検査と本番向けビルド                                                                                                  |
-| `pnpm test`      | Vitest によるユニット・DOMテスト                                                                                        |
-| `pnpm lint`      | ESLint による静的解析                                                                                                   |
-| `pnpm e2e`       | Playwright による画面操作テスト                                                                                         |
+| `bun install`    | ロックファイルに従う依存関係の導入                                                                                      |
+| `bun run dev`    | 開発サーバーの起動                                                                                                      |
+| `bun run build`  | 型検査と本番向けビルド                                                                                                  |
+| `bun run test`   | Vitest によるユニット・DOMテスト                                                                                        |
+| `bun run lint`   | ESLint による静的解析                                                                                                   |
+| `bun run e2e`    | Playwright による画面操作テスト                                                                                         |
 | `docker build .` | ビルド済みファイルを nginx で配信するイメージの作成。本番のアプリサーバーは arm64 のため、本番用は `linux/arm64` で作る |
 
-テストには、認証ガード、画面幅ガード、CSRF再送、セッション失効、検索、調の並び、未保存確認、プレイリスト、ログイン、ホーム（PC・モバイル）、サイドバー、賛美歌操作等のケースがある。Playwright を更新した後は、E2E の前に `pnpm exec playwright install chromium` でブラウザを導入する。E2E は API をモックするため、実バックエンドや Google・YouTube との接続を保証しない。実環境の結合試験、性能・セキュリティ試験、受入基準や実施結果は別途確認する。
+テストには、認証ガード、画面幅ガード、CSRF再送、セッション失効、検索、調の並び、未保存確認、プレイリスト、ログイン、ホーム（PC・モバイル）、サイドバー、賛美歌操作等のケースがある。Playwright を更新した後は、E2E の前に `bunx playwright install chromium` でブラウザを導入する。E2E は API をモックするため、実バックエンドや Google・YouTube との接続を保証しない。実環境の結合試験、性能・セキュリティ試験、受入基準や実施結果は別途確認する。
 
 ## 6. インフラ構成
 
@@ -269,7 +269,7 @@ flowchart LR
 - **入口 nginx コンテナ**: CloudFront からの要求を受け、`/api` をバックエンド（8277）へ、それ以外をフロントエンド（3000）へ振り分ける。設定（振り分け、アップロード上限 `client_max_body_size` 等）と docker compose の定義は、別の非公開リポジトリで管理する。楽譜のアップロード上限30 MiBを通すため、`client_max_body_size` は30m以上とする必要がある。
 - **フロントエンド コンテナ**: 本リポジトリ（nasb-vue）の `Dockerfile` で作るイメージ。ビルドした静的ファイルを nginx で配信する。背景・メニュー画像は `src/assets` から import し、Vite が内容ハッシュ付きのファイル名で出力する。画像を差し替えると参照URLも変わるため、`/assets/` の1年間・`immutable` のキャッシュを利用できる。`index.html` は `Cache-Control: no-cache` で毎回サーバーに確認させ、デプロイ後すぐに新しい参照先を使わせる（CloudFront のキャッシュ設定がこの指定に従うかは本番の設定で確認する）。長期キャッシュ対象の画像を固定名のまま `public/assets` へ置かない。
 - **バックエンド コンテナ**: バックエンドのリポジトリで arm64 用に作るイメージ。DB 接続、Cookie の Secure 指定、CORS の許可オリジン、YouTube の OAuth 設定、タイムゾーン等を環境変数で受け取る。
-- **秘密情報**: DB のパスワードや YouTube の client secret は、アプリサーバー上の `.env` ファイルに書き、docker compose から環境変数として渡している。
+- **秘密情報**: DB のパスワード（`DB_PASSWORD`）と YouTube の client secret（`YT_CLIENT_SECRET`）は、SSM パラメータストアの SecureString（`/nasb1995/prod/` の下。AWS 管理の鍵 `aws/ssm` で暗号化）に置き、ファイルには書かない。アプリサーバーの IAM ロールには、この2つを読む権限（`ssm:GetParameters`）だけを付ける。アプリサーバーでは compose を `docker compose` ではなく `nasb-compose`（`/usr/local/bin/nasb-compose`）で操作する。`nasb-compose` は実行のたびにパラメータストアから2つを読んで環境変数に入れ、`docker compose` に渡す。compose の定義は `${DB_PASSWORD:?…}` の形で、秘密を読めないまま実行すると起動せずに止まる。秘密でない設定（DB の接続先、YouTube の client ID、CORS 等）は今までどおり `.env` に置く。手順は、バックエンドのリポジトリ（nasb1995v4）の `docs/SecretsParameterStoreRunbook.md` にある。
 
 ### 6.3 ネットワークとセキュリティ
 
@@ -284,8 +284,10 @@ flowchart LR
 Jenkins から AWS Systems Manager の Run Command（`AWS-RunShellScript`）でアプリサーバーに次を実行させ、完了を待って結果を取得する。
 
 1. ECR にログインする。
-2. compose の定義を置いたディレクトリで、コンテナ・イメージ・ボリュームを削除して停止する（`docker compose down --rmi all --volumes --remove-orphans`）。
-3. 最新のイメージを取得し（`docker compose pull`）、起動する（`docker compose up -d --build`）。
+2. コンテナ・イメージ・ボリュームを削除して停止する（`nasb-compose down --rmi all --volumes --remove-orphans`）。
+3. 最新のイメージを取得し（`nasb-compose pull`）、起動する（`nasb-compose up -d --build`）。
+
+`nasb-compose` は compose の定義を置いたディレクトリへ移り、パラメータストアの秘密を環境変数に入れてから `docker compose` を実行する（6.2）。EC2 の再起動では、Docker がコンテナを作ったときの環境変数のまま起動し直すため、パラメータストアは読まない。
 
 イメージのタグは `latest` だけを使い、compose も `latest` を取得する。そのため、どの版が動いているかをタグから判別できず、前の版へ戻すには前のイメージを別途残しておく必要がある。
 
@@ -307,6 +309,6 @@ Jenkins から AWS Systems Manager の Run Command（`AWS-RunShellScript`）で�
 1. （解消済み）本文なし・空文字・空白のみ・無効な `message` のエラーでも、共通の抽出処理で各画面の既定メッセージを表示する。ホーム・プレイリスト・楽譜ダウンロードの個別処理も同じ扱いに揃えた。
 2. （解消済み）固定名の画像が1年間キャッシュされ、更新が反映されない恐れがあった。画像を `src/assets` に移し、Vite が内容ハッシュ付きURLを生成するよう変更した。
 3. （解消済み）賛美歌の削除後、削除APIが返さない `X-Page-Num` ヘッダーを通知に使おうとしていた。`X-Page-Num` を返すのは追加（`POST /hymns`）だけのため、削除の通知は固定の文言「削除しました」とした。
-4. 秘密情報（DB のパスワード、YouTube の client secret）がアプリサーバー上の `.env` に平文で置かれている。SSM パラメータストア（SecureString）へ移す手順を、バックエンドのリポジトリ（nasb1995v4）の `docs/SecretsParameterStoreRunbook.md` にまとめた（夜間実施見込み）。
+4. （解消済み）秘密情報（DB のパスワード、YouTube の client secret）がアプリサーバー上の `.env` に平文で置かれていた。2026年11月21日に SSM パラメータストア（SecureString）へ移し、デプロイも `nasb-compose` に切り替えた（6.2・6.4）。手順書はバックエンドのリポジトリ（nasb1995v4）の `docs/SecretsParameterStoreRunbook.md`。以前の値は平文のファイル・AMI 等に残っていたため取り替える必要があるが、取り替え（手順書の8）は未実施。
 5. （解消済み）DB サーバーが公開サブネットにあり、公開 IP を持っていた。2026年11月17日に非公開サブネットへ移設した。手順書は DB の情報を含むため、バックエンドのリポジトリ（nasb1995v4）の `docs/DbPrivateSubnetRunbook.md` に置く。
 6. DB のバックアップのスクリプトに、DB の管理者ユーザーのパスワードが平文で書かれている。非公開サブネットでは実行時に Secrets Manager 等へ接続できないため、書き出しの権限だけを持つバックアップ専用のユーザーと Oracle Wallet（このサーバーのこの OS ユーザーだけが開ける自動ログイン）に切り替える手順を、バックエンドのリポジトリ（nasb1995v4）の `docs/BackupWalletRunbook.md` にまとめた（土日実施見込み）。
