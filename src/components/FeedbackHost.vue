@@ -71,26 +71,29 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown, true));
         </div>
         <div :class="['feedback-dialog-bar mx-2 mt-2', `bg-${color}`]" />
       </div>
-      <div class="pa-6">
+      <v-card-text class="pa-6">
         <p
           id="feedback-dialog-text"
           class="feedback-dialog-text text-medium-emphasis text-center"
         >
           {{ dialog.text }}
         </p>
-        <div class="feedback-dialog-actions d-flex justify-end ga-2 mt-6">
-          <v-btn
-            variant="text"
-            class="text-medium-emphasis"
-            @click="feedback.cancel()"
-          >
-            {{ dialog.cancelLabel }}
-          </v-btn>
-          <v-btn :color="color" variant="flat" @click="feedback.answer(true)">
-            {{ dialog.confirmLabel }}
-          </v-btn>
-        </div>
-      </div>
+      </v-card-text>
+      <!-- フッター: 区切り線の下に「戻る」「OK」を右寄せで置く(Vuetify の v-card-actions) -->
+      <v-divider />
+      <v-card-actions class="feedback-dialog-actions">
+        <v-spacer />
+        <v-btn
+          variant="text"
+          class="text-medium-emphasis"
+          @click="feedback.cancel()"
+        >
+          {{ dialog.cancelLabel }}
+        </v-btn>
+        <v-btn :color="color" variant="flat" @click="feedback.answer(true)">
+          {{ dialog.confirmLabel }}
+        </v-btn>
+      </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
@@ -100,6 +103,11 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown, true));
 .feedback-dialog-text {
   font-size: 1.156rem;
   line-height: 1.6;
+}
+/* フッター: 左右と上下に余白を取り、ボタンの間は 8px */
+.feedback-dialog-actions {
+  gap: 8px;
+  padding: 12px 16px;
 }
 /* ボタン: 文字の大きさは v-btn の既定のまま、太さだけ 600 */
 .feedback-dialog-actions .v-btn {

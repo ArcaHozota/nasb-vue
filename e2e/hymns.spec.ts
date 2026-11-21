@@ -23,6 +23,14 @@ test.describe("賛美歌一覧", () => {
     await page.getByRole("button", { name: "削除" }).click();
     const dialog = page.getByRole("alertdialog");
     await expect(dialog).toContainText("賛美歌11");
+    // 「戻る」「OK」は区切り線の下のフッターにある
+    const footer = dialog.locator(".v-divider + .v-card-actions");
+    await expect(footer.getByRole("button", { name: "戻る" })).toBeVisible();
+    await expect(footer.getByRole("button", { name: "OK" })).toBeVisible();
+    if (process.env.DIALOG_SHOT) {
+      await page.waitForTimeout(500); // 開くアニメーションが終わってから撮る
+      await page.screenshot({ path: process.env.DIALOG_SHOT });
+    }
     await dialog.getByRole("button", { name: "OK" }).click();
     // 削除の通知は固定の文言(削除の応答に X-Page-Num は付かない)
     await expect(page.locator(".app-toast")).toHaveText("削除しました");
