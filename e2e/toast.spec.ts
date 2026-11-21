@@ -45,8 +45,8 @@ test("確認ダイアログの本文は Noto Serif JP。明朝体を使わない
   const text = page.getByRole("alertdialog").locator("#feedback-dialog-text");
   await expect(text).toHaveText("ログアウトしますか。");
   expect(await text.evaluate((el) => getComputedStyle(el).fontFamily)).toContain("Noto Serif JP");
-  await expect(text).toHaveCSS("font-weight", "400");
+  await expect(text).toHaveCSS("font-weight", "600");
   await expect
-    .poll(() => page.evaluate(() => document.fonts.check('400 16px "Noto Serif JP"', "ログアウト")))
+    .poll(() => page.evaluate(() => document.fonts.check('600 16px "Noto Serif JP"', "ログアウト")))
     .toBe(true);
 });

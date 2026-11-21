@@ -138,9 +138,10 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown, true));
 .feedback-dialog-icon {
   flex-shrink: 0;
 }
-/* 本文: Noto Serif JP。大きさは文の長さで決める(textSize)。太さは既定のまま */
+/* 本文: Noto Serif JP の semi-bold(600)。大きさは文の長さで決める(textSize) */
 .feedback-dialog-text {
   font-family: "Noto Serif JP", serif;
+  font-weight: 600;
   flex: 1;
   min-width: 0;
   line-height: 1.6;

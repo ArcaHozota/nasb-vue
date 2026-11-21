@@ -71,7 +71,7 @@ PC・モバイルのホームの調のチップは、選んでいない調をそ
 | 韓国語名                           | Noto Serif KR         |
 | ホーム・管理画面のロゴ「NASB1995」 | Niconne               |
 | トースト（画面下の通知）           | Noto Serif JP（太字） |
-| 確認ダイアログの本文               | Noto Serif JP         |
+| 確認ダイアログの本文               | Noto Serif JP（600）  |
 
 ログイン画面の見出し「NASB1995」は Noto Sans JP（太さ900）で表示する。
 
@@ -84,7 +84,7 @@ PC・モバイルのホームの調のチップは、選んでいない調をそ
 | `src/plugins/fonts/serif.ts`       | ホーム・管理画面共用 Noto Serif JP（400・700）、KR（400）                                                    |
 | `src/plugins/fonts/serif-admin.ts` | 管理画面で使う明朝体の追加ウェイト（JP 600、KR 600・700。共用分も読み込む）                                  |
 | `src/plugins/fonts/logo.ts`        | ホーム・管理画面のロゴ用 Niconne（Latin 400）                                                                |
-| `src/plugins/fonts/feedback.ts`    | トースト（700）・確認ダイアログの本文（400）用 Noto Serif JP。最初のトースト・ダイアログを出すときに読み込む |
+| `src/plugins/fonts/feedback.ts`    | トースト（700）・確認ダイアログの本文（600）用 Noto Serif JP。最初のトースト・ダイアログを出すときに読み込む |
 
 明朝体・ロゴ・ログイン画面用の追加ウェイトは、必要な画面から対応するモジュールを import する。トースト・確認ダイアログはどの画面でも出るため、明朝体を使わない画面（ログイン等）の初回 CSS を増やさないよう、`FeedbackHost` が最初のトースト・ダイアログを出すときに `feedback.ts` を読み込む（初回だけ、読み込みが終わるまで代わりの書体で表示されることがある）。`vite.config.ts` で Fontsource CSS の WOFF フォールバックを除き、同じ字形の重複配布を防ぐ。
 
@@ -172,7 +172,7 @@ PC・モバイルのホームの調のチップは、選んでいない調をそ
 - タイトルは中央、その下に色の線。
 - 本文の左にアイコン（36px）を置く。警告は「!」（`mdi-alert-circle-outline`）、お知らせ・通知は「?」（`mdi-help-circle-outline`）。アイコンの色はタイトル・線と同じ。
 - アイコンと本文を合わせた幅はダイアログの幅の62%とし、中央に置く。アイコンは本文の上下中央にそろえる。
-- 本文の書体は Noto Serif JP（太さは既定の400）。
+- 本文の書体は Noto Serif JP の semi-bold（太さ600）。
 - 本文の文字の大きさは固定せず、文の長さ（文字数）で決める。
 
   | 文字数 | 大きさ    |
