@@ -216,6 +216,8 @@ Vue 3、TypeScript、Vue Router、Pinia、Vuetify、TanStack Vue Query、Axios�
 
 Docker のビルドステージでは `registry.npmjs.org` を使い、Corepack が指定バージョンの Yarn を、Yarn が `yarn.lock` に記録された依存関係を取得する。Jenkins の Docker ビルド環境から、このホストの名前解決と HTTPS 接続ができる必要がある。
 
+Jenkins の `yarn install --immutable` で `getaddrinfo EAI_AGAIN registry.npmjs.org` が出た場合は、同じ `node:22-alpine` の一時コンテナから npm レジストリへの HTTPS 接続を確認する。接続できなければ、一時コンテナの `--dns` で利用環境から到達できる DNS サーバーを試す。接続が回復したら、稼働中のコンテナへの影響を確認してから、その DNS サーバーを Colima の起動時に `--dns` で指定する。復旧後は `docker buildx build --platform linux/arm64 --output=type=cacheonly .` で、ECR に送らずにビルドを確認する。
+
 | コマンド         | 目的                                                                                                                    |
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `yarn install --immutable` | ロックファイルに従う依存関係の導入。開発環境と Docker で使用する |
