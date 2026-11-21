@@ -1,6 +1,6 @@
 # NASB1995 フロントエンド (Vite + Vue 3 + TypeScript + Vuetify 4)
 
-Next.js + shadcn/ui 版(nasb-next)からの移行先。業務ロジックは nasb-next と同じで、UIは Vuetify に統一(Tailwind は使わない)。
+NASB1995 の新フロントエンド v1.1。旧フロントエンド(Next.js + shadcn/ui の nasb-next)の後継で、業務ロジックを引き継ぎ、画面は Vuetify 4 の部品で作る。
 
 - `bun install`(パッケージ管理は Bun。`npm`・`pnpm` では入れない。ロックファイルは `bun.lock`)
 - `bun run dev` : 開発サーバー(`/api` は `http://localhost:8277` へプロキシ)
