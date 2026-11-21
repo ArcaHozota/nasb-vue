@@ -1,14 +1,15 @@
+# --- Bun(パッケージ管理・スクリプトの起動)。package.json の packageManager と同じ版 ---
+FROM oven/bun:1.4.5-alpine AS bun
+
 # --- build stage ---
+# ビルド(vue-tsc・Vite)は Node で動かし、Bun はインストールとスクリプトの起動だけに使う
 FROM node:22-alpine AS build
+COPY --from=bun /usr/local/bin/bun /usr/local/bin/bun
 WORKDIR /app
-# Yarn 本体とプロジェクトの依存パッケージを同じ npm レジストリから取得する。
-ENV COREPACK_NPM_REGISTRY=https://registry.npmjs.org \
-    YARN_NPM_REGISTRY_SERVER=https://registry.npmjs.org
-RUN corepack enable yarn
-COPY package.json yarn.lock .yarnrc.yml ./
-RUN yarn install --immutable
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
 COPY . .
-RUN yarn build
+RUN bun run build
 
 # --- runtime stage: 静的配信(SPA) ---
 # /api は前段(nginx/CloudFront等)でバックエンドへルーティングする想定。

@@ -118,7 +118,7 @@ flowchart LR
 - `queryClient.ts`: TanStack Vue Query の共通設定。
 - `index.ts`: 上記と Pinia・ルーターをまとめて登録する（Pinia を最初に登録する。ルーターのガードや Axios のインターセプターがストアを使うため）。
 
-Vue 3、TypeScript、Vue Router、Pinia、Vuetify、TanStack Vue Query、Axios、Vite を使用する。パッケージ管理とスクリプトの起動には Yarn 4 を使い、ビルド・型検査・テストは Node.js で動かす。Corepack は `package.json` で指定された Yarn のバージョンを使用する。依存関係は `yarn.lock` に従って `node_modules` に導入する。
+Vue 3、TypeScript、Vue Router、Pinia、Vuetify、TanStack Vue Query、Axios、Vite を使用する。パッケージ管理とスクリプトの起動には `package.json` で指定した Bun を使い、ビルド・型検査・テストは Node.js で動かす。依存関係は `bun.lock` に従って `node_modules` に導入する。
 
 ### 4.2 認証・通信・画面遷移
 
@@ -214,21 +214,21 @@ Vue 3、TypeScript、Vue Router、Pinia、Vuetify、TanStack Vue Query、Axios�
 
 ## 5. テスト・ビルド・運用
 
-Docker のビルドステージでは `registry.npmjs.org` を使い、Corepack が指定バージョンの Yarn を、Yarn が `yarn.lock` に記録された依存関係を取得する。Jenkins の Docker ビルド環境から、このホストの名前解決と HTTPS 接続ができる必要がある。
+Docker のビルドステージでは `oven/bun` から `package.json` と同じ版の Bun を取り込み、`bun install --frozen-lockfile` で依存関係を導入する。Jenkins の Docker ビルド環境から npm レジストリの名前を解決し、HTTPS で接続できる必要がある。
 
-Jenkins の `yarn install --immutable` で `getaddrinfo EAI_AGAIN registry.npmjs.org` が出た場合は、同じ `node:22-alpine` の一時コンテナから npm レジストリへの HTTPS 接続を確認する。接続できなければ、一時コンテナの `--dns` で利用環境から到達できる DNS サーバーを試す。接続が回復したら、稼働中のコンテナへの影響を確認してから、その DNS サーバーを Colima の起動時に `--dns` で指定する。復旧後は `docker buildx build --platform linux/arm64 --output=type=cacheonly .` で、ECR に送らずにビルドを確認する。
+依存関係の取得時に名前解決エラーが出た場合は、同じ `node:22-alpine` の一時コンテナから `registry.npmjs.org` への HTTPS 接続を確認する。接続できなければ、一時コンテナの `--dns` で利用環境から到達できる DNS サーバーを試す。接続が回復したら、稼働中のコンテナへの影響を確認してから、その DNS サーバーを Colima の起動時に `--dns` で指定する。復旧後は `docker buildx build --platform linux/arm64 --output=type=cacheonly .` で、ECR に送らずにビルドを確認する。
 
 | コマンド         | 目的                                                                                                                    |
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `yarn install --immutable` | ロックファイルに従う依存関係の導入。開発環境と Docker で使用する |
-| `yarn dev`       | 開発サーバーの起動                                                                                                      |
-| `yarn build`     | 型検査と本番向けビルド                                                                                                  |
-| `yarn test`      | Vitest によるユニット・DOMテスト                                                                                        |
-| `yarn lint`      | ESLint による静的解析                                                                                                   |
-| `yarn e2e`       | Playwright による画面操作テスト                                                                                         |
+| `bun install --frozen-lockfile` | ロックファイルに従う依存関係の導入 |
+| `bun run dev`    | 開発サーバーの起動                                                                                                      |
+| `bun run build`  | 型検査と本番向けビルド                                                                                                  |
+| `bun run test`   | Vitest によるユニット・DOMテスト                                                                                        |
+| `bun run lint`   | ESLint による静的解析                                                                                                   |
+| `bun run e2e`    | Playwright による画面操作テスト                                                                                         |
 | `docker build .` | ビルド済みファイルを nginx で配信するイメージの作成。本番のアプリサーバーは arm64 のため、本番用は `linux/arm64` で作る |
 
-テストには、認証ガード、画面幅ガード、CSRF再送、セッション失効、検索、調の並び、未保存確認、プレイリスト、ログイン、ホーム（PC・モバイル）、サイドバー、賛美歌操作等のケースがある。E2E の初回実行前や Playwright の更新後は、`yarn exec playwright install chromium` でブラウザを導入する。CI では `yarn build` の後に `yarn e2e` を実行する。E2E は API をモックするため、実バックエンドや Google・YouTube との接続を保証しない。実環境の結合試験、性能・セキュリティ試験、受入基準や実施結果は別途確認する。
+テストには、認証ガード、画面幅ガード、CSRF再送、セッション失効、検索、調の並び、未保存確認、プレイリスト、ログイン、ホーム（PC・モバイル）、サイドバー、賛美歌操作等のケースがある。E2E の初回実行前や Playwright の更新後は、`bunx playwright install chromium` でブラウザを導入する。CI では `bun run build` の後に `bun run e2e` を実行する。E2E は API をモックするため、実バックエンドや Google・YouTube との接続を保証しない。実環境の結合試験、性能・セキュリティ試験、受入基準や実施結果は別途確認する。
 
 ## 6. インフラ構成
 
