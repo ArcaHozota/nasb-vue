@@ -214,6 +214,8 @@ Vue 3、TypeScript、Vue Router、Pinia、Vuetify、TanStack Vue Query、Axios�
 
 ## 5. テスト・ビルド・運用
 
+Docker のビルドステージでは `registry.npmjs.org` を使い、Corepack が指定バージョンの Yarn を、Yarn が `yarn.lock` に記録された依存関係を取得する。Jenkins の Docker ビルド環境から、このホストの名前解決と HTTPS 接続ができる必要がある。
+
 | コマンド         | 目的                                                                                                                    |
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `yarn install --immutable` | ロックファイルに従う依存関係の導入。開発環境と Docker で使用する |

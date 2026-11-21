@@ -1,6 +1,9 @@
 # --- build stage ---
 FROM node:22-alpine AS build
 WORKDIR /app
+# Yarn 本体とプロジェクトの依存パッケージを同じ npm レジストリから取得する。
+ENV COREPACK_NPM_REGISTRY=https://registry.npmjs.org \
+    YARN_NPM_REGISTRY_SERVER=https://registry.npmjs.org
 RUN corepack enable yarn
 COPY package.json yarn.lock .yarnrc.yml ./
 RUN yarn install --immutable
