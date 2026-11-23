@@ -3,6 +3,7 @@
 //   左: 曲の一覧(一致度の丸・曲名・韓国語名・一致度)。1ページ10曲。
 //   右: 左で選んだ曲の詳細(HymnDetail)。
 // データ取得・検索・ページ送りの状態は HomeView.vue が持つ。
+import "@/plugins/fonts/sans-800"; // 「ログイン」ボタンの太さ800
 import { computed, ref, watch } from "vue";
 import type { HymnSummary } from "@/api/hymns";
 import HymnDetail from "@/components/home/HymnDetail.vue";
@@ -289,7 +290,7 @@ const caption = computed(() => {
 .desktop-home__login {
   margin-left: auto;
   padding: 0 20px !important;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.05em;
   color: #2b1d14 !important;
 }

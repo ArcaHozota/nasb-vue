@@ -3,7 +3,7 @@ import { makeHymns, mockApi } from "./mock-api";
 
 test.use({ viewport: { width: 1440, height: 900 } });
 
-test("管理画面のナビゲーションは濃い茶色に白い文字で、現在の画面を示す", async ({ page }) => {
+test("管理画面のナビゲーションは濃い灰紺(#252530)に白い文字で、現在の画面を示す", async ({ page }) => {
   await mockApi(page, { loggedIn: true, hymns: makeHymns(3) });
   await page.goto("/hymns");
 
@@ -19,9 +19,9 @@ test("管理画面のナビゲーションは濃い茶色に白い文字で、�
   const current = nav.locator('[aria-current="page"]');
   await expect(current).toHaveCount(1);
   await expect(current).toContainText("賛美歌一覧");
-  await expect(page.locator(".admin-sidebar")).toHaveCSS("background-color", "rgb(43, 29, 20)");
+  await expect(page.locator(".admin-sidebar")).toHaveCSS("background-color", "rgb(37, 37, 48)");
   const bar = page.locator(".admin-bar");
-  await expect(bar).toHaveCSS("background-color", "rgb(43, 29, 20)");
+  await expect(bar).toHaveCSS("background-color", "rgb(37, 37, 48)");
   await expect(bar.getByRole("button", { name: "サイドバーの開閉" })).toHaveCSS("color", white);
   await expect(bar.getByRole("button", { name: "ログアウト", exact: true })).toHaveCSS("color", white);
   await expect(current).toHaveCSS("background-color", "rgb(53, 53, 66)");

@@ -6,6 +6,7 @@ import { useRouter } from "vue-router";
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth";
 import { EMPTY_STRING } from "@/lib/constants";
+import { required } from "@/lib/form";
 import PageBackground from "@/components/PageBackground.vue";
 import backgroundImage from "@/assets/login-bg.webp?no-inline";
 
@@ -16,12 +17,22 @@ const username = ref(EMPTY_STRING);
 const password = ref(EMPTY_STRING);
 const error = ref(EMPTY_STRING);
 const loading = ref(false);
+// パスワードの「表示/非表示」(目のボタン)
+const showPassword = ref(false);
 const MIN_LOGIN_DURATION_MS = 3300;
+
+// 画面での入力チェック(Vuetify の v-form と rules)。空のまま送信すると、欄ごとに「入力してください。」を出し、
+// サーバーへは送らない。チェックは送信したときに行う(validate-on="submit")
+type FormRef = { validate: () => Promise<{ valid: boolean }> };
+const form = ref<FormRef | null>(null);
+const requiredRule = [(v: string) => required(v) || true];
 
 // <form> の送信にすることで、Enter での送信(日本語変換中の Enter は除く)や
 // パスワードマネージャーの保存・自動入力をブラウザに任せる
 const onLogin = async () => {
   if (loading.value) return; // Enter の連打などによる二重送信を防ぐ
+  const { valid } = (await form.value?.validate()) ?? { valid: false };
+  if (!valid) return;
   error.value = EMPTY_STRING;
   loading.value = true;
   try {
@@ -52,7 +63,9 @@ const onLogin = async () => {
     <PageBackground :src="backgroundImage" />
 
     <div class="login-card" :class="{ 'login-card--loading': loading }">
-      <form
+      <v-form
+        ref="form"
+        validate-on="submit"
         aria-label="ログイン"
         :aria-busy="loading"
         @submit.prevent="onLogin"
@@ -60,41 +73,63 @@ const onLogin = async () => {
         <div class="login-card__fields" :aria-hidden="loading">
           <h1 class="login-card__title">NASB1995</h1>
 
-          <label for="login-username" class="login-card__label"
-            >ユーザー名</label
-          >
+          <!-- 入力欄: Vuetify の outlined。ラベルは欄の中にあり、入力・フォーカスで枠の上へ移る -->
           <v-text-field
             id="login-username"
             v-model="username"
+            label="ユーザー名"
             :disabled="loading"
             autocomplete="username"
             type="text"
             variant="outlined"
-            density="compact"
-            bg-color="rgba(255,255,255,0.97)"
-            base-color="#64748b"
-            color="primary"
-            hide-details
+            prepend-inner-icon="mdi-account-outline"
+            base-color="rgba(255,255,255,0.75)"
+            color="#f3e3c3"
+            :rules="requiredRule"
+            hide-details="auto"
             class="login-card__input"
           />
 
-          <label for="login-password" class="login-card__label"
-            >パスワード</label
-          >
           <v-text-field
             id="login-password"
             v-model="password"
+            label="パスワード"
             :disabled="loading"
             autocomplete="current-password"
-            type="password"
+            :type="showPassword ? 'text' : 'password'"
             variant="outlined"
-            density="compact"
-            bg-color="rgba(255,255,255,0.97)"
-            base-color="#64748b"
-            color="primary"
-            hide-details
+            prepend-inner-icon="mdi-lock-outline"
+            base-color="rgba(255,255,255,0.75)"
+            color="#f3e3c3"
+            :rules="requiredRule"
+            hide-details="auto"
             class="login-card__input"
-          />
+          >
+            <template #append-inner>
+              <!-- 欄の中のボタンは type="button" にし、押しても送信しない -->
+              <v-btn
+                type="button"
+                icon
+                variant="text"
+                size="small"
+                density="comfortable"
+                :disabled="loading"
+                :aria-label="
+                  showPassword ? '入力した文字を隠す' : '入力した文字を表示する'
+                "
+                :aria-pressed="showPassword"
+                class="login-card__eye"
+                @click="showPassword = !showPassword"
+              >
+                <v-icon
+                  :icon="
+                    showPassword ? 'mdi-eye-off-outline' : 'mdi-eye-outline'
+                  "
+                  size="20"
+                />
+              </v-btn>
+            </template>
+          </v-text-field>
 
           <v-alert
             v-if="error"
@@ -129,7 +164,7 @@ const onLogin = async () => {
             />
           </template>
         </v-btn>
-      </form>
+      </v-form>
     </div>
   </div>
 </template>
@@ -189,23 +224,27 @@ const onLogin = async () => {
   letter-spacing: 0.025em;
   color: #fff;
 }
-.login-card__label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 0.9375rem;
-  font-weight: 700;
-  color: #fff;
-}
 .login-card__input {
   margin-bottom: 20px;
 }
 .login-card__input :deep(.v-field) {
   border-radius: 6px;
 }
+/* 入力した文字は白。欄の中のアイコンは白80% */
 .login-card__input :deep(.v-field__input) {
-  min-height: 46px;
-  color: #172033;
+  color: #fff;
   opacity: 1;
+}
+.login-card__input :deep(.v-field__prepend-inner .v-icon),
+.login-card__eye {
+  color: rgba(255, 255, 255, 0.8);
+  opacity: 1;
+}
+/* ブラウザの自動入力で欄が水色に塗られないようにする(背景色の変化を事実上止め、文字は白のまま) */
+.login-card__input :deep(input:-webkit-autofill) {
+  -webkit-text-fill-color: #fff;
+  caret-color: #fff;
+  transition: background-color 600000s 0s;
 }
 .login-card__submit {
   border: 1px solid rgba(255, 255, 255, 0.33);

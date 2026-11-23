@@ -73,7 +73,8 @@ test("ホームと管理画面で必要な明朝体の太さを読み込み、�
   expect(home).not.toContain("Noto Serif JP:600");
   expect(home).not.toContain("Noto Serif KR:600");
   expect(home).not.toContain("Noto Serif KR:700");
-  expect(home).not.toContain("Noto Sans JP:800");
+  // PC ホームの「ログイン」ボタンは太さ800(見出し用の900は読み込まない)
+  expect(home).toContain("Noto Sans JP:800");
   expect(home).not.toContain("Noto Sans JP:900");
 
   await page.goto("/hymns");

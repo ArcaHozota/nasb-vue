@@ -7,6 +7,7 @@ import type { IconProps, IconSet } from "vuetify";
 import { mdi as mdiSvg } from "vuetify/iconsets/mdi-svg";
 import {
   mdiAccountCog,
+  mdiAccountOutline,
   mdiAlertCircleOutline,
   mdiAnchor,
   mdiArchiveArrowDownOutline,
@@ -26,6 +27,7 @@ import {
   mdiFormatColorText,
   mdiHelpCircleOutline,
   mdiLightningBolt,
+  mdiLockOutline,
   mdiLogin,
   mdiLogout,
   mdiMagnify,
@@ -48,6 +50,7 @@ import {
 
 const ICONS: Record<string, string> = {
   "mdi-account-cog": mdiAccountCog,
+  "mdi-account-outline": mdiAccountOutline,
   "mdi-alert-circle-outline": mdiAlertCircleOutline,
   "mdi-anchor": mdiAnchor,
   "mdi-archive-arrow-down-outline": mdiArchiveArrowDownOutline,
@@ -67,6 +70,7 @@ const ICONS: Record<string, string> = {
   "mdi-format-color-text": mdiFormatColorText,
   "mdi-help-circle-outline": mdiHelpCircleOutline,
   "mdi-lightning-bolt": mdiLightningBolt,
+  "mdi-lock-outline": mdiLockOutline,
   "mdi-login": mdiLogin,
   "mdi-logout": mdiLogout,
   "mdi-magnify": mdiMagnify,
