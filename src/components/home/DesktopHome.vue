@@ -375,8 +375,8 @@ const caption = computed(() => {
   scrollbar-width: thin;
 }
 .desktop-home__rings {
-  --ring-width: 51px;
-  --ring-hole-width: 8px;
+  --ring-width: 66px;
+  --ring-hole-width: 15px;
   --ring-total-width: calc(var(--ring-width) + var(--ring-hole-width));
   position: absolute;
   inset-block: 0;
@@ -392,12 +392,12 @@ const caption = computed(() => {
   block-size: var(--hymn-row-height);
 }
 .desktop-home__ring {
-  --ring-stroke: 7px;
+  --ring-stroke: 11px;
   position: absolute;
   /* 弧の下端にある左右の穴の中心を、行の上端から62%に合わせる。 */
   inset-block-start: 62%;
   inset-inline: 0;
-  block-size: 16px;
+  block-size: 21px;
   transform: translateY(-100%);
 }
 .desktop-home__ring::before,
@@ -406,13 +406,13 @@ const caption = computed(() => {
   position: absolute;
   inset-block-start: 100%;
   inline-size: var(--ring-hole-width);
-  block-size: 9px;
+  block-size: 13px;
   transform: translateY(-50%);
   border-radius: 50%;
-  background: #6d5944;
+  background: #6b5d4a;
   box-shadow:
-    inset 0 2px 2px #33241780,
-    0 0 0 1px #bca789;
+    inset 0 2px 2px #4a3426,
+    0 0 0 1px #c9b48d;
 }
 .desktop-home__ring::before {
   inset-inline-start: calc(var(--ring-stroke) / 2);
@@ -426,8 +426,8 @@ const caption = computed(() => {
   inset-block: 0;
   inset-inline: calc(var(--ring-hole-width) / 2);
   box-sizing: border-box;
-  border: solid #927b54;
-  border-top-color: #b8a17a;
+  border: solid #8a7a64;
+  border-top-color: #b8a888;
   border-width: var(--ring-stroke) var(--ring-stroke) 0;
   border-radius: 50% 50% 0 0 / 100% 100% 0 0;
 }
