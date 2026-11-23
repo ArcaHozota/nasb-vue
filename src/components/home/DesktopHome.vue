@@ -375,12 +375,14 @@ const caption = computed(() => {
   scrollbar-width: thin;
 }
 .desktop-home__rings {
-  --ring-width: 42px;
+  --ring-width: 51px;
   --ring-hole-width: 8px;
   --ring-total-width: calc(var(--ring-width) + var(--ring-hole-width));
   position: absolute;
   inset-block: 0;
-  inset-inline-start: calc(100% + 1px + (var(--book-gap) - var(--ring-total-width)) / 2);
+  inset-inline-start: calc(
+    100% + 1px + (var(--book-gap) - var(--ring-total-width)) / 2
+  );
   inline-size: var(--ring-total-width);
   overflow: hidden;
   pointer-events: none;
@@ -390,12 +392,13 @@ const caption = computed(() => {
   block-size: var(--hymn-row-height);
 }
 .desktop-home__ring {
-  --ring-stroke: 4px;
+  --ring-stroke: 7px;
   position: absolute;
+  /* 弧の下端にある左右の穴の中心を、行の上端から62%に合わせる。 */
   inset-block-start: 62%;
   inset-inline: 0;
-  block-size: 12px;
-  transform: translateY(-50%);
+  block-size: 16px;
+  transform: translateY(-100%);
 }
 .desktop-home__ring::before,
 .desktop-home__ring::after {
@@ -407,7 +410,9 @@ const caption = computed(() => {
   transform: translateY(-50%);
   border-radius: 50%;
   background: #6d5944;
-  box-shadow: inset 0 2px 2px #33241780, 0 0 0 1px #bca789;
+  box-shadow:
+    inset 0 2px 2px #33241780,
+    0 0 0 1px #bca789;
 }
 .desktop-home__ring::before {
   inset-inline-start: calc(var(--ring-stroke) / 2);

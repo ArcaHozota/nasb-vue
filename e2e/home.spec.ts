@@ -43,24 +43,31 @@ test("PCホーム: 左に一覧(1ページ10曲)、右に選んだ曲の詳細",
   await expect(rows.nth(6)).toContainText("関連");
   await expect(list.getByText("1 / 2")).toBeVisible();
 
-  const expectAlignedRings = async () => {
+  const expectRingHolesAligned = async () => {
     await expect
       .poll(() =>
         list.evaluate((element) => {
           const rows = element.querySelectorAll("[data-hymn-row]");
           const rings = element.querySelectorAll(".desktop-home__ring");
-          const offsets = Array.from(rows, (row, i) => {
+          const offsets = Array.from(rows).flatMap((row, i) => {
             const bounds = row.getBoundingClientRect();
-            const ring = rings[i].getBoundingClientRect();
+            const ring = rings[i];
+            const ringTop = ring.getBoundingClientRect().top;
             const target = bounds.top + bounds.height * 0.62;
-            return Math.abs(ring.top + ring.height / 2 - target);
+            return ["::before", "::after"].map((pseudoElement) => {
+              const hole = getComputedStyle(ring, pseudoElement);
+              const translation = new DOMMatrixReadOnly(hole.transform).m42;
+              const center =
+                ringTop + parseFloat(hole.top) + translation + parseFloat(hole.height) / 2;
+              return Math.abs(center - target);
+            });
           });
           return Math.max(...offsets);
         }),
       )
       .toBeLessThan(0.5);
   };
-  await expectAlignedRings();
+  await expectRingHolesAligned();
 
   const detail = page.getByRole("article", { name: "賛美歌1の詳細" });
   await expect(detail.getByRole("heading", { name: "賛美歌1" })).toBeVisible();
@@ -117,7 +124,7 @@ test("PCホーム: 左に一覧(1ページ10曲)、右に選んだ曲の詳細",
   await expect
     .poll(() => scroll.evaluate((element) => element.scrollTop))
     .toBe(96);
-  await expectAlignedRings();
+  await expectRingHolesAligned();
   await book.evaluate((element) => {
     element.style.removeProperty("height");
   });
@@ -126,5 +133,5 @@ test("PCホーム: 左に一覧(1ページ10曲)、右に選んだ曲の詳細",
   await expect(rows.first()).toContainText("賛美歌11");
   await expect(rows).toHaveCount(3);
   await expect(rings).toHaveCount(3);
-  await expectAlignedRings();
+  await expectRingHolesAligned();
 });
