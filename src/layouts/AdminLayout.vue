@@ -185,8 +185,8 @@ const onSearch = () => {
 </script>
 
 <template>
-  <!-- サイドバー: 紺地。項目は Vuetify の v-list-item(ホバーで薄い背景、押すと波紋)。
-       区切り線・見出しは置かず、選択中の項目は左端の臙脂の線と少し明るい背景で示す -->
+  <!-- サイドバー: 項目は Vuetify の v-list-item(ホバーで薄い背景、押すと波紋)。
+       選択中の項目は左端の臙脂の線と濃い背景で示す -->
   <v-navigation-drawer
     v-model="drawer"
     :rail="isRail"
@@ -320,7 +320,7 @@ const onSearch = () => {
     <v-btn
       icon
       size="small"
-      color="red"
+      color="#4c0014"
       variant="text"
       aria-label="ログアウト"
       class="mx-1"
@@ -343,6 +343,7 @@ const onSearch = () => {
 /* ===== サイドバー ===== */
 .admin-sidebar {
   border-right: 0;
+  --v-medium-emphasis-opacity: 0.8;
 }
 
 /* ===== ブランド ===== */
@@ -359,7 +360,7 @@ const onSearch = () => {
   background: transparent;
   cursor: pointer;
 }
-/* 紺地の上なので、ロゴ(十字・文字)はクリーム色にする */
+/* 管理画面のロゴ(十字・文字)はクリーム色にする */
 .admin-brand :deep(.jerusalem-cross),
 .admin-brand .admin-brand__title {
   color: #f3e3c3;
@@ -377,7 +378,7 @@ const onSearch = () => {
 /* ===== メインナビ ===== */
 .admin-nav {
   padding-block: 8px;
-  color: #d1d5db;
+  color: rgb(var(--v-theme-on-sidebar));
 }
 .admin-nav__item {
   min-height: 44px;
@@ -393,7 +394,7 @@ const onSearch = () => {
 .admin-nav__item :deep(.v-list-item__spacer) {
   width: 14px !important;
 }
-/* 選択中: 左端に臙脂の線、少し明るい背景、白い文字(Vuetify の選択の重ねは消す) */
+/* 選択中: 左端に臙脂の線、濃い背景、白い文字(Vuetify の選択の重ねは消す) */
 .admin-nav__item.v-list-item--active {
   border-left-color: #c43c5a;
   background: #1e293b;
