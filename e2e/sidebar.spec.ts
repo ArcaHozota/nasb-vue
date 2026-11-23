@@ -41,6 +41,10 @@ test("管理画面のナビゲーションは濃い灰紺(#252530)に白い文�
   await username.click();
   const personal = page.getByText("個人スペース", { exact: true });
   await expect(personal).toHaveCSS("color", white);
+  // 開くアニメーションが終わってから Esc を押す(途中で押すと、Vuetify のメニューがまだ Esc を受け付けないことがある)
+  const menuContent = page.locator(".v-menu .v-overlay__content");
+  await expect(menuContent).toBeVisible();
+  await expect(menuContent).not.toHaveClass(/-enter-/);
   await page.keyboard.press("Escape");
   await expect(personal).toBeHidden();
   await page.screenshot({ path: process.env.SIDEBAR_SHOT ?? "test-results/sidebar.png" });

@@ -120,11 +120,3 @@ a.glass-item:hover {
   white-space: nowrap;
   border: 0;
 }
-
-/* フォームのラベル(HymnFormModal / ユーザー情報) */
-.form-label {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 0.875rem;
-  font-weight: 500;
-}

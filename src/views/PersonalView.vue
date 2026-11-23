@@ -3,8 +3,11 @@
 //
 // 【YouTube連携について】
 // バックエンドのYouTube連携API(/youtube/status, /youtube/authorize-url,
-// /youtube/callback, /youtube/unlink)実装済み。トグルは連携状態を反映し、
-// ONへの切り替えでGoogle同意画面へ画面遷移、OFFへの切り替えで連携解除を行う。
+// /youtube/callback, /youtube/unlink)実装済み。未連携なら「YouTubeと連携」でGoogle同意画面へ画面遷移し、
+// 連携済みなら「連携を解除」(確認のうえ)で解除する。
+//
+// 画面は Vuetify の v-card で、「基本情報」「セキュリティ」「YouTube連携」をそれぞれ1枚のカードにし、
+// 最後のフッター(v-card-actions)に「廃棄」「更新」を右寄せで置く。
 import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
@@ -18,7 +21,7 @@ import { useUnsavedGuard } from "@/stores/unsavedGuard";
 import { confirmDiscardUnsaved } from "@/router/guards";
 import { EMPTY_STRING, extractMessage } from "@/lib/constants";
 import { required } from "@/lib/form";
-import Hint from "@/components/Hint.vue";
+import "@/plugins/fonts/serif"; // タイトルの明朝体(Noto Serif JP の太字)
 import PageBackground from "@/components/PageBackground.vue";
 import backgroundImage from "@/assets/mainmenu-bg4.webp?no-inline";
 
@@ -131,9 +134,7 @@ const errors = reactive(emptyErrors());
 const showPassword = ref(false);
 
 // ===== YouTube連携 =====
-// トグル＝連携ボタンの活性/非活性スイッチ。ONで初めてボタンが押せるようになり、
-// OFFに戻すとその場で連携解除する。連携済みかどうかは、ボタンのアイコン色と
-// ラベル(「連携済み」)で表す。
+// 未連携なら「YouTubeと連携」、連携済みなら「連携を解除」のボタンを1つだけ出す
 const youtubeQuery = useQuery(
   computed(() => ({
     queryKey: YOUTUBE_STATUS_KEY,
@@ -145,11 +146,6 @@ const youtubeQuery = useQuery(
   })),
 );
 const youtubeLinked = computed(() => youtubeQuery.data.value ?? false);
-// トグルは、ユーザーが触るまでは連携状態に合わせる
-const toggleOverride = ref<boolean | null>(null);
-const youtubeToggleOn = computed(
-  () => toggleOverride.value ?? youtubeLinked.value,
-);
 
 const unlinkMutation = useMutation({
   mutationFn: () => api.post("/youtube/unlink"),
@@ -157,30 +153,17 @@ const unlinkMutation = useMutation({
     queryClient.setQueryData(YOUTUBE_STATUS_KEY, false);
     feedback.toast("YouTube連携を解除しました");
   },
-  onError: (e) => {
-    feedback.toast(extractMessage(e, "連携解除に失敗しました"));
-    // 解除に失敗したので、実態に合わせてトグルもONへ戻す
-    toggleOverride.value = true;
-  },
+  onError: (e) => feedback.toast(extractMessage(e, "連携解除に失敗しました")),
 });
 const youtubeBusy = unlinkMutation.isPending;
 
-const onYoutubeToggle = (checked: boolean | null) => {
-  const on = !!checked;
-  toggleOverride.value = on;
-  // ONにしただけではまだ何もしない。連携ボタンが活性化するだけ。
-  // OFFにした時点で、連携済みなら即座に解除する。
-  if (!on && youtubeLinked.value) unlinkMutation.mutate();
+const onYoutubeUnlink = async () => {
+  const ok = await feedback.confirm(
+    "YouTube連携を解除しますか。プレイリストを作成するには、もう一度連携が必要です。",
+    "警告",
+  );
+  if (ok) unlinkMutation.mutate();
 };
-
-// 連携ボタンのツールチップ。押せない時は「なぜ押せないか」を伝える
-const youtubeHint = computed(() =>
-  youtubeLinked.value
-    ? "連携済みです"
-    : youtubeToggleOn.value
-      ? "YouTubeアカウントと連携します"
-      : "「YouTube連携」をONにすると押せます",
-);
 
 const onYoutubeConnect = async () => {
   if (!(await confirmDiscardUnsaved())) return;
@@ -283,17 +266,20 @@ const onRestore = () => {
   if (userId.value) void studentQuery.refetch();
 };
 
-/** 入力欄の共通設定(フォーカス時はオレンジ。背景画像の上でも読みやすいよう白ベタ) */
-const inputProps = {
-  variant: "outlined",
-  density: "compact",
-  color: "warning",
-  "bg-color": "white",
-} as const;
+/** 入力欄の共通設定(Vuetify の outlined。ラベルは欄の中にあり、入力・フォーカスで枠の上へ移る) */
+const inputProps = computed(
+  () =>
+    ({
+      variant: "outlined",
+      color: "primary",
+      "hide-details": "auto",
+      disabled: saving.value,
+    }) as const,
+);
 </script>
 
 <template>
-  <div class="personal noto-sans">
+  <div class="personal">
     <PageBackground :src="backgroundImage" />
 
     <v-breadcrumbs
@@ -304,176 +290,174 @@ const inputProps = {
       ]"
     />
 
-    <div class="studentedition-card glass-panel personal__card">
-      <div class="d-flex align-center px-4 py-3 bg-info text-white">
-        <v-icon
-          icon="mdi-card-account-details-outline"
-          size="20"
-          class="mr-2"
-        />
-        <h1 class="text-title-large font-weight-bold">ユーザー情報更新</h1>
-      </div>
+    <v-card rounded="lg" class="personal__card">
+      <v-card-item
+        prepend-icon="mdi-card-account-details-outline"
+        class="bg-info text-white"
+      >
+        <v-card-title tag="h1" class="text-title-large personal__title">
+          ユーザー情報更新
+        </v-card-title>
+      </v-card-item>
 
-      <div class="pa-6">
+      <v-card-text class="personal__body">
         <!-- ===== 基本情報 ===== -->
-        <fieldset class="personal__set" :disabled="saving">
-          <legend class="personal__legend">基本情報</legend>
-          <v-row density="compact">
-            <v-col cols="12" sm="6">
-              <label for="personal-account" class="form-label"
-                >アカウント</label
-              >
-              <v-text-field
-                id="personal-account"
-                v-model="loginAccount"
-                v-bind="inputProps"
-                placeholder="アカウントを入力してください"
-                :error-messages="
-                  errors.loginAccount || accountCheck.error.value || undefined
-                "
-                @blur="checkAccount"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <label for="personal-username" class="form-label">名称</label>
-              <v-text-field
-                id="personal-username"
-                v-model="username"
-                v-bind="inputProps"
-                placeholder="名称を入力してください"
-                :error-messages="errors.username || undefined"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <label for="personal-email" class="form-label">メール</label>
-              <v-text-field
-                id="personal-email"
-                v-model="email"
-                v-bind="inputProps"
-                placeholder="メールを入力してください"
-                :error-messages="errors.email || undefined"
-              />
-            </v-col>
-            <v-col cols="12" sm="6">
-              <label for="personal-dob" class="form-label">生年月日</label>
-              <v-text-field
-                id="personal-dob"
-                v-model="dateOfBirth"
-                v-bind="inputProps"
-                type="date"
-                :error-messages="errors.dateOfBirth || undefined"
-              />
-            </v-col>
-          </v-row>
-        </fieldset>
-
-        <v-divider class="my-5" />
+        <v-card
+          variant="outlined"
+          prepend-icon="mdi-account-outline"
+          title="基本情報"
+          subtitle="ログインと画面の表示に使う情報"
+          class="personal__section"
+        >
+          <v-card-text>
+            <v-row density="compact">
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  id="personal-account"
+                  v-model="loginAccount"
+                  v-bind="inputProps"
+                  label="アカウント"
+                  autocomplete="username"
+                  :error-messages="
+                    errors.loginAccount || accountCheck.error.value || undefined
+                  "
+                  @blur="checkAccount"
+                />
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  id="personal-username"
+                  v-model="username"
+                  v-bind="inputProps"
+                  label="名称"
+                  :error-messages="errors.username || undefined"
+                />
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  id="personal-email"
+                  v-model="email"
+                  v-bind="inputProps"
+                  label="メール"
+                  type="email"
+                  autocomplete="email"
+                  :error-messages="errors.email || undefined"
+                />
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  id="personal-dob"
+                  v-model="dateOfBirth"
+                  v-bind="inputProps"
+                  label="生年月日"
+                  type="date"
+                  :error-messages="errors.dateOfBirth || undefined"
+                />
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
 
         <!-- ===== セキュリティ ===== -->
-        <fieldset class="personal__set" :disabled="saving">
-          <legend class="personal__legend">セキュリティ</legend>
-          <label for="personal-password" class="form-label">パスワード</label>
-          <v-text-field
-            id="personal-password"
-            v-model="password"
-            v-bind="inputProps"
-            :type="showPassword ? 'text' : 'password'"
-            placeholder="パスワードを入力してください"
-            :error-messages="errors.password || undefined"
-          >
-            <template #append-inner>
-              <v-btn
-                :icon="showPassword ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
-                variant="text"
-                size="x-small"
-                :aria-label="
-                  showPassword ? 'パスワードを隠す' : 'パスワードを表示'
-                "
-                @click="showPassword = !showPassword"
-              />
-            </template>
-          </v-text-field>
-        </fieldset>
-
-        <v-divider class="my-5" />
-
-        <!-- ===== 外部連携 ===== -->
-        <fieldset class="personal__set" :disabled="saving">
-          <legend class="personal__legend">外部連携</legend>
-          <div class="personal__link-row">
-            <!-- 左: アイコン・タイトル・状態 -->
-            <div class="d-flex align-center ga-3" style="min-width: 0">
-              <v-icon
-                icon="mdi-youtube"
-                size="32"
-                :color="youtubeLinked ? 'grey' : 'red-darken-1'"
-              />
-              <div style="min-width: 0">
-                <label for="personal-youtube" class="form-label"
-                  >YouTube連携</label
-                >
-                <div class="d-flex align-center ga-2">
-                  <v-chip
-                    size="small"
-                    label
-                    variant="flat"
-                    :color="
-                      youtubeLinked ? 'green-lighten-4' : 'grey-lighten-3'
-                    "
-                    class="font-weight-bold"
-                  >
-                    {{ youtubeLinked ? "連携済み" : "未連携" }}
-                  </v-chip>
-                  <span class="text-body-small text-medium-emphasis"
-                    >ONにすると連携ボタンが押せます</span
-                  >
-                </div>
-              </div>
-            </div>
-
-            <!-- 右: トグル + 連携ボタン(連携処理中はスイッチに読み込み表示を出す) -->
-            <div class="d-flex align-center ga-3 flex-shrink-0">
-              <Hint
-                v-slot="{ props }"
-                label="ONで連携ボタンが押せるようになります"
-              >
-                <span v-bind="props" class="d-inline-flex">
-                  <v-switch
-                    id="personal-youtube"
-                    :model-value="youtubeToggleOn"
-                    :loading="youtubeBusy ? 'warning' : false"
-                    :disabled="youtubeBusy"
-                    color="warning"
-                    inset
-                    hide-details
-                    density="compact"
-                    @update:model-value="onYoutubeToggle"
-                  />
-                </span>
-              </Hint>
-
-              <Hint v-slot="{ props }" :label="youtubeHint" wrap-disabled>
+        <v-card
+          variant="outlined"
+          prepend-icon="mdi-lock-outline"
+          title="セキュリティ"
+          subtitle="ログインに使うパスワード"
+          class="personal__section"
+        >
+          <v-card-text>
+            <v-text-field
+              id="personal-password"
+              v-model="password"
+              v-bind="inputProps"
+              label="パスワード"
+              autocomplete="new-password"
+              :type="showPassword ? 'text' : 'password'"
+              :error-messages="errors.password || undefined"
+            >
+              <template #append-inner>
+                <!-- 欄の中のボタンは type="button" にし、押しても送信しない -->
                 <v-btn
-                  v-bind="props"
-                  variant="outlined"
-                  class="text-grey-darken-3"
-                  :disabled="!youtubeToggleOn || youtubeLinked || youtubeBusy"
-                  @click="onYoutubeConnect"
-                >
-                  <v-icon
-                    icon="mdi-youtube"
-                    :color="youtubeLinked ? 'grey' : 'red-darken-1'"
-                    class="mr-1"
-                  />
-                  {{ youtubeLinked ? "連携済み" : "YouTubeと連携" }}
-                </v-btn>
-              </Hint>
-            </div>
-          </div>
-        </fieldset>
-      </div>
+                  type="button"
+                  :icon="
+                    showPassword ? 'mdi-eye-off-outline' : 'mdi-eye-outline'
+                  "
+                  variant="text"
+                  size="small"
+                  density="comfortable"
+                  :disabled="saving"
+                  :aria-label="
+                    showPassword
+                      ? '入力した文字を隠す'
+                      : '入力した文字を表示する'
+                  "
+                  :aria-pressed="showPassword"
+                  @click="showPassword = !showPassword"
+                />
+              </template>
+            </v-text-field>
+          </v-card-text>
+        </v-card>
 
-      <div class="personal__footer">
+        <!-- ===== YouTube連携 ===== -->
+        <v-card
+          variant="outlined"
+          title="YouTube連携"
+          subtitle="賛美歌のプレイリストを作成するときに使います"
+          class="personal__section"
+        >
+          <template #prepend>
+            <v-icon icon="mdi-youtube" color="red-darken-1" />
+          </template>
+          <template #append>
+            <v-chip
+              size="small"
+              variant="tonal"
+              :color="youtubeLinked ? 'success' : undefined"
+              :prepend-icon="youtubeLinked ? 'mdi-check' : undefined"
+            >
+              {{ youtubeLinked ? "連携済み" : "未連携" }}
+            </v-chip>
+          </template>
+          <v-card-actions>
+            <v-spacer />
+            <v-btn
+              v-if="youtubeLinked"
+              variant="text"
+              color="error"
+              :loading="youtubeBusy"
+              :disabled="saving"
+              @click="onYoutubeUnlink"
+            >
+              連携を解除
+            </v-btn>
+            <v-btn
+              v-else
+              variant="tonal"
+              color="red-darken-1"
+              prepend-icon="mdi-youtube"
+              :disabled="saving || youtubeQuery.isPending.value"
+              @click="onYoutubeConnect"
+            >
+              YouTubeと連携
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-card-text>
+
+      <!-- フッター: 左に「廃棄」(文字だけ)、右に「更新」(臙脂) -->
+      <v-divider />
+      <v-card-actions class="personal__footer">
+        <v-spacer />
+        <v-btn
+          variant="text"
+          prepend-icon="mdi-trash-can-outline"
+          :disabled="saving"
+          @click="onRestore"
+        >
+          廃棄
+        </v-btn>
         <v-btn
           color="primary"
           variant="flat"
@@ -486,17 +470,8 @@ const inputProps = {
         >
           更新
         </v-btn>
-        <v-btn
-          color="#6b7280"
-          variant="flat"
-          prepend-icon="mdi-trash-can-outline"
-          :disabled="saving"
-          @click="onRestore"
-        >
-          廃棄
-        </v-btn>
-      </div>
-    </div>
+      </v-card-actions>
+    </v-card>
   </div>
 </template>
 
@@ -505,8 +480,9 @@ const inputProps = {
   position: relative;
   min-height: 100%;
 }
+/* パンくずはカードと同じ幅・位置にそろえる */
 .personal__breadcrumbs {
-  max-width: 672px;
+  width: 62dvw;
   margin: 0 auto 8px;
   padding: 0;
   font-weight: 600;
@@ -516,49 +492,25 @@ const inputProps = {
 .personal__breadcrumbs :deep(.v-breadcrumbs-item--disabled) {
   opacity: 1;
 }
+/* カードの幅は、サイドバーの開閉にかかわらず、見えている画面の幅の62% */
 .personal__card {
-  position: relative;
-  max-width: 672px;
+  width: 62dvw;
   margin: 0 auto;
-  overflow: hidden;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
 }
-.personal__set {
-  min-width: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-.personal__legend {
-  margin-bottom: 12px;
-  font-size: 1rem;
+/* タイトル「ユーザー情報更新」は Noto Serif JP の太字 */
+.personal__title {
+  font-family: "Noto Serif JP", serif;
   font-weight: 700;
 }
-.personal__link-row {
+/* 3枚のカードを縦に並べ、間を16px空ける */
+.personal__body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 8px;
-  background: #fff;
-}
-@media (min-width: 600px) {
-  .personal__link-row {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
+  gap: 16px;
+  padding: 20px 24px;
 }
 .personal__footer {
-  display: flex;
-  justify-content: flex-end;
   gap: 8px;
-  padding: 16px 24px;
-  border-top: 1px solid rgba(0, 0, 0, 0.12);
-  background: rgba(255, 255, 255, 0.6);
+  padding: 12px 24px;
 }
 </style>
