@@ -73,7 +73,8 @@ const onLogin = async () => {
         <div class="login-card__fields" :aria-hidden="loading">
           <h1 class="login-card__title">NASB1995</h1>
 
-          <!-- 入力欄: Vuetify の outlined。ラベルは欄の中にあり、入力・フォーカスで枠の上へ移る -->
+          <!-- 入力欄: Vuetify の outlined。ラベルは欄の中にあり、入力・フォーカスで枠の上へ移る。
+               暗いガラスのカードの上なので theme="dark"(Vuetify の暗い背景用の配色。文字・アイコンが白系になる) -->
           <v-text-field
             id="login-username"
             v-model="username"
@@ -82,6 +83,7 @@ const onLogin = async () => {
             autocomplete="username"
             type="text"
             variant="outlined"
+            theme="dark"
             prepend-inner-icon="mdi-account-outline"
             base-color="rgba(255,255,255,0.75)"
             color="#f3e3c3"
@@ -98,6 +100,7 @@ const onLogin = async () => {
             autocomplete="current-password"
             :type="showPassword ? 'text' : 'password'"
             variant="outlined"
+            theme="dark"
             prepend-inner-icon="mdi-lock-outline"
             base-color="rgba(255,255,255,0.75)"
             color="#f3e3c3"
@@ -118,7 +121,6 @@ const onLogin = async () => {
                   showPassword ? '入力した文字を隠す' : '入力した文字を表示する'
                 "
                 :aria-pressed="showPassword"
-                class="login-card__eye"
                 @click="showPassword = !showPassword"
               >
                 <v-icon
@@ -178,8 +180,10 @@ const onLogin = async () => {
   align-items: center;
   justify-content: center;
 }
+/* カードの中の文字は白(入力欄は theme="dark" で、この色を受け継いで白系になる) */
 .login-card {
   position: relative;
+  color: #fff;
   width: 360px;
   max-width: calc(100% - 32px);
   padding: 30px 28px;
@@ -226,19 +230,6 @@ const onLogin = async () => {
 }
 .login-card__input {
   margin-bottom: 20px;
-}
-.login-card__input :deep(.v-field) {
-  border-radius: 6px;
-}
-/* 入力した文字は白。欄の中のアイコンは白80% */
-.login-card__input :deep(.v-field__input) {
-  color: #fff;
-  opacity: 1;
-}
-.login-card__input :deep(.v-field__prepend-inner .v-icon),
-.login-card__eye {
-  color: rgba(255, 255, 255, 0.8);
-  opacity: 1;
 }
 /* ブラウザの自動入力で欄が水色に塗られないようにする(背景色の変化を事実上止め、文字は白のまま) */
 .login-card__input :deep(input:-webkit-autofill) {

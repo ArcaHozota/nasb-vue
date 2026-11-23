@@ -94,7 +94,8 @@ test("入力欄: outlined の欄の中にラベル・アイコンがあり、目
 
   await username.fill("tester");
   await password.fill("secret");
-  // 入力した文字は白
+  // 欄は Vuetify の暗い背景用の配色(theme="dark")。入力した文字は白系
+  await expect(page.locator(".login-card__input.v-theme--dark")).toHaveCount(2);
   await expect(username).toHaveCSS("color", "rgb(255, 255, 255)");
 
   // 目のボタン: 押すと文字を表示し、もう一度押すと隠す(送信はしない)
