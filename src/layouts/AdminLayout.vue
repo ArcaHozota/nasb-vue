@@ -186,7 +186,7 @@ const onSearch = () => {
 
 <template>
   <!-- サイドバー: 項目は Vuetify の v-list-item(ホバーで薄い背景、押すと波紋)。
-       選択中の項目は左端の臙脂の線と淡い青の背景で示す -->
+       選択中の項目は左端の白い線と info の背景で示す -->
   <v-navigation-drawer
     v-model="drawer"
     :rail="isRail"
@@ -249,7 +249,7 @@ const onSearch = () => {
               <template #prepend>
                 <v-avatar
                   size="30"
-                  color="sidebar-selected"
+                  color="info"
                   class="admin-user__avatar"
                 >
                   {{ username.slice(0, 1) }}
@@ -268,7 +268,7 @@ const onSearch = () => {
               </template>
             </v-list-item>
           </template>
-          <v-list density="compact" min-width="224" base-color="primary">
+          <v-list density="compact" min-width="224" bg-color="sidebar">
             <v-list-item
               prepend-icon="mdi-account-cog"
               title="個人スペース"
@@ -321,7 +321,6 @@ const onSearch = () => {
     <v-btn
       icon
       size="small"
-      color="primary"
       variant="text"
       aria-label="ログアウト"
       class="mx-1"
@@ -356,7 +355,7 @@ const onSearch = () => {
   gap: 8px;
   padding: 20px 16px;
   border: 0;
-  border-bottom: 1px solid rgb(var(--v-theme-sidebar-selected));
+  border-bottom: 1px solid rgb(var(--v-theme-info));
   background: transparent;
   cursor: pointer;
 }
@@ -369,7 +368,10 @@ const onSearch = () => {
   font-family: "Niconne", cursive;
   font-size: 1.75rem;
   line-height: 1;
-  color: rgb(var(--v-theme-primary));
+}
+.admin-brand :deep(.jerusalem-cross),
+.admin-brand__title {
+  color: rgb(var(--v-theme-on-sidebar));
 }
 
 /* ===== メインナビ ===== */
@@ -391,11 +393,10 @@ const onSearch = () => {
 .admin-nav__item :deep(.v-list-item__spacer) {
   width: 14px !important;
 }
-/* 選択中: 左端に臙脂の線、淡い青の背景、臙脂の太字 */
+/* 選択中: 左端に白い線、info の背景、白い太字 */
 .admin-nav__item.v-list-item--active {
-  border-left-color: rgb(var(--v-theme-primary));
-  background: rgb(var(--v-theme-sidebar-selected));
-  color: rgb(var(--v-theme-on-sidebar-selected));
+  border-left-color: currentColor;
+  background: rgb(var(--v-theme-info));
   font-weight: 600;
 }
 .admin-nav__item.v-list-item--active :deep(.v-list-item__overlay) {
@@ -405,7 +406,7 @@ const onSearch = () => {
 /* ===== ユーザーメニュー ===== */
 .admin-user {
   padding: 8px;
-  border-top: 1px solid rgb(var(--v-theme-sidebar-selected));
+  border-top: 1px solid rgb(var(--v-theme-info));
 }
 .admin-user__avatar {
   font-size: 0.8rem;
@@ -423,7 +424,7 @@ const onSearch = () => {
 
 /* ===== 上部バー ===== */
 .admin-bar {
-  border-bottom: 1px solid rgb(var(--v-theme-sidebar-selected));
+  border-bottom: 1px solid rgb(var(--v-theme-info));
 }
 .admin-search {
   width: 176px;

@@ -6,23 +6,19 @@ import { mdiByName } from "./icons";
 import { MOBILE_BREAKPOINT } from "@/composables/useIsMobile";
 
 // 旧 theme.ts(MUI createTheme) / globals.css の配色を踏襲
-const PRIMARY = "#800020";
-
 const nasbLight: ThemeDefinition = {
   dark: false,
   colors: {
     background: "#ffffff",
     surface: "#ffffff",
-    primary: PRIMARY,
+    primary: "#800020",
     secondary: "#003399",
     success: "#355e3b",
     warning: "#f6c91c",
     info: "#353542",
     error: "#d32f2f",
-    sidebar: "#f2f5fd", // 管理画面のサイドバー・上部バー
-    "on-sidebar": PRIMARY,
-    "sidebar-selected": "#d6e1fb",
-    "on-sidebar-selected": PRIMARY,
+    sidebar: "#2b1d14", // 管理画面のサイドバー・上部バー
+    "on-sidebar": "#ffffff",
   },
 };
 
