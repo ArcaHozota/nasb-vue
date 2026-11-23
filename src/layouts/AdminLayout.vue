@@ -250,7 +250,7 @@ const onSearch = () => {
                 <v-avatar
                   size="30"
                   color="info"
-                  class="admin-user__avatar"
+                  class="admin-user__avatar on-sidebar"
                 >
                   {{ username.slice(0, 1) }}
                 </v-avatar>
@@ -371,7 +371,7 @@ const onSearch = () => {
 }
 .admin-brand :deep(.jerusalem-cross),
 .admin-brand__title {
-  color: rgb(var(--v-theme-on-sidebar));
+  color: #fff;
 }
 
 /* ===== メインナビ ===== */
@@ -393,9 +393,9 @@ const onSearch = () => {
 .admin-nav__item :deep(.v-list-item__spacer) {
   width: 14px !important;
 }
-/* 選択中: 左端に白い線、info の背景、白い太字 */
+/* 選択中は左端に白い線を表示し、info の背景と太字で示す。 */
 .admin-nav__item.v-list-item--active {
-  border-left-color: currentColor;
+  border-left-color: #fff;
   background: rgb(var(--v-theme-info));
   font-weight: 600;
 }
