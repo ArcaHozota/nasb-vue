@@ -10,7 +10,7 @@
         "@fontsource/noto-serif-jp": "^5.3.1",
         "@fontsource/noto-serif-kr": "^5.3.1",
         "@mdi/js": "^7.4.47",
-        "@tanstack/vue-query": "^5.108.2",
+        "@tanstack/vue-query": "^5.108.3",
         "axios": "^1.21.1",
         "pinia": "^4.1.0",
         "vue": "^3.5.46",
@@ -745,18 +745,18 @@
       "sha512-DIpUSOhPfQ7u/qfUi/Wgm0wBO56MyBYXGvnlI0NcauDRPqdBUlAZZjW2Dxm92m+k1UWVhKw8YJ4f47+75Aujyw=="
     ],
     "@tanstack/query-core": [
-      "@tanstack/query-core@5.108.2",
+      "@tanstack/query-core@5.108.3",
       "",
       {},
-      "sha512-0l+0xDKqn71hfJBKaAvFP/X7WYM0TbscEk6nK1pHaWQUWUEA+WJD0VlT8wF+HIJANMV9B/DouPWwDnX3w/l9BA=="
+      "sha512-Lh8fyLDlHOdZXfUB+G1M5bKxfQ1Y0/mfydFP+pMjFKweAU4OUiC4MyIBTcW7Ck+Iwt6K3/pzvADrJi2Dc1lwuQ=="
     ],
     "@tanstack/vue-query": [
-      "@tanstack/vue-query@5.108.2",
+      "@tanstack/vue-query@5.108.3",
       "",
       {
         "dependencies": {
           "@tanstack/match-sorter-utils": "^9.1.2",
-          "@tanstack/query-core": "5.108.2",
+          "@tanstack/query-core": "5.108.3",
           "@vue/devtools-api": "^6.6.3",
           "vue-demi": "^0.14.10"
         },
@@ -768,7 +768,7 @@
           "@vue/composition-api"
         ]
       },
-      "sha512-XWIygzG4QizQZwbyGW3t4SXWjFDm1C3ZmL6fE3DK2pW1UyvgaWB8KqozBPtzFGwBO+fS67Tb4jfRC6OEYKLrAA=="
+      "sha512-k+265zoM3LJ94q6Fky5Y2W1G5TymEYMSMSwCAMxvEkArCUWKQoLyhrt0NBWcrwl/Ga1CLY7NwI7kLo3Jl/fytg=="
     ],
     "@tybys/wasm-util": [
       "@tybys/wasm-util@0.10.5",
