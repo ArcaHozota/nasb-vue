@@ -16,7 +16,7 @@ test("PCホーム: 左に一覧(1ページ10曲)、右に選んだ曲の詳細",
     "SNOWY",
     "SNOWY",
   ];
-  const hymns = makeHymns(20).map((h, i) => ({
+  const hymns = makeHymns(13).map((h, i) => ({
     ...h,
     lineNumber: lines[i] ?? "SNOWY",
     lyric:
@@ -33,13 +33,34 @@ test("PCホーム: 左に一覧(1ページ10曲)、右に選んだ曲の詳細",
   await expect(page.getByRole("button", { name: "ログイン", exact: true })).toHaveCSS("font-weight", "800");
 
   const list = page.getByRole("region", { name: "曲の一覧" });
-  await expect(list.getByText("20件 ・ 一致度の高い順")).toBeVisible();
+  await expect(list.getByText("13件 ・ 一致度の高い順")).toBeVisible();
   const rows = list.locator("[data-hymn-row]");
+  const rings = list.locator(".desktop-home__ring");
   await expect(rows).toHaveCount(10);
+  await expect(rings).toHaveCount(10);
   await expect(rows.first()).toContainText("よく一致");
   await expect(rows.nth(2)).toContainText("一致");
   await expect(rows.nth(6)).toContainText("関連");
   await expect(list.getByText("1 / 2")).toBeVisible();
+
+  const expectAlignedRings = async () => {
+    await expect
+      .poll(() =>
+        list.evaluate((element) => {
+          const rows = element.querySelectorAll("[data-hymn-row]");
+          const rings = element.querySelectorAll(".desktop-home__ring");
+          const offsets = Array.from(rows, (row, i) => {
+            const bounds = row.getBoundingClientRect();
+            const ring = rings[i].getBoundingClientRect();
+            const target = bounds.top + bounds.height * 0.62;
+            return Math.abs(ring.top + ring.height / 2 - target);
+          });
+          return Math.max(...offsets);
+        }),
+      )
+      .toBeLessThan(0.5);
+  };
+  await expectAlignedRings();
 
   const detail = page.getByRole("article", { name: "賛美歌1の詳細" });
   await expect(detail.getByRole("heading", { name: "賛美歌1" })).toBeVisible();
@@ -83,4 +104,27 @@ test("PCホーム: 左に一覧(1ページ10曲)、右に選んだ曲の詳細",
   await expect(
     page.getByRole("article", { name: "賛美歌3の詳細" }),
   ).toBeVisible();
+
+  // 一覧をスクロールしても対応する行からリングがずれない
+  const book = page.locator(".desktop-home__main");
+  await book.evaluate((element) => {
+    element.style.height = "560px";
+  });
+  const scroll = list.locator(".desktop-home__scroll");
+  await scroll.evaluate((element) => {
+    element.scrollTop = 96;
+  });
+  await expect
+    .poll(() => scroll.evaluate((element) => element.scrollTop))
+    .toBe(96);
+  await expectAlignedRings();
+  await book.evaluate((element) => {
+    element.style.removeProperty("height");
+  });
+
+  await list.getByRole("button", { name: "次", exact: true }).click();
+  await expect(rows.first()).toContainText("賛美歌11");
+  await expect(rows).toHaveCount(3);
+  await expect(rings).toHaveCount(3);
+  await expectAlignedRings();
 });

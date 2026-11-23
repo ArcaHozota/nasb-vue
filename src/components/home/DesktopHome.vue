@@ -52,6 +52,12 @@ const selected = computed(() => props.records[selectedIndex.value]);
 
 // ↑↓キーで一覧の曲を移動する
 const list = ref<{ $el: HTMLElement } | null>(null);
+const listScrollTop = ref(0);
+const syncRingScroll = () => {
+  listScrollTop.value = list.value?.$el.scrollTop ?? 0;
+};
+watch(list, syncRingScroll, { flush: "post" });
+
 const onListKeyDown = (e: KeyboardEvent) => {
   if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
   e.preventDefault();
@@ -171,26 +177,43 @@ const caption = computed(() => {
           text="別のキーワードで検索してください。"
           class="desktop-home__empty"
         />
-        <v-list
+        <div
           v-else
-          ref="list"
-          :class="[
-            'desktop-home__scroll py-0',
-            { 'is-stale': isFetching && records.length > 0 },
-          ]"
-          bg-color="transparent"
-          @keydown="onListKeyDown"
+          class="desktop-home__list-body"
+          :class="{ 'is-stale': isFetching && records.length > 0 }"
         >
-          <HymnListRow
-            v-for="(r, i) in records"
-            :key="r.id"
-            :hymn="r"
-            :no="hymnNo(page, pageSize, i)"
-            :searching="searching"
-            :active="i === selectedIndex"
-            @click="selectedId = r.id"
-          />
-        </v-list>
+          <v-list
+            ref="list"
+            class="desktop-home__scroll py-0"
+            bg-color="transparent"
+            @keydown="onListKeyDown"
+            @scroll.passive="syncRingScroll"
+          >
+            <HymnListRow
+              v-for="(r, i) in records"
+              :key="r.id"
+              :hymn="r"
+              :no="hymnNo(page, pageSize, i)"
+              :searching="searching"
+              :active="i === selectedIndex"
+              @click="selectedId = r.id"
+            />
+          </v-list>
+          <!-- リングは一覧の外側に描き、行と同じ距離だけスクロールさせる。 -->
+          <div class="desktop-home__rings" aria-hidden="true">
+            <div :style="{ transform: `translateY(${-listScrollTop}px)` }">
+              <div
+                v-for="r in records"
+                :key="r.id"
+                class="desktop-home__ring-row"
+              >
+                <span class="desktop-home__ring">
+                  <span class="desktop-home__ring-arc" />
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <nav class="desktop-home__pager" aria-label="ページ送り">
           <v-btn
@@ -299,10 +322,11 @@ const caption = computed(() => {
 /* 左右のカードを並べた面(ブック)。幅 1190px・高さ 740px で、ヘッダーの下の余白の中央に置く
    (画面がそれより狭いときは幅を縮め、低いときはページ全体をスクロールする) */
 .desktop-home__main {
+  --book-gap: 28px;
   display: grid;
   flex-shrink: 0;
   grid-template-columns: minmax(320px, 36fr) 64fr;
-  gap: 16px;
+  gap: var(--book-gap);
   width: min(1190px, 100% - 48px);
   height: 740px;
   margin: auto;
@@ -314,6 +338,11 @@ const caption = computed(() => {
   flex-direction: column;
   min-height: 0;
   border: 1px solid #e8e0cf;
+}
+.desktop-home__list-card {
+  --hymn-row-height: 64px;
+  z-index: 1;
+  overflow: visible;
 }
 .desktop-home__caption {
   flex-shrink: 0;
@@ -327,16 +356,75 @@ const caption = computed(() => {
   font-size: 0.75rem;
   color: #8a6400;
 }
+.desktop-home__list-body {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  transition: opacity 0.15s;
+}
+.desktop-home__list-body.is-stale {
+  opacity: 0.5;
+}
 /* 念のため、10曲が収まらない時は、ページ送りを押し出さず一覧の中でスクロールする */
 .desktop-home__scroll {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   scrollbar-width: thin;
-  transition: opacity 0.15s;
 }
-.desktop-home__scroll.is-stale {
-  opacity: 0.5;
+.desktop-home__rings {
+  --ring-width: 42px;
+  --ring-hole-width: 8px;
+  --ring-total-width: calc(var(--ring-width) + var(--ring-hole-width));
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: calc(100% + 1px + (var(--book-gap) - var(--ring-total-width)) / 2);
+  inline-size: var(--ring-total-width);
+  overflow: hidden;
+  pointer-events: none;
+}
+.desktop-home__ring-row {
+  position: relative;
+  block-size: var(--hymn-row-height);
+}
+.desktop-home__ring {
+  --ring-stroke: 4px;
+  position: absolute;
+  inset-block-start: 62%;
+  inset-inline: 0;
+  block-size: 12px;
+  transform: translateY(-50%);
+}
+.desktop-home__ring::before,
+.desktop-home__ring::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 100%;
+  inline-size: var(--ring-hole-width);
+  block-size: 9px;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: #6d5944;
+  box-shadow: inset 0 2px 2px #33241780, 0 0 0 1px #bca789;
+}
+.desktop-home__ring::before {
+  inset-inline-start: calc(var(--ring-stroke) / 2);
+}
+.desktop-home__ring::after {
+  inset-inline-end: calc(var(--ring-stroke) / 2);
+}
+.desktop-home__ring-arc {
+  position: absolute;
+  z-index: 1;
+  inset-block: 0;
+  inset-inline: calc(var(--ring-hole-width) / 2);
+  box-sizing: border-box;
+  border: solid #927b54;
+  border-top-color: #b8a17a;
+  border-width: var(--ring-stroke) var(--ring-stroke) 0;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
 }
 .desktop-home__skeleton {
   border-bottom: 1px solid #efe8da;

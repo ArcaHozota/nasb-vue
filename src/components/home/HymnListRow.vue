@@ -47,7 +47,7 @@ defineProps<{
 
 <style scoped>
 .hymn-row {
-  height: 64px;
+  height: var(--hymn-row-height, 64px);
   min-height: 0 !important;
   padding-block: 0 !important;
   box-sizing: border-box;
