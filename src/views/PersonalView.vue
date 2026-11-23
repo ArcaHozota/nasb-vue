@@ -305,13 +305,13 @@ const inputProps = {
     />
 
     <div class="studentedition-card glass-panel personal__card">
-      <div class="personal__header">
+      <div class="d-flex align-center px-4 py-3 bg-info text-white">
         <v-icon
           icon="mdi-card-account-details-outline"
           size="20"
           class="mr-2"
         />
-        <h1 class="text-title-large">ユーザー情報更新</h1>
+        <h1 class="text-title-large font-weight-bold">ユーザー情報更新</h1>
       </div>
 
       <div class="pa-6">
@@ -525,13 +525,6 @@ const inputProps = {
   background: rgba(255, 255, 255, 0.85) !important;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-}
-.personal__header {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  background: #ff883e;
-  color: #fff;
 }
 .personal__set {
   min-width: 0;

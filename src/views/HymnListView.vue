@@ -186,9 +186,9 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
     <PageBackground :src="backgroundImage" />
 
     <div class="hymnlist-card glass-panel">
-      <div class="hymn-list__header noto-serif">
+      <div class="d-flex align-center px-4 py-3 bg-info text-white noto-serif">
         <v-icon icon="mdi-view-grid-outline" size="20" class="mr-2" />
-        <h1 class="text-title-large">賛美歌情報メンテナンス</h1>
+        <h1 class="text-title-large font-weight-bold">賛美歌情報メンテナンス</h1>
       </div>
 
       <div class="pa-6">
@@ -508,13 +508,6 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
   position: relative;
   overflow: hidden;
   border-radius: 18px;
-}
-.hymn-list__header {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  background: #1e293b;
-  color: #fff;
 }
 .hymn-list__toolbar {
   display: grid;

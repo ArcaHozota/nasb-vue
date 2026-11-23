@@ -58,8 +58,8 @@ onMounted(() => {
         @click="card.action"
       >
         <img :src="card.img" :alt="card.title" class="menu-card__img" />
-        <div class="menu-card__caption">
-          <h2>{{ card.title }}</h2>
+        <div class="menu-card__caption bg-info text-white">
+          <h2 class="font-weight-bold">{{ card.title }}</h2>
         </div>
       </v-card>
     </div>
@@ -91,12 +91,9 @@ onMounted(() => {
   bottom: 0;
   width: 100%;
   padding: 12px 0;
-  background: rgba(0, 0, 0, 0.35);
   text-align: center;
-  color: #fff;
 }
 .menu-card__caption h2 {
   font-size: 1.25rem;
-  font-weight: 400;
 }
 </style>

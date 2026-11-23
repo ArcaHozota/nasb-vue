@@ -312,9 +312,9 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
     <PageBackground :src="backgroundImage" />
 
     <div class="bookaddition-card noto-serif glass-panel">
-      <div class="book-addition__header">
+      <div class="d-flex align-center px-4 py-3 bg-info text-white">
         <v-icon icon="mdi-book-open-variant" size="20" class="mr-2" />
-        <h1 class="text-title-large">聖書章節入力</h1>
+        <h1 class="text-title-large font-weight-bold">聖書章節入力</h1>
       </div>
 
       <div class="pa-6">
@@ -480,13 +480,6 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
   position: relative;
   overflow: hidden;
   border-radius: 18px;
-}
-.book-addition__header {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  background: #1e293b;
-  color: #fff;
 }
 .book-addition__row {
   display: flex;
