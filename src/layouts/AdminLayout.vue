@@ -186,7 +186,7 @@ const onSearch = () => {
 
 <template>
   <!-- サイドバー: 項目は Vuetify の v-list-item(ホバーで薄い背景、押すと波紋)。
-       選択中の項目は左端の臙脂の線と濃い背景で示す -->
+       選択中の項目は左端の臙脂の線と淡い青の背景で示す -->
   <v-navigation-drawer
     v-model="drawer"
     :rail="isRail"
@@ -209,9 +209,7 @@ const onSearch = () => {
         "
       >
         <JerusalemCross :size="isRail ? 33 : 44" />
-        <span v-if="!isRail" class="effect-shine admin-brand__title"
-          >NASB1995</span
-        >
+        <span v-if="!isRail" class="admin-brand__title">NASB1995</span>
       </button>
     </template>
 
@@ -249,7 +247,11 @@ const onSearch = () => {
               :aria-label="isRail ? username : undefined"
             >
               <template #prepend>
-                <v-avatar size="30" color="#374151" class="admin-user__avatar">
+                <v-avatar
+                  size="30"
+                  color="sidebar-selected"
+                  class="admin-user__avatar"
+                >
                   {{ username.slice(0, 1) }}
                 </v-avatar>
               </template>
@@ -266,7 +268,7 @@ const onSearch = () => {
               </template>
             </v-list-item>
           </template>
-          <v-list density="compact" min-width="224">
+          <v-list density="compact" min-width="224" base-color="primary">
             <v-list-item
               prepend-icon="mdi-account-cog"
               title="個人スペース"
@@ -284,7 +286,6 @@ const onSearch = () => {
             <v-list-item
               prepend-icon="mdi-logout"
               title="ログアウト"
-              base-color="error"
               @click="onLogout"
             />
           </v-list>
@@ -320,7 +321,7 @@ const onSearch = () => {
     <v-btn
       icon
       size="small"
-      color="#4c0014"
+      color="primary"
       variant="text"
       aria-label="ログアウト"
       class="mx-1"
@@ -343,7 +344,6 @@ const onSearch = () => {
 /* ===== サイドバー ===== */
 .admin-sidebar {
   border-right: 0;
-  --v-medium-emphasis-opacity: 0.8;
 }
 
 /* ===== ブランド ===== */
@@ -356,14 +356,9 @@ const onSearch = () => {
   gap: 8px;
   padding: 20px 16px;
   border: 0;
-  border-bottom: 1px solid #1e293b;
+  border-bottom: 1px solid rgb(var(--v-theme-sidebar-selected));
   background: transparent;
   cursor: pointer;
-}
-/* 管理画面のロゴ(十字・文字)はクリーム色にする */
-.admin-brand :deep(.jerusalem-cross),
-.admin-brand .admin-brand__title {
-  color: #f3e3c3;
 }
 .admin-brand--rail {
   justify-content: center;
@@ -371,8 +366,10 @@ const onSearch = () => {
 }
 .admin-brand__title {
   white-space: nowrap;
+  font-family: "Niconne", cursive;
   font-size: 1.75rem;
   line-height: 1;
+  color: rgb(var(--v-theme-primary));
 }
 
 /* ===== メインナビ ===== */
@@ -394,11 +391,11 @@ const onSearch = () => {
 .admin-nav__item :deep(.v-list-item__spacer) {
   width: 14px !important;
 }
-/* 選択中: 左端に臙脂の線、濃い背景、白い文字(Vuetify の選択の重ねは消す) */
+/* 選択中: 左端に臙脂の線、淡い青の背景、臙脂の太字 */
 .admin-nav__item.v-list-item--active {
-  border-left-color: #c43c5a;
-  background: #1e293b;
-  color: #fff;
+  border-left-color: rgb(var(--v-theme-primary));
+  background: rgb(var(--v-theme-sidebar-selected));
+  color: rgb(var(--v-theme-on-sidebar-selected));
   font-weight: 600;
 }
 .admin-nav__item.v-list-item--active :deep(.v-list-item__overlay) {
@@ -408,11 +405,10 @@ const onSearch = () => {
 /* ===== ユーザーメニュー ===== */
 .admin-user {
   padding: 8px;
-  border-top: 1px solid #1e293b;
+  border-top: 1px solid rgb(var(--v-theme-sidebar-selected));
 }
 .admin-user__avatar {
   font-size: 0.8rem;
-  color: #e5e7eb;
 }
 .admin-user__name {
   font-size: 0.9rem;
@@ -427,7 +423,7 @@ const onSearch = () => {
 
 /* ===== 上部バー ===== */
 .admin-bar {
-  border-bottom: 1px solid #1e293b;
+  border-bottom: 1px solid rgb(var(--v-theme-sidebar-selected));
 }
 .admin-search {
   width: 176px;
