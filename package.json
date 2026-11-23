@@ -20,7 +20,7 @@
     "@fontsource/noto-serif-jp": "^5.3.1",
     "@fontsource/noto-serif-kr": "^5.3.1",
     "@mdi/js": "^7.4.47",
-    "@tanstack/vue-query": "^5.108.3",
+    "@tanstack/vue-query": "^5.108.4",
     "axios": "^1.21.1",
     "pinia": "^4.1.0",
     "vue": "^3.5.46",
