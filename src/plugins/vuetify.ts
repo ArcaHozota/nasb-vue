@@ -17,7 +17,7 @@ const nasbLight: ThemeDefinition = {
     warning: "#f6c91c",
     info: "#353542",
     error: "#d32f2f",
-    sidebar: "#2b1d14", // 管理画面のサイドバー・上部バー
+    sidebar: "#252530", // 管理画面のサイドバー・上部バー
     "on-sidebar": "#ffffff",
   },
 };
