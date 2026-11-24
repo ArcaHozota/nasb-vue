@@ -455,8 +455,9 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
             <v-btn
               block
               color="primary"
+              height="40"
               variant="flat"
-              class="noto-serif"
+              class="book-addition__submit noto-serif font-weight-bold"
               :loading="saving"
               :disabled="saving || !chapterReady || lookup === 'loading'"
               :prepend-icon="isUpdate ? 'mdi-cross' : 'mdi-book-outline'"
@@ -534,6 +535,9 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
 .book-addition__ghost {
   visibility: hidden;
 }
+.book-addition__submit:not(:disabled) :deep(.v-btn__content) {
+  color: rgb(var(--v-theme-ivory));
+}
 @media (max-width: 767px) {
   .book-addition__ghost {
     display: none;
@@ -549,6 +553,7 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
   }
   .book-addition__field--action {
     width: 16%;
+    margin-inline-start: auto;
   }
 }
 </style>

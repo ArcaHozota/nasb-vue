@@ -19,6 +19,22 @@ async function openBookEditor(page: Page) {
 
 test("本文エディタの名称・複数行・入力エラーを読み上げ用に関連付ける", async ({ page }) => {
   await openBookEditor(page);
+  const add = page.getByRole("button", { name: "追加", exact: true });
+  const addLabel = add.locator(".v-btn__content");
+  await expect(addLabel).toHaveCSS("font-family", /^"Noto Serif JP"/);
+  await expect(addLabel).toHaveCSS("font-weight", "700");
+  await expect(addLabel).toHaveCSS("color", "rgb(255, 255, 240)");
+
+  const addBox = (await add.boundingBox())!;
+  const fieldsBox = (await page.locator(".book-addition__fields").boundingBox())!;
+  expect(addBox.x + addBox.width).toBeCloseTo(fieldsBox.x + fieldsBox.width, 0);
+  for (const field of ["book", "chapter"]) {
+    const dropdown = page.locator(`.book-addition__field--${field} .v-field`);
+    const dropdownBox = (await dropdown.boundingBox())!;
+    expect(addBox.height).toBe(dropdownBox.height);
+    expect(addBox.y).toBeCloseTo(dropdownBox.y, 0);
+  }
+
   const english = page.getByRole("textbox", { name: "英語", exact: true });
   const japanese = page.getByRole("textbox", { name: "日本語", exact: true });
   for (const editor of [english, japanese]) {
@@ -33,7 +49,7 @@ test("本文エディタの名称・複数行・入力エラーを読み上げ�
   await page.keyboard.press("Tab");
   await expect(japanese).toBeFocused();
 
-  await page.getByRole("button", { name: "追加", exact: true }).click();
+  await add.click();
   for (const editor of [english, japanese]) {
     await expect(editor).toHaveAttribute("aria-invalid", "true");
     await expect(editor).toHaveAccessibleDescription("入力してください。");
