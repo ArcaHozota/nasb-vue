@@ -296,14 +296,16 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
                 <th>{{ isSearching ? "一致度" : "番号" }}</th>
                 <th>曲名</th>
                 <th>韓国語名</th>
-                <th class="text-center">操作</th>
+                <th>操作</th>
               </tr>
             </thead>
             <tbody class="noto-serif">
               <!-- 初回読み込み中はスケルトン行(ページ切替中は keepPreviousData で前の行を薄く残す) -->
               <template v-if="isFetching && records.length === 0">
                 <tr v-for="i in pageSize" :key="`skeleton-${i}`">
-                  <td><v-skeleton-loader type="text" width="32" /></td>
+                  <td>
+                    <v-skeleton-loader type="text" width="32" class="mx-auto" />
+                  </td>
                   <td><v-skeleton-loader type="text" width="75%" /></td>
                   <td><v-skeleton-loader type="text" width="66%" /></td>
                   <td>
@@ -343,7 +345,7 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
                 @click="openYoutube(row)"
                 @keydown.enter.self="openYoutube(row)"
               >
-                <td>
+                <td class="text-center">
                   <span
                     v-if="isSearching"
                     :class="['match-chip', matchLevel(row).chip]"
@@ -367,6 +369,7 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
                 </td>
                 <!-- 操作列のクリックは行(YouTube)へ伝えない。押下も伝えず、行の波紋を出さない(ボタン自身の波紋だけ) -->
                 <td
+                  class="text-center"
                   @click.stop
                   @keydown.stop
                   @mousedown.stop
@@ -529,6 +532,7 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
   background: rgb(var(--v-theme-ivory));
   font-weight: 700 !important;
   color: #4b5563 !important;
+  text-align: center;
 }
 .hymn-list__table tbody td {
   padding: 8px 12px !important;

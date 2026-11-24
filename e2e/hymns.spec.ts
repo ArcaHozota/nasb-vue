@@ -7,13 +7,20 @@ test.describe("賛美歌一覧", () => {
     await page.goto("/hymns");
 
     for (const name of ["番号", "曲名", "韓国語名", "操作"]) {
-      await expect(page.getByRole("columnheader", { name, exact: true })).toHaveCSS(
-        "background-color",
-        "rgb(255, 255, 240)",
-      );
+      const header = page.getByRole("columnheader", { name, exact: true });
+      await expect(header).toHaveCSS("background-color", "rgb(255, 255, 240)");
+      await expect(header).toHaveCSS("text-align", "center");
     }
     await expect(page.getByText("全11件 / 1 / 2ページ")).toBeVisible();
     await expect(page.getByRole("button", { name: "削除" })).toHaveCount(10);
+
+    const cells = page.locator(".hymn-list__row").first().getByRole("cell");
+    for (const index of [0, 3]) {
+      await expect(cells.nth(index)).toHaveCSS("text-align", "center");
+    }
+    for (const index of [1, 2]) {
+      await expect(cells.nth(index)).toHaveCSS("text-align", /^(start|left)$/);
+    }
 
     const table = page.locator(".hymn-list__table-wrap");
     const search = page.locator(".hymn-list__toolbar .v-field");
