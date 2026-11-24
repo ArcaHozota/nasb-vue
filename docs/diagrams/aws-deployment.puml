@@ -1,0 +1,48 @@
+@startuml
+!pragma layout smetana
+
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 15
+skinparam defaultFontColor #243044
+skinparam ArrowColor #526278
+skinparam component {
+  BackgroundColor #EDF3FA
+  BorderColor #72839B
+}
+
+rectangle "利用者のブラウザ" as Browser #F5F7FA
+cloud "Route 53" as DNS #F5F7FA
+cloud "CloudFront\nACM 証明書" as CDN #F5F7FA
+artifact "ECR" as Registry #F5F7FA
+
+rectangle "VPC" as VPC #F8FAFC {
+  node "アプリサーバー\nEC2 t4g.micro / Fedora / arm64" as App #EDF3FA {
+    component "入口 nginx\nコンテナ" as Ingress
+    component "フロントエンド コンテナ\nnasb-vue・nginx :3000" as Frontend
+    component "バックエンド コンテナ\nScala :8277" as Backend
+  }
+
+  frame "非公開サブネット" as Private #F1F5F9 {
+    node "DB サーバー\nEC2 t3a.small / Ubuntu" as DBHost #EDF3FA {
+      database "Oracle XE" as Oracle #FFFFFF
+    }
+  }
+
+  component "S3 ゲートウェイ型\nエンドポイント" as S3Endpoint
+}
+
+cloud "Google / YouTube" as External #F5F7FA
+storage "S3" as Bucket #F5F7FA
+
+Browser --> CDN : HTTPS
+DNS ..> CDN : 名前解決
+CDN --> App : HTTP・Elastic IP\n入口 nginx へ
+Registry ..> App : イメージ
+Ingress --> Frontend : /
+Ingress --> Backend : /api
+Backend --> DBHost : 1521 (Oracle XE)
+Backend --> External
+Oracle ..> S3Endpoint : 毎週バックアップ
+S3Endpoint --> Bucket
+@enduml

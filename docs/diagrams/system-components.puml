@@ -1,0 +1,29 @@
+@startuml
+!pragma layout smetana
+left to right direction
+
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 15
+skinparam defaultFontColor #243044
+skinparam ArrowColor #526278
+skinparam component {
+  BackgroundColor #EDF3FA
+  BorderColor #72839B
+}
+
+component "nginx\n静的配信" as Web
+rectangle "利用者のブラウザ" as Browser #F5F7FA {
+  component "Vue SPA" as SPA
+}
+component "API ルーティング" as Routing
+component "バックエンド" as Backend
+database "永続データ" as Data #F5F7FA
+cloud "Google / YouTube" as External #F5F7FA
+
+Web --> SPA : 静的ファイル
+SPA --> Routing : /api・Cookie
+Routing --> Backend
+Backend --> Data
+Backend --> External
+@enduml

@@ -50,15 +50,11 @@
 
 ### 3.1 システム構成と責務
 
-```mermaid
-flowchart LR
-  U[利用者のブラウザ] --> V[Vue SPA]
-  V -->|/api・Cookie| P[APIルーティング]
-  P --> B[バックエンド]
-  B --> D[(永続データ)]
-  B --> Y[Google / YouTube]
-  N[nginx 静的配信] --> V
-```
+![ブラウザ内の Vue SPA、静的配信、API ルーティング、バックエンドの関係を示すコンポーネント図](diagrams/system-components.svg)
+
+[コンポーネント図の PlantUML ソース](diagrams/system-components.puml)
+
+図を更新するときは、リポジトリのルートから `plantuml -charset UTF-8 -tsvg -nometadata docs/diagrams/*.puml` を実行して SVG を再生成する。
 
 ブラウザ内の SPA が画面表示、入力検証、画面状態、検索の一部を担当する。バックエンドは API、認証、データの永続化および外部連携の窓口である。上の図は論理構成であり、AWS 上の実際の配置は6章に記載する。
 
@@ -236,26 +232,9 @@ AWS の東京リージョンに構築している。構成と役割は関係者�
 
 ### 6.1 全体構成
 
-```mermaid
-flowchart LR
-  U[利用者のブラウザ] -->|HTTPS| CF[CloudFront<br/>ACM 証明書]
-  R53[Route 53] -.名前解決.-> CF
-  CF -->|HTTP・Elastic IP| GW
-  subgraph VPC
-    subgraph APP[アプリサーバー EC2 t4g.micro / Fedora / arm64]
-      GW[入口 nginx コンテナ] -->|/| FE[フロントエンド コンテナ<br/>nasb-vue・nginx :3000]
-      GW -->|/api| BE[バックエンド コンテナ<br/>Scala :8277]
-    end
-    subgraph DBS[非公開サブネット: DB サーバー EC2 t3a.small / Ubuntu]
-      DB[(Oracle XE)]
-    end
-    BE -->|1521| DB
-    S3EP[S3 ゲートウェイ型エンドポイント]
-  end
-  BE --> G[Google / YouTube]
-  ECR[(ECR)] -.イメージ.-> APP
-  DB -.毎週バックアップ.-> S3EP --> S3[(S3)]
-```
+![CloudFront と VPC 内のアプリサーバー・DB サーバー、S3 へのバックアップ経路を示す AWS 配置図](diagrams/aws-deployment.svg)
+
+[AWS 配置図の PlantUML ソース](diagrams/aws-deployment.puml)
 
 | 構成要素           | 内容                                                                                                                                                             |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -2,6 +2,7 @@
 // 賛美歌の追加・編集モーダル(旧 components/HymnFormModal.tsx)。
 // 賛美歌一覧から v-if で開く。ルーティングやURLパラメータは使わず、一覧側の状態(pageSize 等)を props で受け取る。
 // Esc・背景クリック・「閉じる」のどれで閉じようとしても close() を通り、入力中の内容があれば確認する。
+import "@fontsource/noto-sans-jp/600.css";
 import { computed, reactive, ref, watch } from "vue";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { storeToRefs } from "pinia";
@@ -267,13 +268,13 @@ const close = async () => {
     @update:model-value="(v) => !v && close()"
   >
     <v-card
-      class="noto-sans"
+      class="hymn-form"
       :prepend-icon="
         isEdit ? 'mdi-notebook-edit-outline' : 'mdi-plus-circle-outline'
       "
     >
       <template #title>
-        <span id="hymn-form-title">
+        <span id="hymn-form-title" class="font-weight-bold">
           {{ isEdit ? "賛美歌情報更新" : "賛美歌情報追加" }}
         </span>
       </template>
@@ -371,3 +372,18 @@ const close = async () => {
     </v-card>
   </v-dialog>
 </template>
+
+<style scoped>
+.hymn-form :deep(.v-field-label) {
+  font-weight: 600;
+}
+
+.hymn-form :deep(.v-field__input) {
+  font-family: "Noto Serif JP", "Noto Serif KR", serif;
+  font-weight: 600;
+}
+
+.hymn-form :deep(.v-switch .v-label) {
+  font-weight: 700;
+}
+</style>

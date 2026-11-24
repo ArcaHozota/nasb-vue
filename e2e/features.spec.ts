@@ -78,7 +78,10 @@ test("編集モーダル: 読み込んだ内容を表示し、廃棄で元に戻
   await page.getByRole("button", { name: "編集" }).first().click();
   const dialog = page.getByRole("dialog", { name: "賛美歌情報更新" });
   const nameJp = dialog.getByLabel("日本語名称");
+  await expect(dialog.getByText("賛美歌情報更新", { exact: true })).toHaveCSS("font-weight", "700");
   await expect(nameJp).toHaveValue("賛美歌1");
+  await expect(nameJp).toHaveCSS("font-family", /^"Noto Serif JP"/);
+  await expect(nameJp).toHaveCSS("font-weight", "600");
   await expect(dialog.getByLabel("韓国語名称")).toHaveValue("찬송가1");
   await expect(dialog.getByText("最終更新者：テストユーザー")).toBeVisible();
 
@@ -95,6 +98,15 @@ test("追加モーダル: 入力の案内を出し、空のまま追加すると
 
   await page.getByRole("button", { name: "賛美歌情報追加" }).click();
   const dialog = page.getByRole("dialog", { name: "賛美歌情報追加" });
+  await expect(dialog.getByText("賛美歌情報追加", { exact: true })).toHaveCSS("font-weight", "700");
+  await expect(dialog.getByText("クラシック", { exact: true })).toHaveCSS("font-weight", "700");
+  for (const name of ["日本語名称", "韓国語名称", "リンク", "歌詞"]) {
+    const field = dialog.getByRole("textbox", { name, exact: true });
+    await expect(field).toHaveCSS("font-family", /^"Noto Serif JP"/);
+    await expect(field).toHaveCSS("font-weight", "600");
+    const labels = dialog.locator(".v-field-label").filter({ hasText: name });
+    await expect(labels.first()).toHaveCSS("font-weight", "600");
+  }
   await expect(
     dialog.getByText("すべての項目を入力してください"),
   ).toBeVisible();
