@@ -65,7 +65,7 @@ a.glass-item:hover {
   outline: none;
   white-space: pre-wrap;
   word-break: break-word;
-  background: #fff;
+  background: rgb(var(--v-theme-ivory));
 }
 
 .red-letter-editor.is-error {

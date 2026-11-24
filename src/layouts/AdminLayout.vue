@@ -371,7 +371,7 @@ const onSearch = () => {
 }
 .admin-brand :deep(.jerusalem-cross),
 .admin-brand__title {
-  color: #fff;
+  color: rgb(var(--v-theme-on-sidebar));
 }
 
 /* ===== メインナビ ===== */

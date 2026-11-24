@@ -25,6 +25,10 @@ test("PCホーム: 左に一覧(1ページ10曲)、右に選んだ曲の詳細",
   await mockApi(page, { hymns });
   await page.goto("/home");
 
+  await expect(page.locator(".desktop-home__bar")).toHaveCSS(
+    "background-color",
+    "rgb(255, 255, 240)",
+  );
   const search = page.getByRole("search").getByLabel("キーワード");
   await search.fill("은혜");
   await search.press("Enter");

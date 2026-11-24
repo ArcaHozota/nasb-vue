@@ -3,13 +3,12 @@ import { makeHymns, mockApi } from "./mock-api";
 
 test.use({ viewport: { width: 1440, height: 900 } });
 
-test("管理画面のナビゲーションとカードの見出しは #fdfaf2 で表示する", async ({ page }) => {
+test("管理画面のロゴ・ナビゲーション・カードの見出しは #fffff0 で表示する", async ({ page }) => {
   await mockApi(page, { loggedIn: true, hymns: makeHymns(3) });
   await page.goto("/hymns");
 
   const nav = page.getByRole("navigation").getByLabel("メニュー");
-  const foreground = "rgb(253, 250, 242)";
-  const white = "rgb(255, 255, 255)";
+  const foreground = "rgb(255, 255, 240)";
   for (const t of ["聖書章節選択", "聖書章節入力", "賛美歌一覧", "ランダム検索", "レシート明細入力"]) {
     const label = nav.getByText(t, { exact: true });
     await expect(label).toBeVisible();
@@ -31,12 +30,12 @@ test("管理画面のナビゲーションとカードの見出しは #fdfaf2 �
   await expect(title).toHaveCSS("color", foreground);
   await expect(title).toHaveCSS("font-weight", "700");
   // 選択中は左端に白い線(3px)
-  await expect(current).toHaveCSS("border-left-color", white);
+  await expect(current).toHaveCSS("border-left-color", "rgb(255, 255, 255)");
   await expect(current).toHaveCSS("border-left-width", "3px");
-  // ロゴのエルサレム十字と文字も白。
+  // ロゴのエルサレム十字と文字もナビゲーションと同じ色。
   await expect(page.locator(".admin-brand .jerusalem-cross")).toBeVisible();
-  await expect(page.locator(".admin-brand .jerusalem-cross")).toHaveCSS("color", white);
-  await expect(page.locator(".admin-brand__title")).toHaveCSS("color", white);
+  await expect(page.locator(".admin-brand .jerusalem-cross")).toHaveCSS("color", foreground);
+  await expect(page.locator(".admin-brand__title")).toHaveCSS("color", foreground);
   const username = page.locator(".admin-user__name");
   await expect(username).toHaveCSS("color", foreground);
   await expect(page.locator(".admin-user__avatar")).toHaveCSS("color", foreground);

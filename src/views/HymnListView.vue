@@ -188,7 +188,9 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
     <div class="hymnlist-card glass-panel">
       <div class="d-flex align-center px-4 py-3 bg-info on-sidebar noto-serif">
         <v-icon icon="mdi-view-grid-outline" size="20" class="mr-2" />
-        <h1 class="text-title-large font-weight-bold">賛美歌情報メンテナンス</h1>
+        <h1 class="text-title-large font-weight-bold">
+          賛美歌情報メンテナンス
+        </h1>
       </div>
 
       <div class="pa-6">
@@ -535,7 +537,7 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
 }
 .hymn-list__table thead th {
   padding: 0 12px !important;
-  background: #f9fafb;
+  background: rgb(var(--v-theme-ivory));
   font-weight: 700 !important;
   color: #4b5563 !important;
 }

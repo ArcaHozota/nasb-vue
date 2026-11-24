@@ -22,6 +22,7 @@ test("本文エディタの名称・複数行・入力エラーを読み上げ�
   const english = page.getByRole("textbox", { name: "英語", exact: true });
   const japanese = page.getByRole("textbox", { name: "日本語", exact: true });
   for (const editor of [english, japanese]) {
+    await expect(editor).toHaveCSS("background-color", "rgb(255, 255, 240)");
     await expect(editor).toHaveAttribute("aria-multiline", "true");
     await expect(editor).toHaveAttribute("aria-invalid", "false");
     await expect(editor).toHaveAccessibleDescription("");

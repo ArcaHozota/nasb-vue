@@ -6,6 +6,12 @@ test.describe("賛美歌一覧", () => {
     await mockApi(page, { loggedIn: true, hymns: makeHymns(11) });
     await page.goto("/hymns");
 
+    for (const name of ["番号", "曲名", "韓国語名", "操作"]) {
+      await expect(page.getByRole("columnheader", { name, exact: true })).toHaveCSS(
+        "background-color",
+        "rgb(255, 255, 240)",
+      );
+    }
     await expect(page.getByText("全11件 / 1 / 2ページ")).toBeVisible();
     await expect(page.getByRole("button", { name: "削除" })).toHaveCount(10);
   });
