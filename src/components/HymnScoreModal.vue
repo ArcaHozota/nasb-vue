@@ -159,7 +159,7 @@ const chordText = () =>
     aria-describedby="score-modal-desc"
     @update:model-value="(v) => !v && close()"
   >
-    <v-card class="score-modal noto-sans" rounded="xl">
+    <v-card class="score-modal noto-sans" color="surface-muted" rounded="xl">
       <div class="pt-3">
         <!-- タイトルは中央、閉じるボタンは右上に固定する -->
         <div class="score-modal__head">

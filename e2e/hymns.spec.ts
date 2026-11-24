@@ -8,7 +8,7 @@ test.describe("賛美歌一覧", () => {
 
     for (const name of ["番号", "曲名", "韓国語名", "操作"]) {
       const header = page.getByRole("columnheader", { name, exact: true });
-      await expect(header).toHaveCSS("background-color", "rgb(255, 255, 240)");
+      await expect(header).toHaveCSS("background-color", "rgb(249, 250, 251)");
       await expect(header).toHaveCSS("text-align", "center");
     }
     await expect(page.getByText("全11件 / 1 / 2ページ")).toBeVisible();
@@ -34,6 +34,10 @@ test.describe("賛美歌一覧", () => {
       expect(searchBox.width).toBeCloseTo(tableBox.width * 0.38, 1);
       expect(playlistBox.x + playlistBox.width).toBeCloseTo(tableBox.x + tableBox.width, 0);
     }
+
+    await page.getByRole("button", { name: "楽譜アップロード", exact: true }).first().click();
+    const score = page.getByRole("dialog", { name: /^楽譜-/ });
+    await expect(score.locator(".v-card")).toHaveCSS("background-color", "rgb(249, 250, 251)");
   });
 
   test("最後のページの最後の1件を削除すると、前のページへ戻る", async ({
@@ -49,6 +53,7 @@ test.describe("賛美歌一覧", () => {
     await page.getByRole("button", { name: "削除" }).click();
     const dialog = page.getByRole("alertdialog");
     await expect(dialog).toContainText("賛美歌11");
+    await expect(dialog.locator(".v-card")).toHaveCSS("background-color", "rgb(249, 250, 251)");
     // 警告は「!」のアイコン(タイトルと同じ臙脂)。アイコンと本文の欄はダイアログの幅の62%
     const body = dialog.locator(".feedback-dialog-body");
     const icon = body.locator(".v-icon");

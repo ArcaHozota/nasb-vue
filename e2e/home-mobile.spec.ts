@@ -42,6 +42,8 @@ test("モバイルホーム: 下までフリックで読み足し、曲を押す
   await rows.nth(1).click();
   const sheet = page.locator(".mobile-sheet__card");
   await expect(sheet.getByText("2 / 25")).toBeVisible();
+  await expect(sheet).toHaveCSS("background-color", "rgb(249, 250, 251)");
+  await expect(sheet.getByRole("article")).toHaveCSS("background-color", "rgb(249, 250, 251)");
   await expect(sheet.getByRole("heading", { name: "賛美歌2" })).toBeVisible();
   await expect(sheet.getByRole("button", { name: "ト長調の楽譜をダウンロード" })).toBeVisible();
   // シートが下から上がりきるのを待つ(途中で触ると背景に当たる)

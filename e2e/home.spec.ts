@@ -27,7 +27,7 @@ test("PCホーム: 左に一覧(1ページ10曲)、右に選んだ曲の詳細",
 
   await expect(page.locator(".desktop-home__bar")).toHaveCSS(
     "background-color",
-    "rgb(255, 255, 240)",
+    "rgb(253, 250, 242)",
   );
   const search = page.getByRole("search").getByLabel("キーワード");
   await search.fill("은혜");

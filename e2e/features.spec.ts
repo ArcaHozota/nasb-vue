@@ -77,6 +77,7 @@ test("編集モーダル: 読み込んだ内容を表示し、廃棄で元に戻
 
   await page.getByRole("button", { name: "編集" }).first().click();
   const dialog = page.getByRole("dialog", { name: "賛美歌情報更新" });
+  await expect(dialog.locator(".v-card")).toHaveCSS("background-color", "rgb(249, 250, 251)");
   const nameJp = dialog.getByLabel("日本語名称");
   await expect(dialog.getByText("賛美歌情報更新", { exact: true })).toHaveCSS("font-weight", "700");
   await expect(nameJp).toHaveValue("賛美歌1");
@@ -98,6 +99,7 @@ test("追加モーダル: 入力の案内を出し、空のまま追加すると
 
   await page.getByRole("button", { name: "賛美歌情報追加" }).click();
   const dialog = page.getByRole("dialog", { name: "賛美歌情報追加" });
+  await expect(dialog.locator(".v-card")).toHaveCSS("background-color", "rgb(249, 250, 251)");
   await expect(dialog.getByText("賛美歌情報追加", { exact: true })).toHaveCSS("font-weight", "700");
   await expect(dialog.getByText("クラシック", { exact: true })).toHaveCSS("font-weight", "700");
   for (const name of ["日本語名称", "韓国語名称", "リンク", "歌詞"]) {

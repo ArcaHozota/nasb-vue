@@ -268,6 +268,7 @@ const close = async () => {
   >
     <v-card
       class="hymn-form"
+      color="surface-muted"
       :prepend-icon="
         isEdit ? 'mdi-notebook-edit-outline' : 'mdi-plus-circle-outline'
       "

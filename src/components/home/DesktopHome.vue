@@ -287,7 +287,7 @@ const caption = computed(() => {
   height: 64px;
   padding: 0 32px 0 24px;
   border-bottom: 1px solid #e8e0cf;
-  background: rgb(var(--v-theme-ivory));
+  background: #fdfaf2;
 }
 .desktop-home__brand {
   height: auto !important;

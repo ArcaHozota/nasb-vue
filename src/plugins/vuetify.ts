@@ -13,6 +13,7 @@ const nasbLight: ThemeDefinition = {
   colors: {
     background: "#ffffff",
     surface: "#ffffff",
+    "surface-muted": "#f9fafb",
     primary: "#800020",
     secondary: "#003399",
     success: "#355e3b",
