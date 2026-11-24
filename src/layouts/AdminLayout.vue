@@ -225,8 +225,12 @@ const onSearch = () => {
         :aria-current="item.isActive ? 'page' : undefined"
         rounded="0"
         class="admin-nav__item"
+        :class="{ 'admin-nav__item--with-cross': item.isActive && !isRail }"
         @click="onNav(item)"
       >
+        <template v-if="item.isActive && !isRail" #append>
+          <JerusalemCross class="admin-nav__active-cross" />
+        </template>
         <v-tooltip
           activator="parent"
           location="end"
@@ -389,6 +393,19 @@ const onSearch = () => {
 .admin-nav__item :deep(.v-list-item-title) {
   font-size: 0.9rem;
   letter-spacing: normal;
+}
+.admin-nav__item--with-cross {
+  padding-inline-end: 52px;
+}
+.admin-nav__item .admin-nav__active-cross {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: 16px;
+  inline-size: auto;
+  block-size: 62%;
+  transform: translateY(-50%);
+  color: rgb(var(--v-theme-ivory));
+  pointer-events: none;
 }
 /* アイコンと文字の間を詰める(既定は 32px) */
 .admin-nav__item :deep(.v-list-item__spacer) {

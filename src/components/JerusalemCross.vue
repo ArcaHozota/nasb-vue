@@ -3,7 +3,7 @@
 // 腕の先が T 字形の本来のエルサレム十字。PC版ホーム・モバイル版ホーム・管理画面のサイドバーで共通に使う。
 // 色は文字色(currentColor)に従う(既定はテーマの primary = 臙脂)。大きさは size(px)で指定する。
 // 太さを元の SVG ファイルと同じにするため、塗りに加えて同じ色の線(stroke)を重ねている。
-withDefaults(defineProps<{ size?: number | string }>(), { size: 32 });
+withDefaults(defineProps<{ size?: number | string }>(), { size: 33 });
 </script>
 
 <template>

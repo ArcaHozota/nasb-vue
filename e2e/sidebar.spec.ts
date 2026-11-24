@@ -34,6 +34,13 @@ test("管理画面のロゴ・ナビゲーション・カードの見出しは #
   // 選択中は左端にアイボリーの線(3px)
   await expect(current).toHaveCSS("border-left-color", foreground);
   await expect(current).toHaveCSS("border-left-width", "3px");
+  const activeCross = current.locator(".admin-nav__active-cross");
+  await expect(nav.locator(".admin-nav__active-cross")).toHaveCount(1);
+  await expect(activeCross).toHaveCSS("color", foreground);
+  const rowBox = (await current.boundingBox())!;
+  const crossBox = (await activeCross.boundingBox())!;
+  expect(crossBox.height / rowBox.height).toBeCloseTo(0.62, 2);
+  expect(rowBox.x + rowBox.width - crossBox.x - crossBox.width).toBeCloseTo(16, 0);
   // ロゴのエルサレム十字と文字もナビゲーションと同じ色。
   await expect(page.locator(".admin-brand .jerusalem-cross")).toBeVisible();
   await expect(page.locator(".admin-brand .jerusalem-cross")).toHaveCSS("color", foreground);
@@ -57,7 +64,14 @@ test("管理画面のロゴ・ナビゲーション・カードの見出しは #
   await expect(page).toHaveURL(/\/hymns\/random-five/);
   await expect(nav.locator('[aria-current="page"]')).toContainText("ランダム検索");
   await expect(current.getByText("ランダム検索", { exact: true })).toHaveCSS("font-weight", "600");
+  await expect(activeCross).toBeVisible();
   await expect(page.getByRole("heading", { name: "賛美歌ランダム選択" })).toHaveCSS("color", foreground);
+
+  const toggle = bar.getByRole("button", { name: "サイドバーの開閉" });
+  await toggle.click();
+  await expect(nav.locator(".admin-nav__active-cross")).toHaveCount(0);
+  await toggle.click();
+  await expect(activeCross).toBeVisible();
 
   await page.goto("/books/add");
   await expect(page.getByRole("heading", { name: "聖書章節入力" })).toHaveCSS("color", foreground);
