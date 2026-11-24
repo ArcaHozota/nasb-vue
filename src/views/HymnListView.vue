@@ -195,11 +195,7 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
 
       <div class="pa-6">
         <div class="hymn-list__toolbar mb-4">
-          <form
-            role="search"
-            class="hymn-list__search"
-            @submit.prevent="onSearch"
-          >
+          <form role="search" @submit.prevent="onSearch">
             <v-text-field
               v-model="keyword"
               type="text"
@@ -226,9 +222,6 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
               </template>
             </v-text-field>
           </form>
-
-          <!-- 韓国語名列に対応する空セル(グリッド比率合わせのためのスペーサー) -->
-          <div />
 
           <!-- 操作列と同じ幅のセルに収め、列内で中央寄せにする -->
           <div class="d-flex align-center justify-center ga-2">
@@ -513,14 +506,11 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
 }
 .hymn-list__toolbar {
   display: grid;
-  /* 表の列(12% / 34% / 30% / 24%)に合わせつつ、狭い画面ではボタンが切れないよう右端の列は内容の幅まで広がる */
-  grid-template-columns: 12% 34% minmax(0, 1fr) minmax(24%, max-content);
+  /* 表と同じ横幅を基準にし、右端は操作列またはボタン列の幅に合わせる。 */
+  grid-template-columns: 38% minmax(24%, max-content);
+  justify-content: space-between;
   align-items: center;
   gap: 8px;
-}
-.hymn-list__search {
-  grid-column: span 2;
-  max-width: 480px;
 }
 .hymn-list__table-wrap {
   overflow: hidden;

@@ -14,6 +14,16 @@ test.describe("賛美歌一覧", () => {
     }
     await expect(page.getByText("全11件 / 1 / 2ページ")).toBeVisible();
     await expect(page.getByRole("button", { name: "削除" })).toHaveCount(10);
+
+    const table = page.locator(".hymn-list__table-wrap");
+    const search = page.locator(".hymn-list__toolbar .v-field");
+    for (const width of [900, 1600]) {
+      await page.setViewportSize({ width, height: 900 });
+      const tableBox = (await table.boundingBox())!;
+      const searchBox = (await search.boundingBox())!;
+      expect(searchBox.x).toBeCloseTo(tableBox.x, 0);
+      expect(searchBox.width).toBeCloseTo(tableBox.width * 0.38, 1);
+    }
   });
 
   test("最後のページの最後の1件を削除すると、前のページへ戻る", async ({
