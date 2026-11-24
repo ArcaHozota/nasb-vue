@@ -223,8 +223,7 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
             </v-text-field>
           </form>
 
-          <!-- 操作列と同じ幅のセルに収め、列内で中央寄せにする -->
-          <div class="d-flex align-center justify-center ga-2">
+          <div class="d-flex align-center justify-end ga-2">
             <v-btn
               color="success"
               variant="flat"

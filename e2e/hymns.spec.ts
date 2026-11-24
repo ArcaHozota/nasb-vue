@@ -17,12 +17,15 @@ test.describe("賛美歌一覧", () => {
 
     const table = page.locator(".hymn-list__table-wrap");
     const search = page.locator(".hymn-list__toolbar .v-field");
+    const playlist = page.getByRole("button", { name: "プレイリスト作成", exact: true });
     for (const width of [900, 1600]) {
       await page.setViewportSize({ width, height: 900 });
       const tableBox = (await table.boundingBox())!;
       const searchBox = (await search.boundingBox())!;
+      const playlistBox = (await playlist.boundingBox())!;
       expect(searchBox.x).toBeCloseTo(tableBox.x, 0);
       expect(searchBox.width).toBeCloseTo(tableBox.width * 0.38, 1);
+      expect(playlistBox.x + playlistBox.width).toBeCloseTo(tableBox.x + tableBox.width, 0);
     }
   });
 
