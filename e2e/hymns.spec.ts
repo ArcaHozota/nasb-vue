@@ -12,7 +12,9 @@ test.describe("賛美歌一覧", () => {
       await expect(header).toHaveCSS("text-align", "center");
     }
     await expect(page.getByText("全11件 / 1 / 2ページ")).toBeVisible();
-    await expect(page.getByRole("button", { name: "削除" })).toHaveCount(10);
+    const deleteButtons = page.getByRole("button", { name: "削除" });
+    await expect(deleteButtons).toHaveCount(10);
+    await expect(deleteButtons.first()).toHaveCSS("color", "rgb(128, 0, 32)");
 
     const cells = page.locator(".hymn-list__row").first().getByRole("cell");
     for (const index of [0, 3]) {

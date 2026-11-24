@@ -6,23 +6,23 @@ import { mdiByName } from "./icons";
 import { MOBILE_BREAKPOINT } from "@/composables/useIsMobile";
 
 const ivory = "#fffff0";
+const warning = ivory;
 
 // 旧 theme.ts(MUI createTheme) / globals.css の配色を踏襲
 const nasbLight: ThemeDefinition = {
   dark: false,
   colors: {
     background: "#ffffff",
-    surface: "#ffffff",
-    "surface-muted": "#f9fafb",
+    surface: "#f9fafb",
     primary: "#800020",
     secondary: "#003399",
     success: "#355e3b",
-    warning: "#f6c91c",
+    warning,
     info: "#353542",
-    error: "#d32f2f",
+    error: "#800020",
     ivory,
     sidebar: "#252530", // 管理画面のサイドバー・上部バー
-    "on-sidebar": ivory,
+    "on-sidebar": warning,
   },
 };
 

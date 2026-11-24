@@ -529,7 +529,7 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
 }
 .hymn-list__table thead th {
   padding: 0 12px !important;
-  background: rgb(var(--v-theme-surface-muted));
+  background: rgb(var(--v-theme-surface));
   font-weight: 700 !important;
   color: #4b5563 !important;
   text-align: center;

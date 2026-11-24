@@ -73,7 +73,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown, true));
     aria-describedby="feedback-dialog-text"
   >
     <!-- タイトル・ボタンは全体の書体(Noto Sans JP)のまま。本文だけ Noto Serif JP(.feedback-dialog-text) -->
-    <v-card color="surface-muted" rounded="lg">
+    <v-card color="surface" rounded="lg">
       <div class="pt-3">
         <div
           id="feedback-dialog-title"

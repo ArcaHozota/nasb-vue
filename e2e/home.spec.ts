@@ -34,7 +34,9 @@ test("PCホーム: 左に一覧(1ページ10曲)、右に選んだ曲の詳細",
   await search.press("Enter");
 
   // ヘッダーの「ログイン」は太さ800
-  await expect(page.getByRole("button", { name: "ログイン", exact: true })).toHaveCSS("font-weight", "800");
+  const login = page.getByRole("button", { name: "ログイン", exact: true });
+  await expect(login).toHaveCSS("font-weight", "800");
+  await expect(login).toHaveCSS("background-color", "rgb(255, 255, 240)");
 
   const list = page.getByRole("region", { name: "曲の一覧" });
   await expect(list.getByText("13件 ・ 一致度の高い順")).toBeVisible();

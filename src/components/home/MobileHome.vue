@@ -213,7 +213,7 @@ const onSearch = () => {
     <!-- ===== 詳細シート ===== -->
     <!-- 高さは画面の 88%(Vuetify のシートの高さ指定。中のカードは flex で伸びる) -->
     <v-bottom-sheet v-model="sheetOpen" height="88dvh" class="mobile-sheet">
-      <v-card color="surface-muted" rounded="t-xl" class="mobile-sheet__card">
+      <v-card color="surface" rounded="t-xl" class="mobile-sheet__card">
         <!-- 取っ手: 下へスワイプで閉じる -->
         <div
           class="mobile-sheet__head"
@@ -242,7 +242,7 @@ const onSearch = () => {
           <v-window-item v-for="(r, i) in records" :key="r.id" :value="i">
             <HymnDetail
               compact
-              color="surface-muted"
+              color="surface"
               :hymn="r"
               :terms="terms"
               :download="download"
