@@ -7,6 +7,7 @@
 // モバイル(768px未満)は左から出るドロワー。折りたたみ状態は localStorage に保存して次回も復元する。
 // 画面全体の高さを固定し、スクロールは右側のメインエリア内だけに閉じ込める。
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import "@fontsource/noto-sans-jp/600.css";
 import "@/plugins/fonts/logo";
 import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
@@ -186,7 +187,7 @@ const onSearch = () => {
 
 <template>
   <!-- サイドバー: 項目は Vuetify の v-list-item(ホバーで薄い背景、押すと波紋)。
-       選択中の項目は左端の白い線と info の背景で示す -->
+       選択中の項目は左端のアイボリーの線と info の背景で示す -->
   <v-navigation-drawer
     v-model="drawer"
     :rail="isRail"
@@ -393,10 +394,12 @@ const onSearch = () => {
 .admin-nav__item :deep(.v-list-item__spacer) {
   width: 14px !important;
 }
-/* 選択中は左端に白い線を表示し、info の背景と太字で示す。 */
+/* 選択中は左端にアイボリーの線を表示し、info の背景で示す。 */
 .admin-nav__item.v-list-item--active {
-  border-left-color: #fff;
+  border-left-color: rgb(var(--v-theme-ivory));
   background: rgb(var(--v-theme-info));
+}
+.admin-nav__item.v-list-item--active :deep(.v-list-item-title) {
   font-weight: 600;
 }
 .admin-nav__item.v-list-item--active :deep(.v-list-item__overlay) {

@@ -2,7 +2,6 @@
 // 賛美歌の追加・編集モーダル(旧 components/HymnFormModal.tsx)。
 // 賛美歌一覧から v-if で開く。ルーティングやURLパラメータは使わず、一覧側の状態(pageSize 等)を props で受け取る。
 // Esc・背景クリック・「閉じる」のどれで閉じようとしても close() を通り、入力中の内容があれば確認する。
-import "@fontsource/noto-sans-jp/600.css";
 import { computed, reactive, ref, watch } from "vue";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { storeToRefs } from "pinia";

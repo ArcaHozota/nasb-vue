@@ -19,6 +19,8 @@ test("管理画面のロゴ・ナビゲーション・カードの見出しは #
   const current = nav.locator('[aria-current="page"]');
   await expect(current).toHaveCount(1);
   await expect(current).toContainText("賛美歌一覧");
+  await expect(current.getByText("賛美歌一覧", { exact: true })).toHaveCSS("font-weight", "600");
+  await expect(nav.getByText("ランダム検索", { exact: true })).toHaveCSS("font-weight", "400");
   await expect(page.locator(".admin-sidebar")).toHaveCSS("background-color", "rgb(37, 37, 48)");
   const bar = page.locator(".admin-bar");
   await expect(bar).toHaveCSS("background-color", "rgb(37, 37, 48)");
@@ -29,8 +31,8 @@ test("管理画面のロゴ・ナビゲーション・カードの見出しは #
   await expect(title.locator("..")).toHaveCSS("background-color", "rgb(53, 53, 66)");
   await expect(title).toHaveCSS("color", foreground);
   await expect(title).toHaveCSS("font-weight", "700");
-  // 選択中は左端に白い線(3px)
-  await expect(current).toHaveCSS("border-left-color", "rgb(255, 255, 255)");
+  // 選択中は左端にアイボリーの線(3px)
+  await expect(current).toHaveCSS("border-left-color", foreground);
   await expect(current).toHaveCSS("border-left-width", "3px");
   // ロゴのエルサレム十字と文字もナビゲーションと同じ色。
   await expect(page.locator(".admin-brand .jerusalem-cross")).toBeVisible();
@@ -54,6 +56,7 @@ test("管理画面のロゴ・ナビゲーション・カードの見出しは #
   await nav.getByText("ランダム検索").click();
   await expect(page).toHaveURL(/\/hymns\/random-five/);
   await expect(nav.locator('[aria-current="page"]')).toContainText("ランダム検索");
+  await expect(current.getByText("ランダム検索", { exact: true })).toHaveCSS("font-weight", "600");
   await expect(page.getByRole("heading", { name: "賛美歌ランダム選択" })).toHaveCSS("color", foreground);
 
   await page.goto("/books/add");
