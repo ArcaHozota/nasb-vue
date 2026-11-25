@@ -16,10 +16,12 @@ test.describe("賛美歌一覧", () => {
     // 表の背景は透明(行からガラスのカードの背景が透ける)。見出しだけ surface の色
     await expect(page.locator(".hymn-list__table")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
     const footer = page.locator(".hymn-list__table .v-data-table-footer");
-    await expect(footer).toContainText("1ページあたりの件数：");
+    await expect(footer).toContainText("1ページの件数");
     // 件数のプルダウンは枠なしの下線だけ(underlined)
     await expect(footer.locator(".v-field--variant-underlined")).toHaveCount(1);
     await expect(footer.locator(".v-field--variant-outlined")).toHaveCount(0);
+    // 「10」と矢印が収まる幅(64px)
+    expect((await footer.locator(".v-select").boundingBox())!.width).toBe(64);
     for (const name of ["最初のページ", "前のページ", "次のページ", "最後のページ"]) {
       await expect(footer.getByRole("button", { name })).toBeVisible();
     }
@@ -125,5 +127,27 @@ test.describe("賛美歌一覧", () => {
     await page.getByRole("option", { name: "5", exact: true }).click();
     await expect(page.getByText("1-5 件目 / 11件")).toBeVisible();
     await expect(page.getByRole("button", { name: "削除" })).toHaveCount(5);
+  });
+
+  test("ページを送っている間もフッターを出したままにし、表の高さを変えない", async ({ page }) => {
+    await mockApi(page, { loggedIn: true, hymns: makeHymns(25) });
+    await page.goto("/hymns");
+    await expect(page.getByText("1-10 件目 / 25件")).toBeVisible();
+    const wrap = page.locator(".hymn-list__table-wrap");
+    const before = (await wrap.boundingBox())!.height;
+    let release!: () => void;
+    const gate = new Promise<void>((r) => (release = r));
+    await page.route("**/api/hymns?**", async (route) => {
+      await gate;
+      await route.fallback();
+    });
+    await page.getByRole("button", { name: "次のページ" }).click();
+    // 読み込み中: フッターは消えず、行は少し薄くなるだけ。高さも変わらない
+    await expect(page.locator(".hymn-list__row.is-stale").first()).toBeVisible();
+    await expect(page.locator(".v-data-table-footer")).toBeVisible();
+    expect((await wrap.boundingBox())!.height).toBe(before);
+    release();
+    await expect(page.getByText("11-20 件目 / 25件")).toBeVisible();
+    expect((await wrap.boundingBox())!.height).toBe(before);
   });
 });

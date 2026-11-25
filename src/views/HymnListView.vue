@@ -40,8 +40,9 @@ const MATCH_RELATED = { label: "関連", chip: "match-chip--related" };
 const ACTION_VARIANT = "text" as const;
 // 表の標準フッターの「1ページあたりの件数」のプルダウンは、枠をやめて下線だけ(underlined)にする。
 // Vuetify の入れ子の既定値(VDataTableFooter の中の VSelect)で指定する
+// 幅も既定(90px)では「10」と矢印の間が空きすぎるので、数字と矢印が収まる幅にする(VSelect の width)
 const FOOTER_DEFAULTS = {
-  VDataTableFooter: { VSelect: { variant: "underlined" } },
+  VDataTableFooter: { VSelect: { variant: "underlined", width: 64 } },
 } as const;
 // 1ページの件数の選択肢(表の標準フッターの「1ページあたりの件数」)
 const PAGE_SIZE_OPTIONS = [5, 10, 15].map((n) => ({
@@ -334,7 +335,8 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
               :items-length="totalRecords"
               :loading="isFetching"
               :header-props="{ class: 'hymn-list__th' }"
-              :hide-default-footer="!data || isPlaceholderData"
+              :hide-default-footer="!data"
+            items-per-page-text="1ページの件数"
               item-value="id"
               density="comfortable"
               hover
@@ -342,8 +344,9 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
               class="hymn-list__table bg-transparent"
               @update:items-per-page="onPageSizeChange"
             >
-              <!-- 初回読み込み中はスケルトン行(ページ切替中は keepPreviousData で前の行を薄く残す) -->
-              <template #loading>
+              <!-- 初回読み込み中だけスケルトン行。ページ切替中は keepPreviousData で前の行を少し薄く残す
+                 (#loading を常に渡すと、Vuetify は読み込みのたびに行をスケルトンに置き換えてしまう) -->
+              <template v-if="records.length === 0" #loading>
                 <v-skeleton-loader :type="`table-row@${pageSize}`" />
               </template>
               <!-- 更新に失敗して前回の一覧を出しているときは、フッターの件数の前に知らせる -->
@@ -530,8 +533,12 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
 .hymn-list__row.is-link {
   cursor: pointer;
 }
+/* ページ切り替えなどで読み込み中の行は少しだけ薄くし、ふわっと変える(急に暗くしない) */
+.hymn-list__row {
+  transition: opacity 0.2s ease;
+}
 .hymn-list__row.is-stale {
-  opacity: 0.5;
+  opacity: 0.7;
 }
 .hymn-list__no {
   font-weight: 700;
