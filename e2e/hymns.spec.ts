@@ -13,6 +13,8 @@ test.describe("賛美歌一覧", () => {
     }
     await expect(page.getByText("1-10 件目 / 11件")).toBeVisible();
     // ページ送りは表の標準フッター(v-data-table-server): 1ページあたりの件数・範囲・最初/前/次/最後
+    // 表の背景は透明(行からガラスのカードの背景が透ける)。見出しだけ surface の色
+    await expect(page.locator(".hymn-list__table")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
     const footer = page.locator(".hymn-list__table .v-data-table-footer");
     await expect(footer).toContainText("1ページあたりの件数：");
     for (const name of ["最初のページ", "前のページ", "次のページ", "最後のページ"]) {
@@ -24,11 +26,9 @@ test.describe("賛美歌一覧", () => {
     await expect(deleteButtons.first()).toHaveCSS("color", "rgb(128, 0, 32)");
 
     const cells = page.locator(".hymn-list__row").first().getByRole("cell");
-    for (const index of [0, 3]) {
+    // データ行も全列を中央揃え(番号・曲名・韓国語名・操作)
+    for (const index of [0, 1, 2, 3]) {
       await expect(cells.nth(index)).toHaveCSS("text-align", "center");
-    }
-    for (const index of [1, 2]) {
-      await expect(cells.nth(index)).toHaveCSS("text-align", /^(start|left)$/);
     }
 
     const table = page.locator(".hymn-list__table-wrap");

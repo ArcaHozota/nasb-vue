@@ -308,7 +308,7 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
           </v-btn>
         </v-alert>
 
-        <!-- 一覧表: Vuetify の v-data-table-server。ページ送り・1ページの件数・「1-10 件目 / 350件」は
+        <!-- 一覧表: Vuetify の v-data-table-server。背景は透明(bg-transparent)にして、行からガラスのカードの背景が透けて見えるようにする。ページ送り・1ページの件数・「1-10 件目 / 350件」は
              表の標準フッターを使う(サーバー側でページ分割するので -server)。行は #item で自前に描き、
              押すと YouTube を開く・操作列のボタンなど、これまでの動きを保つ -->
         <div
@@ -333,7 +333,7 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
             density="comfortable"
             hover
             no-data-text="データがありません"
-            class="hymn-list__table"
+            class="hymn-list__table bg-transparent"
             @update:items-per-page="onPageSizeChange"
           >
             <!-- 初回読み込み中はスケルトン行(ページ切替中は keepPreviousData で前の行を薄く残す) -->
@@ -372,13 +372,13 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
                   <span v-else class="hymn-list__no">{{ rowNumber(i) }}</span>
                 </td>
                 <!-- 長い名称は文字サイズを縮小。2行まで折り返し、それ以上は「…」で省略(省略時のみホバーで全文) -->
-                <td class="hymn-list__name">
+                <td class="hymn-list__name text-center">
                   <ClampText
                     :text="row.nameJp"
                     :class="hymnNameSizeClass(row.nameJp)"
                   />
                 </td>
-                <td class="hymn-list__name hymn-list__name--kr">
+                <td class="hymn-list__name hymn-list__name--kr text-center">
                   <ClampText
                     :text="row.nameKr"
                     :class="hymnNameSizeClass(row.nameKr)"
