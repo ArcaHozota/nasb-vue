@@ -293,7 +293,7 @@ const inputProps = computed(
     <v-card rounded="lg" class="personal__card">
       <v-card-item
         prepend-icon="mdi-card-account-details-outline"
-        class="bg-info on-sidebar"
+        class="bg-info text-ivory"
       >
         <v-card-title tag="h1" class="text-title-large personal__title">
           ユーザー情報更新

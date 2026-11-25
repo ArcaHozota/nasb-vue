@@ -134,7 +134,7 @@ const onCreatePlaylist = () =>
     <PageBackground :src="backgroundImage" />
 
     <div class="randomfive-card noto-serif glass-panel">
-      <div class="d-flex align-center px-4 py-3 bg-info on-sidebar">
+      <div class="d-flex align-center px-4 py-3 bg-info text-ivory">
         <v-icon icon="mdi-view-grid-outline" size="20" class="mr-2" />
         <h1 class="text-title-large font-weight-bold">賛美歌ランダム選択</h1>
       </div>

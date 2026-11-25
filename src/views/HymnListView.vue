@@ -186,7 +186,7 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
     <PageBackground :src="backgroundImage" />
 
     <div class="hymnlist-card glass-panel">
-      <div class="d-flex align-center px-4 py-3 bg-info on-sidebar noto-serif">
+      <div class="d-flex align-center px-4 py-3 bg-info text-ivory noto-serif">
         <v-icon icon="mdi-view-grid-outline" size="20" class="mr-2" />
         <h1 class="text-title-large font-weight-bold">
           賛美歌情報メンテナンス

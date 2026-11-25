@@ -5,9 +5,6 @@ import { ja } from "vuetify/locale";
 import { mdiByName } from "./icons";
 import { MOBILE_BREAKPOINT } from "@/composables/useIsMobile";
 
-const ivory = "#fffff0";
-const warning = ivory;
-
 // 旧 theme.ts(MUI createTheme) / globals.css の配色を踏襲
 const nasbLight: ThemeDefinition = {
   dark: false,
@@ -17,12 +14,11 @@ const nasbLight: ThemeDefinition = {
     primary: "#800020",
     secondary: "#003399",
     success: "#355e3b",
-    warning,
+    warning: "#f6c91c",
     info: "#353542",
     error: "#800020",
-    ivory,
+    ivory: "#fffff0",
     sidebar: "#252530", // 管理画面のサイドバー・上部バー
-    "on-sidebar": warning,
   },
 };
 

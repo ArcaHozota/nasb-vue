@@ -194,7 +194,7 @@ const onSearch = () => {
     rail-width="56"
     width="256"
     color="sidebar"
-    class="admin-sidebar"
+    class="admin-sidebar text-ivory"
   >
     <!-- ===== ブランド ===== -->
     <template #prepend>
@@ -215,7 +215,7 @@ const onSearch = () => {
     </template>
 
     <!-- ===== メインナビ ===== -->
-    <v-list bg-color="transparent" class="admin-nav" aria-label="メニュー">
+    <v-list bg-color="transparent" class="admin-nav text-ivory" aria-label="メニュー">
       <v-list-item
         v-for="item in navItems"
         :key="item.key"
@@ -255,7 +255,7 @@ const onSearch = () => {
                 <v-avatar
                   size="30"
                   color="info"
-                  class="admin-user__avatar on-sidebar"
+                  class="admin-user__avatar text-ivory"
                 >
                   {{ username.slice(0, 1) }}
                 </v-avatar>
@@ -273,7 +273,7 @@ const onSearch = () => {
               </template>
             </v-list-item>
           </template>
-          <v-list density="compact" min-width="224" bg-color="sidebar">
+          <v-list density="compact" min-width="224" bg-color="sidebar" class="text-ivory">
             <v-list-item
               prepend-icon="mdi-account-cog"
               title="個人スペース"
@@ -300,7 +300,7 @@ const onSearch = () => {
   </v-navigation-drawer>
 
   <!-- ===== 上部バー ===== -->
-  <v-app-bar color="sidebar" height="48" flat class="admin-bar">
+  <v-app-bar color="sidebar" height="48" flat class="admin-bar text-ivory">
     <v-app-bar-nav-icon
       size="small"
       aria-label="サイドバーの開閉"
@@ -376,13 +376,12 @@ const onSearch = () => {
 }
 .admin-brand :deep(.jerusalem-cross),
 .admin-brand__title {
-  color: rgb(var(--v-theme-on-sidebar));
+  color: rgb(var(--v-theme-ivory));
 }
 
 /* ===== メインナビ ===== */
 .admin-nav {
   padding-block: 8px;
-  color: rgb(var(--v-theme-on-sidebar));
 }
 .admin-nav__item {
   min-height: 44px;

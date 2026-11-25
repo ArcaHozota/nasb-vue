@@ -58,7 +58,7 @@ onMounted(() => {
         @click="card.action"
       >
         <img :src="card.img" :alt="card.title" class="menu-card__img" />
-        <div class="menu-card__caption bg-info on-sidebar">
+        <div class="menu-card__caption bg-info text-ivory">
           <h2 class="font-weight-bold">{{ card.title }}</h2>
         </div>
       </v-card>

@@ -312,7 +312,7 @@ const jpError = computed(() => errors.textJp && !isFilled(textJp.value));
     <PageBackground :src="backgroundImage" />
 
     <div class="bookaddition-card noto-serif glass-panel">
-      <div class="d-flex align-center px-4 py-3 bg-info on-sidebar">
+      <div class="d-flex align-center px-4 py-3 bg-info text-ivory">
         <v-icon icon="mdi-book-open-variant" size="20" class="mr-2" />
         <h1 class="text-title-large font-weight-bold">聖書章節入力</h1>
       </div>
