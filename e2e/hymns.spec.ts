@@ -17,6 +17,13 @@ test.describe("賛美歌一覧", () => {
     await expect(page.locator(".hymn-list__table")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
     const footer = page.locator(".hymn-list__table .v-data-table-footer");
     await expect(footer).toContainText("1ページの件数");
+    // フッターは surface の背景、文字は濃い灰色(#4b5563)の semi-bold
+    const footerBox = page.locator(".hymn-list__footer");
+    await expect(footerBox).toHaveCSS("background-color", "rgb(249, 250, 251)");
+    for (const text of [footer.getByText("1ページの件数"), footer.getByText("1-10 件目 / 11件")]) {
+      await expect(text).toHaveCSS("color", "rgb(75, 85, 99)");
+      await expect(text).toHaveCSS("font-weight", "600");
+    }
     // 件数のプルダウンは枠なしの下線だけ(underlined)
     await expect(footer.locator(".v-field--variant-underlined")).toHaveCount(1);
     await expect(footer.locator(".v-field--variant-outlined")).toHaveCount(0);

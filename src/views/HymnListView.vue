@@ -336,7 +336,6 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
               :loading="isFetching"
               :header-props="{ class: 'hymn-list__th' }"
               :hide-default-footer="!data"
-            items-per-page-text="1ページの件数"
               item-value="id"
               density="comfortable"
               hover
@@ -349,12 +348,23 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
               <template v-if="records.length === 0" #loading>
                 <v-skeleton-loader :type="`table-row@${pageSize}`" />
               </template>
-              <!-- 更新に失敗して前回の一覧を出しているときは、フッターの件数の前に知らせる -->
-              <template #[`footer.prepend`]>
-                <span v-if="isError" class="hymn-list__stale-note"
-                  >（前回取得時）</span
-                >
-                <v-spacer />
+              <!-- フッター: Vuetify の標準フッター(v-data-table-footer)を、surface の背景・濃い灰色・semi-bold の
+                   自前の枠で包む(#bottom)。更新に失敗して前回の一覧を出しているときは、件数の前に知らせる -->
+              <template v-if="data" #bottom>
+                <v-divider />
+                <div class="hymn-list__footer">
+                  <v-data-table-footer
+                    :items-per-page-options="PAGE_SIZE_OPTIONS"
+                    items-per-page-text="1ページの件数"
+                  >
+                    <template #prepend>
+                      <span v-if="isError" class="hymn-list__stale-note"
+                        >（前回取得時）</span
+                      >
+                      <v-spacer />
+                    </template>
+                  </v-data-table-footer>
+                </div>
               </template>
               <template #item="{ item: row, index: i }">
                 <!-- 行をクリック(またはEnter)すると YouTube を新しいタブで開く。押すと Vuetify の波紋(v-ripple)が出る -->
@@ -525,6 +535,12 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
   background: rgb(var(--v-theme-surface));
   color: #4b5563;
   font-weight: 700;
+}
+/* フッター(自前の枠): surface の背景、文字は濃い灰色の semi-bold(中の文字はこの色・太さを受け継ぐ) */
+.hymn-list__footer {
+  background: rgb(var(--v-theme-surface));
+  color: #4b5563;
+  font-weight: 600;
 }
 .hymn-list__stale-note {
   font-size: 0.875rem;
