@@ -17,6 +17,9 @@ test.describe("賛美歌一覧", () => {
     await expect(page.locator(".hymn-list__table")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
     const footer = page.locator(".hymn-list__table .v-data-table-footer");
     await expect(footer).toContainText("1ページあたりの件数：");
+    // 件数のプルダウンは枠なしの下線だけ(underlined)
+    await expect(footer.locator(".v-field--variant-underlined")).toHaveCount(1);
+    await expect(footer.locator(".v-field--variant-outlined")).toHaveCount(0);
     for (const name of ["最初のページ", "前のページ", "次のページ", "最後のページ"]) {
       await expect(footer.getByRole("button", { name })).toBeVisible();
     }

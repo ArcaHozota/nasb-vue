@@ -38,6 +38,11 @@ const MATCH_RELATED = { label: "関連", chip: "match-chip--related" };
 // 操作列のアイコンボタンの見た目(Vuetify の v-btn の variant)。
 // text: 枠・背景なしの丸いボタン(ホバーで薄い丸、押すと波紋)。tonal / outlined / flat / plain にも変えられる
 const ACTION_VARIANT = "text" as const;
+// 表の標準フッターの「1ページあたりの件数」のプルダウンは、枠をやめて下線だけ(underlined)にする。
+// Vuetify の入れ子の既定値(VDataTableFooter の中の VSelect)で指定する
+const FOOTER_DEFAULTS = {
+  VDataTableFooter: { VSelect: { variant: "underlined" } },
+} as const;
 // 1ページの件数の選択肢(表の標準フッターの「1ページあたりの件数」)
 const PAGE_SIZE_OPTIONS = [5, 10, 15].map((n) => ({
   value: n,
@@ -319,142 +324,144 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
           <span v-if="isFetching" role="status" class="sr-only">
             賛美歌一覧を読み込み中です
           </span>
-          <v-data-table-server
-            v-model:page="page"
-            :items-per-page="pageSize"
-            :items-per-page-options="PAGE_SIZE_OPTIONS"
-            :headers="headers"
-            :items="records"
-            :items-length="totalRecords"
-            :loading="isFetching"
-            :header-props="{ class: 'hymn-list__th' }"
-            :hide-default-footer="!data || isPlaceholderData"
-            item-value="id"
-            density="comfortable"
-            hover
-            no-data-text="データがありません"
-            class="hymn-list__table bg-transparent"
-            @update:items-per-page="onPageSizeChange"
-          >
-            <!-- 初回読み込み中はスケルトン行(ページ切替中は keepPreviousData で前の行を薄く残す) -->
-            <template #loading>
-              <v-skeleton-loader :type="`table-row@${pageSize}`" />
-            </template>
-            <!-- 更新に失敗して前回の一覧を出しているときは、フッターの件数の前に知らせる -->
-            <template #[`footer.prepend`]>
-              <span v-if="isError" class="hymn-list__stale-note"
-                >（前回取得時）</span
-              >
-              <v-spacer />
-            </template>
-            <template #item="{ item: row, index: i }">
-              <!-- 行をクリック(またはEnter)すると YouTube を新しいタブで開く。押すと Vuetify の波紋(v-ripple)が出る -->
-              <tr
-                v-ripple="!!row.link"
-                :tabindex="row.link ? 0 : undefined"
-                :aria-label="
-                  row.link ? `${row.nameJp}をYouTubeで開く` : undefined
-                "
-                :class="[
-                  'hymn-list__row noto-serif',
-                  { 'is-link': row.link, 'is-stale': isFetching || isError },
-                ]"
-                @click="openYoutube(row)"
-                @keydown.enter.self="openYoutube(row)"
-              >
-                <td class="text-center">
-                  <span
-                    v-if="isSearching"
-                    :class="['match-chip', matchLevel(row).chip]"
-                  >
-                    {{ matchLevel(row).label }}
-                  </span>
-                  <span v-else class="hymn-list__no">{{ rowNumber(i) }}</span>
-                </td>
-                <!-- 長い名称は文字サイズを縮小。2行まで折り返し、それ以上は「…」で省略(省略時のみホバーで全文) -->
-                <td class="hymn-list__name text-center">
-                  <ClampText
-                    :text="row.nameJp"
-                    :class="hymnNameSizeClass(row.nameJp)"
-                  />
-                </td>
-                <td class="hymn-list__name hymn-list__name--kr text-center">
-                  <ClampText
-                    :text="row.nameKr"
-                    :class="hymnNameSizeClass(row.nameKr)"
-                  />
-                </td>
-                <!-- 操作列のクリックは行(YouTube)へ伝えない。押下も伝えず、行の波紋を出さない(ボタン自身の波紋だけ) -->
-                <td
-                  class="text-center"
-                  @click.stop
-                  @keydown.stop
-                  @mousedown.stop
-                  @pointerdown.stop
-                  @touchstart.stop
+          <v-defaults-provider :defaults="FOOTER_DEFAULTS">
+            <v-data-table-server
+              v-model:page="page"
+              :items-per-page="pageSize"
+              :items-per-page-options="PAGE_SIZE_OPTIONS"
+              :headers="headers"
+              :items="records"
+              :items-length="totalRecords"
+              :loading="isFetching"
+              :header-props="{ class: 'hymn-list__th' }"
+              :hide-default-footer="!data || isPlaceholderData"
+              item-value="id"
+              density="comfortable"
+              hover
+              no-data-text="データがありません"
+              class="hymn-list__table bg-transparent"
+              @update:items-per-page="onPageSizeChange"
+            >
+              <!-- 初回読み込み中はスケルトン行(ページ切替中は keepPreviousData で前の行を薄く残す) -->
+              <template #loading>
+                <v-skeleton-loader :type="`table-row@${pageSize}`" />
+              </template>
+              <!-- 更新に失敗して前回の一覧を出しているときは、フッターの件数の前に知らせる -->
+              <template #[`footer.prepend`]>
+                <span v-if="isError" class="hymn-list__stale-note"
+                  >（前回取得時）</span
                 >
-                  <div class="d-flex justify-center">
-                    <Hint v-slot="{ props }" label="楽譜アップロード">
-                      <v-btn
-                        v-bind="props"
-                        icon="mdi-music"
-                        :variant="ACTION_VARIANT"
-                        size="small"
-                        aria-label="楽譜アップロード"
-                        @click="
-                          scoreModalHymn = { id: row.id, nameKr: row.nameKr }
-                        "
-                      />
-                    </Hint>
-                    <Hint v-slot="{ props }" label="編集">
-                      <v-btn
-                        v-bind="props"
-                        icon="mdi-notebook-edit-outline"
-                        :variant="ACTION_VARIANT"
-                        size="small"
-                        aria-label="編集"
-                        @click="formModal = { mode: 'edit', id: row.id }"
-                      />
-                    </Hint>
-                    <Hint v-slot="{ props }" label="削除">
-                      <v-btn
-                        v-bind="props"
-                        icon="mdi-trash-can-outline"
-                        :variant="ACTION_VARIANT"
-                        size="small"
-                        color="error"
-                        aria-label="削除"
-                        @click="onDelete(row)"
-                      />
-                    </Hint>
-                    <!-- 楽譜が複数あるときは、アイコンの右にふきだしで調を選ばせる -->
-                    <ScoreKeyPopover
-                      :id="row.id"
-                      v-slot="{ onClick, loading, open, anchorRef }"
-                      :fetch-keys="fetchKeys"
-                      :download="downloadScoreOrToast"
-                      side="right"
+                <v-spacer />
+              </template>
+              <template #item="{ item: row, index: i }">
+                <!-- 行をクリック(またはEnter)すると YouTube を新しいタブで開く。押すと Vuetify の波紋(v-ripple)が出る -->
+                <tr
+                  v-ripple="!!row.link"
+                  :tabindex="row.link ? 0 : undefined"
+                  :aria-label="
+                    row.link ? `${row.nameJp}をYouTubeで開く` : undefined
+                  "
+                  :class="[
+                    'hymn-list__row noto-serif',
+                    { 'is-link': row.link, 'is-stale': isFetching || isError },
+                  ]"
+                  @click="openYoutube(row)"
+                  @keydown.enter.self="openYoutube(row)"
+                >
+                  <td class="text-center">
+                    <span
+                      v-if="isSearching"
+                      :class="['match-chip', matchLevel(row).chip]"
                     >
-                      <Hint v-slot="{ props }" label="楽譜をダウンロード">
+                      {{ matchLevel(row).label }}
+                    </span>
+                    <span v-else class="hymn-list__no">{{ rowNumber(i) }}</span>
+                  </td>
+                  <!-- 長い名称は文字サイズを縮小。2行まで折り返し、それ以上は「…」で省略(省略時のみホバーで全文) -->
+                  <td class="hymn-list__name text-center">
+                    <ClampText
+                      :text="row.nameJp"
+                      :class="hymnNameSizeClass(row.nameJp)"
+                    />
+                  </td>
+                  <td class="hymn-list__name hymn-list__name--kr text-center">
+                    <ClampText
+                      :text="row.nameKr"
+                      :class="hymnNameSizeClass(row.nameKr)"
+                    />
+                  </td>
+                  <!-- 操作列のクリックは行(YouTube)へ伝えない。押下も伝えず、行の波紋を出さない(ボタン自身の波紋だけ) -->
+                  <td
+                    class="text-center"
+                    @click.stop
+                    @keydown.stop
+                    @mousedown.stop
+                    @pointerdown.stop
+                    @touchstart.stop
+                  >
+                    <div class="d-flex justify-center">
+                      <Hint v-slot="{ props }" label="楽譜アップロード">
                         <v-btn
                           v-bind="props"
-                          :ref="anchorRef"
-                          icon="mdi-file-download-outline"
+                          icon="mdi-music"
                           :variant="ACTION_VARIANT"
                           size="small"
-                          :loading="loading"
-                          aria-label="楽譜をダウンロード"
-                          aria-haspopup="menu"
-                          :aria-expanded="open"
-                          @click="onClick"
+                          aria-label="楽譜アップロード"
+                          @click="
+                            scoreModalHymn = { id: row.id, nameKr: row.nameKr }
+                          "
                         />
                       </Hint>
-                    </ScoreKeyPopover>
-                  </div>
-                </td>
-              </tr>
-            </template>
-          </v-data-table-server>
+                      <Hint v-slot="{ props }" label="編集">
+                        <v-btn
+                          v-bind="props"
+                          icon="mdi-notebook-edit-outline"
+                          :variant="ACTION_VARIANT"
+                          size="small"
+                          aria-label="編集"
+                          @click="formModal = { mode: 'edit', id: row.id }"
+                        />
+                      </Hint>
+                      <Hint v-slot="{ props }" label="削除">
+                        <v-btn
+                          v-bind="props"
+                          icon="mdi-trash-can-outline"
+                          :variant="ACTION_VARIANT"
+                          size="small"
+                          color="error"
+                          aria-label="削除"
+                          @click="onDelete(row)"
+                        />
+                      </Hint>
+                      <!-- 楽譜が複数あるときは、アイコンの右にふきだしで調を選ばせる -->
+                      <ScoreKeyPopover
+                        :id="row.id"
+                        v-slot="{ onClick, loading, open, anchorRef }"
+                        :fetch-keys="fetchKeys"
+                        :download="downloadScoreOrToast"
+                        side="right"
+                      >
+                        <Hint v-slot="{ props }" label="楽譜をダウンロード">
+                          <v-btn
+                            v-bind="props"
+                            :ref="anchorRef"
+                            icon="mdi-file-download-outline"
+                            :variant="ACTION_VARIANT"
+                            size="small"
+                            :loading="loading"
+                            aria-label="楽譜をダウンロード"
+                            aria-haspopup="menu"
+                            :aria-expanded="open"
+                            @click="onClick"
+                          />
+                        </Hint>
+                      </ScoreKeyPopover>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+            </v-data-table-server>
+          </v-defaults-provider>
         </div>
       </div>
     </div>
