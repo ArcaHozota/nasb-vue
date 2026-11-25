@@ -12,23 +12,24 @@ test.describe("賛美歌一覧", () => {
       await expect(header).toHaveCSS("text-align", "center");
     }
     await expect(page.getByText("1-10 件目 / 11件")).toBeVisible();
-    // ページ送りは表の標準フッター(v-data-table-server): 1ページあたりの件数・範囲・最初/前/次/最後
+    // ページ送り: 「10件/ページ ▾」のメニューボタン・範囲・最初/前/次/最後
     // 表の背景は透明(行からガラスのカードの背景が透ける)。見出しだけ surface の色
     await expect(page.locator(".hymn-list__table")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
-    const footer = page.locator(".hymn-list__table .v-data-table-footer");
-    await expect(footer).toContainText("1ページの件数");
+    const footer = page.locator(".hymn-list__footer");
     // フッターは surface の背景、文字は濃い灰色(#4b5563)の semi-bold
-    const footerBox = page.locator(".hymn-list__footer");
-    await expect(footerBox).toHaveCSS("background-color", "rgb(249, 250, 251)");
-    for (const text of [footer.getByText("1ページの件数"), footer.getByText("1-10 件目 / 11件")]) {
-      await expect(text).toHaveCSS("color", "rgb(75, 85, 99)");
-      await expect(text).toHaveCSS("font-weight", "600");
-    }
-    // 件数のプルダウンは枠なしの下線だけ(underlined)
-    await expect(footer.locator(".v-field--variant-underlined")).toHaveCount(1);
-    await expect(footer.locator(".v-field--variant-outlined")).toHaveCount(0);
-    // 「10」と矢印が収まる幅(64px)
-    expect((await footer.locator(".v-select").boundingBox())!.width).toBe(64);
+    await expect(footer).toHaveCSS("background-color", "rgb(249, 250, 251)");
+    const range = footer.getByText("1-10 件目 / 11件");
+    await expect(range).toHaveCSS("color", "rgb(75, 85, 99)");
+    await expect(range).toHaveCSS("font-weight", "600");
+    // 件数はメニューボタン(下線・枠なし)。ボタンと範囲の文字は同じ高さにそろう
+    const sizeButton = footer.getByRole("button", { name: "1ページの件数: 10件" });
+    await expect(sizeButton).toHaveText("10件/ページ");
+    await expect(footer.locator(".v-select, .v-field")).toHaveCount(0);
+    const center = async (l: typeof range) => {
+      const b = (await l.boundingBox())!;
+      return b.y + b.height / 2;
+    };
+    expect(Math.abs((await center(sizeButton)) - (await center(range)))).toBeLessThan(2);
     for (const name of ["最初のページ", "前のページ", "次のページ", "最後のページ"]) {
       await expect(footer.getByRole("button", { name })).toBeVisible();
     }
@@ -130,8 +131,9 @@ test.describe("賛美歌一覧", () => {
     await page.goto("/hymns");
     await page.getByRole("button", { name: "次のページ" }).click();
     await expect(page.getByText("11-11 件目 / 11件")).toBeVisible();
-    await page.locator(".v-data-table-footer .v-select").click();
-    await page.getByRole("option", { name: "5", exact: true }).click();
+    await page.getByRole("button", { name: "1ページの件数: 10件" }).click();
+    await page.locator(".v-menu .v-list").getByText("5件", { exact: true }).click();
+    await expect(page.getByRole("button", { name: "1ページの件数: 5件" })).toBeVisible();
     await expect(page.getByText("1-5 件目 / 11件")).toBeVisible();
     await expect(page.getByRole("button", { name: "削除" })).toHaveCount(5);
   });
@@ -151,7 +153,7 @@ test.describe("賛美歌一覧", () => {
     await page.getByRole("button", { name: "次のページ" }).click();
     // 読み込み中: フッターは消えず、行は少し薄くなるだけ。高さも変わらない
     await expect(page.locator(".hymn-list__row.is-stale").first()).toBeVisible();
-    await expect(page.locator(".v-data-table-footer")).toBeVisible();
+    await expect(page.locator(".hymn-list__footer")).toBeVisible();
     expect((await wrap.boundingBox())!.height).toBe(before);
     release();
     await expect(page.getByText("11-20 件目 / 25件")).toBeVisible();
