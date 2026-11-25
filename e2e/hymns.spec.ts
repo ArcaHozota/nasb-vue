@@ -11,7 +11,14 @@ test.describe("賛美歌一覧", () => {
       await expect(header).toHaveCSS("background-color", "rgb(249, 250, 251)");
       await expect(header).toHaveCSS("text-align", "center");
     }
-    await expect(page.getByText("全11件 / 1 / 2ページ")).toBeVisible();
+    await expect(page.getByText("1-10 件目 / 11件")).toBeVisible();
+    // ページ送りは表の標準フッター(v-data-table-server): 1ページあたりの件数・範囲・最初/前/次/最後
+    const footer = page.locator(".hymn-list__table .v-data-table-footer");
+    await expect(footer).toContainText("1ページあたりの件数：");
+    for (const name of ["最初のページ", "前のページ", "次のページ", "最後のページ"]) {
+      await expect(footer.getByRole("button", { name })).toBeVisible();
+    }
+    if (process.env.LIST_SHOT) await page.screenshot({ path: process.env.LIST_SHOT });
     const deleteButtons = page.getByRole("button", { name: "削除" });
     await expect(deleteButtons).toHaveCount(10);
     await expect(deleteButtons.first()).toHaveCSS("color", "rgb(128, 0, 32)");
@@ -48,8 +55,8 @@ test.describe("賛美歌一覧", () => {
     const api = await mockApi(page, { loggedIn: true, hymns: makeHymns(11) });
     await page.goto("/hymns");
 
-    await page.getByRole("button", { name: "2ページ目" }).click();
-    await expect(page.getByText("全11件 / 2 / 2ページ")).toBeVisible();
+    await page.getByRole("button", { name: "次のページ" }).click();
+    await expect(page.getByText("11-11 件目 / 11件")).toBeVisible();
     await expect(page.getByText("賛美歌11", { exact: true })).toBeVisible();
 
     await page.getByRole("button", { name: "削除" }).click();
@@ -85,7 +92,7 @@ test.describe("賛美歌一覧", () => {
     await expect(page.locator(".app-toast")).toHaveText("削除しました");
 
     // 空の2ページ目に取り残されず、1ページ目(残り10件)を表示する
-    await expect(page.getByText("全10件 / 1 / 1ページ")).toBeVisible();
+    await expect(page.getByText("1-10 件目 / 10件")).toBeVisible();
     await expect(page.getByText("データがありません")).toHaveCount(0);
     await expect(page.getByRole("button", { name: "削除" })).toHaveCount(10);
     expect(api.hymns).toHaveLength(10);
@@ -103,6 +110,17 @@ test.describe("賛美歌一覧", () => {
 
     await expect(page.getByRole("alertdialog")).toHaveCount(0);
     expect(api.calls.some((c) => c.method === "DELETE")).toBe(false);
-    await expect(page.getByText("全3件 / 1 / 1ページ")).toBeVisible();
+    await expect(page.getByText("1-3 件目 / 3件")).toBeVisible();
+  });
+
+  test("1ページあたりの件数を変えると、1ページ目から表示し直す", async ({ page }) => {
+    await mockApi(page, { loggedIn: true, hymns: makeHymns(11) });
+    await page.goto("/hymns");
+    await page.getByRole("button", { name: "次のページ" }).click();
+    await expect(page.getByText("11-11 件目 / 11件")).toBeVisible();
+    await page.locator(".v-data-table-footer .v-select").click();
+    await page.getByRole("option", { name: "5", exact: true }).click();
+    await expect(page.getByText("1-5 件目 / 11件")).toBeVisible();
+    await expect(page.getByRole("button", { name: "削除" })).toHaveCount(5);
   });
 });

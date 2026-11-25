@@ -38,9 +38,10 @@ const MATCH_RELATED = { label: "関連", chip: "match-chip--related" };
 // 操作列のアイコンボタンの見た目(Vuetify の v-btn の variant)。
 // text: 枠・背景なしの丸いボタン(ホバーで薄い丸、押すと波紋)。tonal / outlined / flat / plain にも変えられる
 const ACTION_VARIANT = "text" as const;
+// 1ページの件数の選択肢(表の標準フッターの「1ページあたりの件数」)
 const PAGE_SIZE_OPTIONS = [5, 10, 15].map((n) => ({
   value: n,
-  title: `${n}件/ページ`,
+  title: String(n),
 }));
 
 const feedback = useFeedbackStore();
@@ -100,6 +101,37 @@ const isSearching = computed(
 );
 const matchLevel = (row: HymnSummary) =>
   MATCH_LEVEL[row.lineNumber] ?? MATCH_RELATED;
+// 表の見出し(v-data-table-server の headers)。並べ替えはしない
+const headers = computed(() => [
+  {
+    key: "no",
+    title: isSearching.value ? "一致度" : "番号",
+    align: "center" as const,
+    width: "12%",
+    sortable: false,
+  },
+  {
+    key: "nameJp",
+    title: "曲名",
+    align: "center" as const,
+    width: "34%",
+    sortable: false,
+  },
+  {
+    key: "nameKr",
+    title: "韓国語名",
+    align: "center" as const,
+    width: "30%",
+    sortable: false,
+  },
+  {
+    key: "actions",
+    title: "操作",
+    align: "center" as const,
+    width: "24%",
+    sortable: false,
+  },
+]);
 const rowNumber = (i: number) =>
   String((page.value - 1) * pageSize.value + i + 1).padStart(2, "0");
 
@@ -276,6 +308,9 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
           </v-btn>
         </v-alert>
 
+        <!-- 一覧表: Vuetify の v-data-table-server。ページ送り・1ページの件数・「1-10 件目 / 350件」は
+             表の標準フッターを使う(サーバー側でページ分割するので -server)。行は #item で自前に描き、
+             押すと YouTube を開く・操作列のボタンなど、これまでの動きを保つ -->
         <div
           v-if="!isError || data"
           class="hymn-list__table-wrap"
@@ -284,62 +319,44 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
           <span v-if="isFetching" role="status" class="sr-only">
             賛美歌一覧を読み込み中です
           </span>
-          <v-table class="hymn-list__table" density="comfortable" hover>
-            <colgroup>
-              <col style="width: 12%" />
-              <col style="width: 34%" />
-              <col style="width: 30%" />
-              <col style="width: 24%" />
-            </colgroup>
-            <thead>
-              <tr>
-                <th>{{ isSearching ? "一致度" : "番号" }}</th>
-                <th>曲名</th>
-                <th>韓国語名</th>
-                <th>操作</th>
-              </tr>
-            </thead>
-            <tbody class="noto-serif">
-              <!-- 初回読み込み中はスケルトン行(ページ切替中は keepPreviousData で前の行を薄く残す) -->
-              <template v-if="isFetching && records.length === 0">
-                <tr v-for="i in pageSize" :key="`skeleton-${i}`">
-                  <td>
-                    <v-skeleton-loader type="text" width="32" class="mx-auto" />
-                  </td>
-                  <td><v-skeleton-loader type="text" width="75%" /></td>
-                  <td><v-skeleton-loader type="text" width="66%" /></td>
-                  <td>
-                    <v-skeleton-loader
-                      type="button"
-                      width="128"
-                      class="mx-auto"
-                    />
-                  </td>
-                </tr>
-              </template>
-              <tr
-                v-else-if="
-                  isSuccess &&
-                  !isFetching &&
-                  !isPlaceholderData &&
-                  records.length === 0
-                "
+          <v-data-table-server
+            v-model:page="page"
+            :items-per-page="pageSize"
+            :items-per-page-options="PAGE_SIZE_OPTIONS"
+            :headers="headers"
+            :items="records"
+            :items-length="totalRecords"
+            :loading="isFetching"
+            :header-props="{ class: 'hymn-list__th' }"
+            :hide-default-footer="!data || isPlaceholderData"
+            item-value="id"
+            density="comfortable"
+            hover
+            no-data-text="データがありません"
+            class="hymn-list__table"
+            @update:items-per-page="onPageSizeChange"
+          >
+            <!-- 初回読み込み中はスケルトン行(ページ切替中は keepPreviousData で前の行を薄く残す) -->
+            <template #loading>
+              <v-skeleton-loader :type="`table-row@${pageSize}`" />
+            </template>
+            <!-- 更新に失敗して前回の一覧を出しているときは、フッターの件数の前に知らせる -->
+            <template #[`footer.prepend`]>
+              <span v-if="isError" class="hymn-list__stale-note"
+                >（前回取得時）</span
               >
-                <td colspan="4" class="py-6 text-center text-disabled">
-                  データがありません
-                </td>
-              </tr>
+              <v-spacer />
+            </template>
+            <template #item="{ item: row, index: i }">
               <!-- 行をクリック(またはEnter)すると YouTube を新しいタブで開く。押すと Vuetify の波紋(v-ripple)が出る -->
               <tr
-                v-for="(row, i) in records"
-                :key="row.id"
                 v-ripple="!!row.link"
                 :tabindex="row.link ? 0 : undefined"
                 :aria-label="
                   row.link ? `${row.nameJp}をYouTubeで開く` : undefined
                 "
                 :class="[
-                  'hymn-list__row',
+                  'hymn-list__row noto-serif',
                   { 'is-link': row.link, 'is-stale': isFetching || isError },
                 ]"
                 @click="openYoutube(row)"
@@ -436,42 +453,8 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
                   </div>
                 </td>
               </tr>
-            </tbody>
-          </v-table>
-        </div>
-
-        <!-- ページネーション -->
-        <div class="hymn-list__pager mt-3">
-          <div v-if="data && !isPlaceholderData">
-            全{{ totalRecords }}件 / {{ page }} / {{ totalPages }}ページ
-            <span v-if="isError">（前回取得時）</span>
-          </div>
-          <div class="d-flex align-center flex-wrap ga-3">
-            <v-select
-              :model-value="pageSize"
-              :items="PAGE_SIZE_OPTIONS"
-              aria-label="1ページの件数"
-              variant="outlined"
-              density="compact"
-              bg-color="white"
-              color="primary"
-              hide-details
-              class="hymn-list__size"
-              @update:model-value="onPageSizeChange"
-            />
-            <v-pagination
-              v-if="data"
-              v-model="page"
-              :length="totalPages"
-              :total-visible="5"
-              density="compact"
-              active-color="primary"
-              variant="tonal"
-              size="default"
-              rounded="circle"
-              class="hymn-list__pagination"
-            />
-          </div>
+            </template>
+          </v-data-table-server>
         </div>
       </div>
     </div>
@@ -519,29 +502,23 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
   border: 1px solid #e5e7eb;
   border-radius: 6px;
 }
-/* 背景画像が透けるガラスのカードの上に置くので、表は透明にする(v-table の既定は白) */
-.hymn-list__table {
-  table-layout: fixed;
-  background: transparent;
-}
-.hymn-list__table :deep(table) {
-  table-layout: fixed;
-}
-.hymn-list__table thead th {
-  padding: 0 12px !important;
-  background: rgb(var(--v-theme-surface));
-  font-weight: 700 !important;
-  color: #4b5563 !important;
-  text-align: center;
-}
-.hymn-list__table tbody td {
-  padding: 8px 12px !important;
-  font-weight: 500;
-}
-/* v-ripple の波紋を行の中に収める */
+/* v-ripple の波紋を行の中に収める。行は #item で自前に描くので、ホバーの薄い色もここで付ける(テーマの値を使う) */
 .hymn-list__row {
   position: relative;
   overflow: hidden;
+}
+.hymn-list__row:hover {
+  background: rgba(var(--v-theme-on-surface), var(--v-hover-opacity));
+}
+/* 見出し(header-props で付けた自前のクラス): surface の背景に、濃い灰色の太字 */
+.hymn-list__table :deep(.hymn-list__th) {
+  background: rgb(var(--v-theme-surface));
+  color: #4b5563;
+  font-weight: 700;
+}
+.hymn-list__stale-note {
+  font-size: 0.875rem;
+  color: rgb(var(--v-theme-error));
 }
 .hymn-list__row.is-link {
   cursor: pointer;
@@ -556,6 +533,7 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
 }
 /* 名称列: 2行まで折り返す。日本語は禁則処理、韓国語は単語(空白)単位、空白の無い長い英数字だけ強制改行 */
 .hymn-list__name {
+  padding-block: 8px;
   white-space: normal;
   line-height: 1.4;
   line-break: strict;
@@ -586,24 +564,5 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
 .match-chip--related {
   background: #f3f4f6;
   color: #4b5563;
-}
-.hymn-list__pager {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 0.875rem;
-  color: #4b5563;
-}
-.hymn-list__size {
-  width: 168px;
-  flex: none;
-}
-.hymn-list__pagination {
-  padding: 2px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  background: #fff;
 }
 </style>

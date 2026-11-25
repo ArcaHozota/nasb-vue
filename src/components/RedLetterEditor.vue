@@ -89,6 +89,14 @@ const onBeforeInput = (e: InputEvent) => {
   range.deleteContents();
   const newline = document.createTextNode("\n");
   range.insertNode(newline);
+  // 本文の最後に改行したときは、すぐに <br> を添える(renderSegments と同じ形)。
+  // 末尾の改行だけだと、次の描画までの間に続けて入力した文字が改行の前に入ってしまう
+  // (ブラウザが「末尾の改行の後ろ」を「改行の前」として扱うため)。<br> は読み取り時に本文に含めない。
+  const tail = document.createRange();
+  tail.setStartAfter(newline);
+  tail.setEnd(el, el.childNodes.length);
+  if (tail.toString() === "" && !tail.cloneContents().querySelector("br"))
+    el.appendChild(document.createElement("br"));
   range.setStartAfter(newline);
   range.collapse(true);
   selection.removeAllRanges();

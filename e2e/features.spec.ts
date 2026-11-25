@@ -15,7 +15,7 @@ test("賛美歌一覧のプレイリスト作成は、検索条件だけを送�
   });
   await search.press("Enter");
   await searched; // 件数が検索前と同じでも、検索の通信が終わってから回数を比較する
-  await expect(page.getByText("全12件 / 1 / 2ページ")).toBeVisible();
+  await expect(page.getByText("1-10 件目 / 12件")).toBeVisible();
   const hymnRequests = () =>
     api.calls.filter((c) => c.method === "GET" && c.path === "/hymns");
   const before = hymnRequests().length;

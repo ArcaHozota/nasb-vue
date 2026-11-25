@@ -88,6 +88,20 @@ for (const key of ["Enter", "Shift+Enter"]) {
   });
 }
 
+test("Shift+Enter の直後、次の描画より先に入力しても、文字は改行の後ろに入る", async ({ page }) => {
+  await openBookEditor(page);
+  const editor = page.locator("[contenteditable]").first();
+  await editor.fill("First");
+  await editor.press("End");
+  // エディタは入力のあと次のフレームで描き直す。その描き直しを止めて、描画前に続けて入力した状態を作る
+  await page.evaluate(() => {
+    window.requestAnimationFrame = () => 0;
+  });
+  await editor.press("Shift+Enter");
+  await editor.pressSequentially("Second");
+  await expect(editor).toHaveJSProperty("textContent", "First\nSecond");
+});
+
 test("連続Enterによる空行と、入れ子の赤字を含む複数行の貼り付けを保持する", async ({
   page,
   context,
