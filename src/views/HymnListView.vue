@@ -354,16 +354,23 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
                 >
                 <v-spacer />
                 <v-menu location="top">
-                  <template #activator="{ props: menuProps }">
+                  <template #activator="{ props: menuProps, isActive }">
                     <v-btn
                       v-bind="menuProps"
                       variant="text"
                       color="primary"
-                      append-icon="mdi-chevron-down"
                       class="hymn-list__size-btn"
                       :aria-label="`1ページの件数: ${pageSize}件`"
                     >
                       {{ pageSize }}件/ページ
+                      <!-- 矢印: メニューを開くと上向きに回り、閉じると下向きに戻る(サイドバーのユーザーメニューと同じ) -->
+                      <template #append>
+                        <v-icon
+                          icon="mdi-chevron-down"
+                          class="hymn-list__size-chevron"
+                          :class="{ 'hymn-list__size-chevron--open': isActive }"
+                        />
+                      </template>
                     </v-btn>
                   </template>
                   <v-list density="compact" aria-label="1ページの件数">
@@ -570,6 +577,12 @@ const fetchKeys = (id: string) => fetchScoreKeysOrToast(queryClient, id);
 }
 .hymn-list__size-btn {
   letter-spacing: normal;
+}
+.hymn-list__size-chevron {
+  transition: transform 0.2s;
+}
+.hymn-list__size-chevron--open {
+  transform: rotate(180deg);
 }
 .hymn-list__range {
   min-width: 116px;

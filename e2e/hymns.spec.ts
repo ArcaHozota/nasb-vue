@@ -131,9 +131,15 @@ test.describe("賛美歌一覧", () => {
     await page.goto("/hymns");
     await page.getByRole("button", { name: "次のページ" }).click();
     await expect(page.getByText("11-11 件目 / 11件")).toBeVisible();
+    const chevron = page.locator(".hymn-list__size-chevron");
+    await expect(chevron).not.toHaveClass(/--open/);
     await page.getByRole("button", { name: "1ページの件数: 10件" }).click();
+    // 開くと矢印が上向きに回る
+    await expect(chevron).toHaveClass(/hymn-list__size-chevron--open/);
     await page.locator(".v-menu .v-list").getByText("5件", { exact: true }).click();
     await expect(page.getByRole("button", { name: "1ページの件数: 5件" })).toBeVisible();
+    // 閉じると下向きに戻る
+    await expect(chevron).not.toHaveClass(/--open/);
     await expect(page.getByText("1-5 件目 / 11件")).toBeVisible();
     await expect(page.getByRole("button", { name: "削除" })).toHaveCount(5);
   });
