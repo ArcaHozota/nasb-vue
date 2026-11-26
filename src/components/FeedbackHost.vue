@@ -31,12 +31,15 @@ const icon = computed(() =>
     : "mdi-help-circle-outline",
 );
 // 本文の文字の大きさは、文の長さで決める(本文の欄はダイアログの幅の62%と狭いので、長い文ほど小さくする)
+// ダイアログの大きさ(363×225px)とアイコン(36px)は固定し、変わるのは本文の文字の大きさだけ。
+// 本文の欄(幅はダイアログの62%、高さは見出しとフッターを除いた残り)に収まる大きさを、文字数で選ぶ
 const textSize = computed(() => {
   const n = [...dialog.value.text].length;
   if (n <= 20) return "1.156rem";
-  if (n <= 40) return "1.0625rem";
-  if (n <= 60) return "1rem";
-  return "0.9375rem";
+  if (n <= 30) return "1.0625rem";
+  if (n <= 44) return "0.9375rem";
+  if (n <= 52) return "0.8125rem";
+  return "0.75rem";
 });
 
 // Esc は「戻る」と同じく false を返す(onCancel は呼ばない)。
@@ -67,13 +70,14 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown, true));
   <v-dialog
     :model-value="dialog.show"
     persistent
-    max-width="384"
+    width="363"
     role="alertdialog"
     aria-labelledby="feedback-dialog-title"
     aria-describedby="feedback-dialog-text"
   >
     <!-- タイトル・ボタンは全体の書体(Noto Sans JP)のまま。本文だけ Noto Serif JP(.feedback-dialog-text) -->
-    <v-card color="surface" rounded="lg">
+    <!-- 大きさは幅363px・高さ225pxで固定(本文の長さで変わらない) -->
+    <v-card color="surface" rounded="lg" height="225" class="d-flex flex-column">
       <div class="pt-3">
         <div
           id="feedback-dialog-title"
@@ -87,7 +91,8 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown, true));
         <div :class="['feedback-dialog-bar mx-2 mt-2', `bg-${color}`]" />
       </div>
       <!-- 左右の余白は0にして、62% がダイアログの幅に対する割合になるようにする -->
-      <v-card-text class="px-0 py-6">
+      <!-- 本文の欄は、見出しとフッターを除いた残りの高さいっぱいに広げ、上下の中央に置く -->
+      <v-card-text class="px-0 py-3 feedback-dialog-main">
         <!-- アイコンと本文: 合わせてダイアログの幅の62%、中央に置く -->
         <div class="feedback-dialog-body">
           <v-icon
@@ -127,6 +132,14 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown, true));
 </template>
 
 <style scoped>
+.feedback-dialog-main {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  min-height: 0;
+  /* 想定より長い文でも、ダイアログの大きさは変えずに本文の欄の中で読めるようにする */
+  overflow-y: auto;
+}
 /* アイコンと本文の欄: ダイアログの幅の62%。アイコンは本文の上下中央にそろえる */
 .feedback-dialog-body {
   display: flex;
@@ -144,7 +157,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown, true));
   font-weight: 600;
   flex: 1;
   min-width: 0;
-  line-height: 1.6;
+  line-height: 1.5;
   overflow-wrap: anywhere;
 }
 /* フッター: 左右と上下に余白を取り、ボタンの間は 8px */

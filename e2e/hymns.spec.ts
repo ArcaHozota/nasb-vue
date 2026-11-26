@@ -90,7 +90,7 @@ test.describe("賛美歌一覧", () => {
     expect(
       await dialog.locator("#feedback-dialog-text").evaluate((el) => getComputedStyle(el).fontFamily),
     ).toContain("Noto Serif JP");
-    // 21〜40文字の本文は 1.0625rem
+    // 21〜30文字の本文は 1.0625rem
     await expect(dialog.locator("#feedback-dialog-text")).toHaveCSS("font-size", "17px");
     // 「戻る」「OK」は区切り線の下のフッターにある
     const footer = dialog.locator(".v-divider + .v-card-actions");

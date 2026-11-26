@@ -30,13 +30,13 @@ test("プレイリストの作成中に画面を離れると確認し、「戻�
   await nav.getByText("ランダム検索").click();
   await expect(dialog).toContainText(leaveText);
   await expect(dialog).toContainText("お知らせ");
-  // お知らせは「?」のアイコン(タイトルと同じ緑)。41〜60文字の本文は 1rem
+  // お知らせは「?」のアイコン(タイトルと同じ緑)。45〜52文字の本文は 0.8125rem
   await expect(dialog.locator(".feedback-dialog-body .v-icon")).toHaveAttribute(
     "data-icon",
     "mdi-help-circle-outline",
   );
   await expect(dialog.locator(".feedback-dialog-body .v-icon")).toHaveCSS("color", "rgb(53, 94, 59)");
-  await expect(dialog.locator("#feedback-dialog-text")).toHaveCSS("font-size", "16px");
+  await expect(dialog.locator("#feedback-dialog-text")).toHaveCSS("font-size", "13px");
   await dialog.getByRole("button", { name: "戻る" }).click();
   await expect(page).toHaveURL(/\/hymns$/);
   const polls = api.calls.filter(
